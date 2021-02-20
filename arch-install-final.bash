@@ -165,6 +165,7 @@ createArchISO() {
 	cp archiso-files/packages.x86_64 archlive/packages.x86_64
 	repo-add archiso-files/customrepo/x86_64/customrepo.db.tar.gz archiso-files/customrepo/x86_64/*
 	# repo-add archiso-files/customrepo/customrepo.db.tar.gz archiso-files/customrepo/x86_64/*.pkg.tar*
+	localIP=$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')
 	cat > temp << EOF
 [custom]
 SigLevel = Optional TrustAll
