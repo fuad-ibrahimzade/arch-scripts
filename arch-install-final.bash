@@ -307,6 +307,7 @@ installCacheCleanTools() {
 	paccache -ruk0
 	pikaur --noconfirm -Scc --aur
 	pacman --noconfirm -S bleachbit ncdu rmlint
+	bleachbit -c system.*
 
 	# pacman --noconfirm -S qt5-tools qt5-charts python-pyqt5-chart && installAURpackage stacer
 	installAURpackageTrizen $user_name $user_password stacer;
