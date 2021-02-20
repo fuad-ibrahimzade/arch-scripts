@@ -1,0 +1,103 @@
+#!/bin/bash
+#todo
+#
+# (to run:) 
+	# tr -d '\r' < this.sh > new.sh
+	# create efi and root partition anch check if exists inside lsblk, if not try partprobe then change efipart and rootpart according
+	# sudo ./this.sh | tee log.txt
+# (after running:)
+	# exit chroot create /boot/EFI and try to mount with mount "$efipart" /boot/EFI and then grub-install or install without exiting and mounting EFI
+	# if not mounted grub-install /dev/sdb1 --no-bootsector
+	# grub-install --target=x86_64-efi --efi-directory=/boot/EFI --bootloader-id=GRUB [--boot-directory=/boot]
+	# grub-mkconfig -o /boot/grub/grub.cfg
+	# exit
+	# reboot
+	# (configure snapper for automating the snapshotting procedure.)
+	# snapper -c root create-config /
+	# (edit the config and alter TIMELINE_LIMIT_{HOURLY,DAILY,WEEKLY,MONTHLY,YEARLY} according to your needs.)
+	# nano /etc/snapper/configs/root
+	# (enable the systemd timers.)
+	# systemctl enable snapper-timeline.timer
+	# systemctl start snapper-timeline.timer
+	# systemctl enable snapper-cleanup.timer
+	# systemctl start snapper-cleanup.timer
+	# (install display server, display manager and desktop environment)
+	# sudo pacman -S xorg lightdm lightdm-gtk-greeter;
+	# sudo systemctl enable lightdm;
+	# sudo packman -S xfce4 xfce4-goodies
+#
+#todo
+
+#echo -n "Output Device (example: /dev/sdb):";
+#read Output_Device;
+read -p "Output Device (example: /dev/sdb):" Output_Device
+read -p "Root Password:" root_password;
+read -p "User Password:" user_password;
+sfdisk --delete "$Output_Device";
+(echo o; echo n; echo p; echo 1; echo ""; echo +512M; echo n; echo p; echo 2; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
+partprobe;
+efipart=$(echo $Output_Device)1;
+rootpart=$(echo $Output_Device)2;
+mkfs.fat -F32 -n EFI "$efipart";
+mkfs.btrfs -f -m single -L arch "$rootpart";
+mount -o compress=lzo "$rootpart" /mnt;
+cd /mnt;
+btrfs su cr @;
+#btrfs su cr @boot;
+btrfs su cr @home;
+cd /;
+umount /mnt;
+mount -o noauto,compress=lzo,subvol=@ "$rootpart" /mnt;
+cd /mnt;
+mkdir -p {boot,home};
+#mount -o noauto,compress=lzo,subvol=@boot "$rootpart" boot;
+#mkdir boot/EFI;
+#mount "$efipart" /mnt/boot/EFI;
+mount "$efipart" /mnt/boot;
+mount -o noauto,compress=lzo,subvol=@home "$rootpart" home;
+
+#echo -n "Root Password:";
+#read -s root_password;
+#echo -n "User Password:";
+#read -s user_password;
+#echo -e "rootpass\nrootpass" | passwd;
+#pacstrap -i /mnt base base-devel linux linux-firmware efibootmgr grub amd-ucode intel-ucode os-prober snapper vim nano lynx iwd;
+yes '' | pacstrap -i /mnt base base-devel btrfs-progs linux linux-firmware 
+yes | pacstrap -i /mnt efibootmgr grub amd-ucode intel-ucode os-prober snapper vim nano lynx iwd;
+genfstab -U /mnt >> /mnt/etc/fstab;
+arch-chroot /mnt << EOF
+#!/usr/bin/bash
+ln -s /usr/share/zoneinfo/Asia/Baku /etc/localtime;
+hwclock --systohc;
+sed  -i 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen;
+locale-gen;
+echo "LANG=en_US.UTF-8" >> /etc/locale.conf;
+yes | pacman -S networkmanager;
+echo "localhost" >> /etc/hostname;# Replace your-hostname with your value;
+echo "127.0.0.1 localhost" >> /etc/hosts;
+echo "::1 localhost" >> /etc/hosts;
+systemctl enable NetworkManager.service;
+yes '' | pacman -S xorg lightdm lightdm-gtk-greeter;
+systemctl enable lightdm.service;
+yes '' | pacman -S xfce4 xfce4-goodies
+sed -i 's/MODULES=()/MODULES=(btrfs)/g' /etc/mkinitcpio.conf;
+search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
+#replace="HOOKS=(base udev block automount modconf filesystems keyboard fsck)"
+replace="HOOKS=(base udev block autodetect modconf filesystems keyboard fsck)"
+sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
+mkinitcpio -p linux;
+echo "root:${root_password}" | chpasswd
+groupadd user
+useradd -m -g user -G users,wheel,storage,power,network -s /bin/bash -c "Arch Qaqa" user
+echo "user:${user_password}" | chpasswd
+search="# %wheel ALL=(ALL) ALL"
+replace=" %wheel ALL=(ALL) ALL"
+sed -i "s|\$search|\$replace|g" /etc/sudoers;
+grub-install --target=x86_64-efi --efi-directory=/boot
+grub-mkconfig -o /boot/grub/grub.cfg;
+exec bash
+EOF
+umount /mnt/boot
+umount /mnt/home
+umount -l /mnt
+exec bash

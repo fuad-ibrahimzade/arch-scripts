@@ -1,0 +1,78 @@
+(install multiplexer for restoring session even after shutdown with tmux attach)
+pacman -Sy tmux
+
+(First things first, let's partition the disk.)
+lsblk
+mkfs.fat -F32 -n EFI /dev/disk/by-partlabel/EFI
+mkfs.btrfs -m single -L arch /dev/vda
+mount -o compress=lzo /dev/vda /mnt
+
+(Next comes the tricky part: creating subvolumes.)
+cd /mnt
+btrfs su cr @
+btrfs su cr @boot
+btrfs su cr @home
+btrfs su cr @log
+btrfs su cr @pkg
+btrfs su cr @srv
+btrfs su cr @tmp
+
+(Then, mount the subvolumes.)
+cd /
+umount /mnt
+mount -o compress=lzo,subvol=@ /dev/vda /mnt
+cd /mnt
+mkdir -p {boot,home,srv,var/{log,cache/pacman/pkg,tmp}}
+mount -o compress=lzo,subvol=@boot /dev/vda boot
+mount -o compress=lzo,subvol=@home /dev/vda home
+mount -o compress=lzo,subvol=@log /dev/vda var/log
+mount -o compress=lzo,subvol=@pkg /dev/vda var/cache/pacman/pkg
+mount -o compress=lzo,subvol=@srv /dev/vda srv
+mount -o compress=lzo,subvol=@tmp /dev/vda var/tmp
+
+(Install the base system.)
+pacstrap -i /mnt base base-devel snapper vim
+
+(Configure the system.)
+genfstab -U /mnt >> /mnt/etc/fstab
+arch-chroot /mnt
+ln -s /usr/share/zoneinfo/Region/City /etc/localtime # Replace Region/City with your value
+hwclock --systohc
+vim /etc/locale.gen # Uncomment en_US.UTF-8 UTF-8 line
+locale-gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
+pacman -S networkmanager 
+echo "your-hostname" > /etc/hostname # Replace your-hostname with your value
+vim /etc/hosts # Configure 127.0.0.1 and ::1 lines accordingly
+systemctl enable NetworkManager.service
+
+(Configure the initramfs so that it satisfies our need for btrfs.)
+vim /etc/mkinitcpio.conf
+
+(Locate MODULES="..." and add btrfs into the list. Re-generate the initramfs:)
+mkinitcpio -p linux
+
+(Set the root password.)
+passwd
+
+(Install and configure the bootloader.)
+grub-install /dev/vda --no-boot...
+grub-mkconfig -o /boot/grub/grub.cfg
+
+(Reboot and remove the ISO in your machine control panel.)
+exit
+reboot
+
+(Let's configure snapper, which automates the snapshotting procedure.)
+snapper -c root create-config /
+
+(Edit the config and alter TIMELINE_LIMIT_{HOURLY,DAILY,WEEKLY,MONTHLY,YEARLY} according to your needs.)
+vim /etc/snapper/configs/root
+
+(Enable the systemd timers.)
+systemctl enable snapper-timeline.timer
+systemctl start snapper-timeline.timer
+systemctl enable snapper-cleanup.timer
+systemctl start snapper-cleanup.timer
+
+()

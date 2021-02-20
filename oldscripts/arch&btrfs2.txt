@@ -1,0 +1,105 @@
+https://ermannoferrari.net/arch-linux-install-with-btrfs
+
+ip a
+wifi-menu
+or 
+iwctl --passphrase "passphrase"
+station wlan0 connect "wifiname"
+
+(Network Time Protocol sync:)
+timedatectl set-ntp true
+
+(Disk partitioning:)
+fdisk/[disk name](or cgdisk)
+
+(Format EFI and Root partitions:)
+mkfs.fat -F32 /dev/[partition name]
+mkfs.btrfs /dev/[partiton name]
+mkswap /dev/[partition name]
+swapon /dev/[partition name]
+
+(Mount partitions and subvolume creation:)
+mount /dev/[partition name] /mnt
+btrfs su cr /mnt/@
+umount /mnt
+mount -o compress=lzo,subvol=@ /dev/[partition name] /mnt
+mkdir -p /mnt/boot/EFI
+mount /dev/[efi partition] /mnt/boot/EFI
+
+(Base install:)
+pacstrap /mnt base linux linux-firmware nano
+
+(Generate the FSTAB file:)
+genfstab -U /mnt >> /mnt/etc/fstab
+
+(Enter the installation)
+arch-chroot /mnt
+
+(Localization (replace accordingly to your Timezone):)
+ln -sf /usr/share/zoneinfo/Europe/Zurich /etc/localtime
+hwclock --systohc
+nano /etc/locale.gen (uncomment the locale of your choice)
+locale-gen
+echo "LANG=your locale here" >> /etc/locale.conf
+
+$ timedatectl list-timezones
+$ timedatectl set-timezone Asia/Colombo
+
+(Hostname and Hosts file:)
+nano /etc/hostname (enter a name of your choice)
+nano /etc/hosts
+127.0.0.1 localhost
+::1       localhost
+127.0.1.1 hostname.localdomain hostname (replace with your hostname)
+
+(Root password:)
+passwd
+
+(Bootloader and Networking tools:)
+pacman -S grub efibootmgr networkmanager network-manager-applet wireless_tools wpa_supplicant dialog os-prober mtools dosfstools base-devel linux-headers reflector cron
+
+(Grub install:)
+grub-install --target=x86_64-efi --efi-directory=/boot/EFI --bootloader-id=GRUB
+
+(Grub configuration file:)
+grub-mkconfig -o /boot/grub/grub.cfg
+
+(Activate internet for next reboot:)
+systemctl enable NetworkManager
+
+(Add user:)
+useradd -mG wheel username (replace with yours)
+
+(Create password for the user:)
+passwd username (replace with yours)
+
+(Give the user Sudo priviledges:)
+EDITOR=nano visudo
+uncomment the %wheel all=(all) all
+
+(Return to the installer, unmount all partitions and reboot:)
+exit
+umount -a
+reboot
+
+(Check for internet:)
+ip a
+
+(If on Wi-Fi connect with:)
+nmtui
+
+(Graphics card drivers for Intel, AMD and Nvidia cards:)
+sudo pacman -S xf86-video-intl
+sudo pacman -S xf86-video-amdgpu
+sudo pacman -S nvidia nividia-utils
+
+(Display server:)
+sudo pacman -S xorg
+
+(Display manager installation and activation:)
+sudo pacman -S gdm
+sudo systemctl enable gdm
+
+(Desktop Environment install:)
+sudo pacman -S gnome gnome-extra firefox
+

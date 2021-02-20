@@ -1,0 +1,35 @@
+#!/bin/bash
+
+efipart=/dev/sdb1;
+rootpart=/dev/sdb2;
+mkfs.fat -F32 -n EFI "$efipart";
+mkfs.btrfs -f -m single -L arch "$rootpart";
+mount -o compress=lzo "$rootpart" /mnt;
+cd /mnt;
+btrfs su cr @;
+btrfs su cr @boot;
+btrfs su cr @home;
+cd /;
+umount /mnt;
+mount -o compress=lzo,subvol=@ "$rootpart" /mnt;
+cd /mnt;
+mkdir -p {boot,home};
+mount -o compress=lzo,subvol=@boot "$rootpart" boot;
+mount -o compress=lzo,subvol=@home "$rootpart" home;
+pacstrap -i /mnt base base-devel snapper vim nano linux linux-kernel efibootmgr grub;
+genfstab -U /mnt >> /mnt/etc/fstab;
+arch-chroot /mnt;
+ln -s /usr/share/zoneinfo/Asia/Baku /etc/localtime;
+hwclock --systohc;
+sed  -i 'en_US.UTF-8 UTF-8' /etc/locale.gen;
+locale-gen;
+echo "LANG=en_US.UTF-8" > /etc/locale.conf;
+pacman -S networkmanager ;
+echo "localhost" > /etc/hostname # Replace your-hostname with your value;
+sed  -i '127.0.0.1 localhost' /etc/hosts;
+sed  -i '::1 localhost' /etc/hosts;
+systemctl enable NetworkManager.service;
+sed -i 's/MODULES=""/MODULES="btrfs"/g' /etc/mkinitcpio.conf;
+mkinitcpio -p linux;
+passwd;
+exec bash

@@ -1,0 +1,6 @@
+[Desktop Entry]
+Exec=feh --bg-fill /usr/share/backgrounds/archlinux/1403423502665.png && xcompmgr -o 0.7 &
+OnlyShowIn=LXQt
+Name=i3related
+Type=Application
+Version=1.0

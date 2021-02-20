@@ -1,0 +1,145 @@
+# before run tr -d '\r' < this.sh > new.sh
+#read -p "Output Device (example: /dev/sdb):" Output_Device
+read -p "Output Device (default: /dev/sda):" Output_Device
+Output_Device=${Output_Device:-/dev/sda}
+echo $Output_Device
+read -p "Root Password (default: root):" root_password;
+root_password=${root_password:-root}
+echo $root_password
+read -p "User Name (default: user):" user_name;
+user_name=${user_name:-user}
+echo $user_name
+read -p "User Password (default: user):" user_password;
+user_password=${user_password:-user}
+echo $user_password
+sfdisk --delete "$Output_Device";
+partprobe;
+(echo o; echo n; echo p; echo 1; echo ""; echo +512M; echo n; echo p; echo 2; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
+efipart=$(echo $Output_Device)1;
+rootpart=$(echo $Output_Device)2;
+#mkfs.fat -F32 -n EFI "$efipart";
+# after ls -l /dev/disk/by-label	found ARCH_202011 on mount of /dev/sr0 at /run/archiso/bootmnt/arch/boot/syslinux/archiso_sys-linux.cfg
+mkfs.fat -F32 -n ARCH_202011 "$efipart";
+mkfs.ext4 -L root "$rootpart";
+mount "$rootpart" /mnt
+mkdir -p /mnt/efi
+mount "$efipart" /mnt/efi
+# time cp -ax / /mnt
+rsync -ax --info=progress2 --no-i-r / /mnt
+cp -vaT /run/archiso/bootmnt/arch/boot/$(uname -m)/vmlinuz-linux /mnt/boot/vmlinuz-linux
+lynx --source https://raw.githubusercontent.com/archlinux/mkinitcpio/master/mkinitcpio.conf | tr -d '\r' > /mnt/etc/mkinitcpio.conf
+genfstab -U /mnt >> /mnt/etc/fstab
+arch-chroot /mnt << EOF
+sed -i 's/Storage=volatile/#Storage=auto/' /etc/systemd/journald.conf
+rm /etc/udev/rules.d/81-dhcpcd.rules
+systemctl disable pacman-init.service choose-mirror.service
+rm -r /etc/systemd/system/{choose-mirror.service,pacman-init.service,etc-pacman.d-gnupg.mount,getty@tty1.service.d}
+rm /etc/systemd/scripts/choose-mirror
+rm /root/{.automated_script.sh,.zlogin}
+rm /etc/mkinitcpio-archiso.conf
+rm -r /etc/initcpio
+search="HOOKS=(base udev modconf memdisk archiso_shutdown archiso archiso_loop_mnt archiso_pxe_common archiso_pxe_nbd archiso_pxe_http archiso_pxe_ntfs archiso_kms block filesystems keyboard)"
+replace='HOOKS="base udev resume autodetect modconf block filesystems keyboard fsck"'
+#sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
+pacman -Sy
+#pacman -S --noconfirm archlinux-keyring
+#echo "keyserver hkp://ipv4.pool.sks-keyservers.net:11371" >> /etc/pacman.d/gnupg/gpg.conf
+#pacman-key --init
+#pacman-key --populate archlinux
+echo "keyserver hkp://ipv4.pool.sks-keyservers.net:11371" >> /etc/pacman.d/gnupg/gpg.conf
+#rm -r /etc/pacman.d/gnupg
+pacman-key --init
+pacman -S --noconfirm archlinux-keyring
+pacman-key --populate archlinux
+ln -sf /usr/share/zoneinfo/Asia/Baku /etc/localtime
+hwclock --systohc
+sed  -i 's/\#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen;
+locale-gen;
+echo "LANG=en_US.UTF-8" >> /etc/locale.conf;
+echo "localhost" >> /etc/hostname;# Replace your-hostname with your value;
+echo "127.0.0.1 localhost" >> /etc/hosts;
+echo "::1 localhost" >> /etc/hosts;
+ 
+# AUR helper installation
+yes '' | pacman --needed -S base-devel;
+yes | pacman -S curl wget python python-pip pyalpm git;
+pip install pikaur
+# GUI installation
+yes '' | pacman -S xorg-server xorg-xinit xorg
+# Find out your graphics drivers
+yes '' | pacman -S xorg-drivers # For all if you do not know
+yes '' | pacman -S xf86-input-synaptics
+yes | pacman -S networkmanager
+systemctl enable NetworkManager
+ 
+#yes | pacman -S rxvt-unicode;
+#echo "$user_password" | sudo -S -u "$user_name" mkdir /home/"$user_name";
+cat > /usr/bin/temp-script.sh << EOF2
+#!/usr/bin/bash
+echo "$user_password" | sudo -S -u "$user_name" /bin/bash -c '
+		python -m pikaur --noconfirm -S ly-git;
+		systemctl enable ly.service
+		python -m pikaur --noconfirm -S remontoire-git
+		#mkdir -p ${HOME}/Downloads/build && cd $_
+		mkdir -p /home/"$user_name"/Downloads/build && cd $_
+		git clone https://github.com/gardotd426/regolith-de.git && cd regolith-de
+		#echo "$user_password" | sudo -S -u "$user_name" makepkg -si
+		makepkg -d
+		#arch-chroot -u nobody makepkg -d
+		pacman -U -d *.tar
+		cd ..
+		echo "exec regolith-session" > /home/"$user_name"/.xinitrc
+		#echo "exec regolith-session" >> /etc/X11/xinit/xinitrc;
+		systemctl stop temp-script.service
+		systemctl disable temp-script.service
+		rm /etc/systemd/system/temp-script.service
+		rm /etc/systemd/system/temp-script.service # and symlinks that might be related
+		rm /usr/lib/systemd/system/temp-script.service 
+		rm /usr/lib/systemd/system/temp-script.service # and symlinks that might be related
+		systemctl daemon-reload
+		systemctl reset-failed
+		rm /usr/bin/temp-script.sh
+		#rm ${HOME}/Downloads/build
+		rm -rf /home/"$user_name"/Downloads/build
+	'
+EOF2
+cat > /etc/systemd/system/temp-script.service << EOF3
+[Unit]
+Description=My temp script
+[Service]
+Type=forking
+ExecStart=/bin/bash /usr/bin/temp-script.sh
+KillMode=proces
+[Install]
+WantedBy=multi-user.target 
+EOF3
+sudo chmod 755 /usr/bin/temp-script.sh
+#chmod u+x /usr/bin/temp-script.sh
+sudo systemctl enable temp-script.service
+ 
+yes | pacman -S grub efibootmgr os-prober intel-ucode amd-ucode
+userdel live
+rm -rf /home/live
+# useradd -m user
+# echo "user:user" | chpasswd
+groupadd "$user_name"
+useradd -m -g "$user_name" -G users,wheel,storage,power,network -s /bin/bash -c "Arch Qaqa" "$user_name"
+echo "${user_name}:${user_password}" | chpasswd
+search="# %wheel ALL=(ALL) ALL"
+replace=" %wheel ALL=(ALL) ALL"
+sed -i "s|\$search|\$replace|g" /etc/sudoers;
+ 
+echo "root:${root_password}" | chpasswd
+mkinitcpio -p linux
+# grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+# grub-install --force --recheck $(echo $Output_Device)
+grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB
+grub-mkconfig -o /boot/grub/grub.cfg
+#or
+#bootctl --path=/boot install
+#blkid -s PARTUUID -o value /dev/sda1 > /boot/loader/entries/arch.conf
+exit
+EOF
+umount /mnt/boot
+umount /mnt -l
+reboot

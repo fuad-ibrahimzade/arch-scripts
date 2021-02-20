@@ -1,0 +1,36 @@
+https://github.com/MatMoul/archfi
+wifi-menu (wifi-menu for wifi)
+----
+curl -L archfi.sf.net/archfi > archfi
+or
+curl -L matmoul.github.io/archfi > archfi
+sh archfi
+
+----
+archdi (after install desktop environment choose)
+
+curl -L archdi.sf.net/archdi > archdi
+or
+curl -L matmoul.github.io/archdi > archdi
+sh archdi
+
+(or sh archdi -i And then you can use archdi cmd, then if needed update)
+
+
+=====
+wifi
+
+
+iw command	wireless_tools command	Description
+iw dev wlan0 link	iwconfig wlan0	Getting link status.
+iw dev wlan0 scan	iwlist wlan0 scan	Scanning for available access points.
+iw dev wlan0 set type ibss	iwconfig wlan0 mode ad-hoc	Setting the operation mode to ad-hoc.
+iw dev wlan0 connect your_essid	iwconfig wlan0 essid your_essid	Connecting to open network.
+iw dev wlan0 connect your_essid 2432	iwconfig wlan0 essid your_essid freq 2432M	Connecting to open network specifying channel.
+iw dev wlan0 connect your_essid key 0:your_key	iwconfig wlan0 essid your_essid key your_key	Connecting to WEP encrypted network using hexadecimal key.
+iwconfig wlan0 essid your_essid key s:your_key	Connecting to WEP encrypted network using ASCII key.
+iw dev wlan0 set power_save on	iwconfig wlan0 power on	Enabling power save.
+
+
+
+

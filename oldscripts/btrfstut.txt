@@ -1,0 +1,65 @@
+after btrfs partition create in expert install
+ctrl + alt + f1 to bussybox console(ctrl + alt + f2 revert)
+df	list all mount points
+umount /target/boot/efi
+umount /target/
+mount /dev/vda3(old target) /mnt
+cd /mnt
+btrfs subvolume create @
+btrfs subvolume create @home
+btrfs subvolume create @snapshots
+btrfs subvolume list .(lists all subvolumes with ids)
+mount -o rw,noatime,compress=lso,space_cache,subvolid=257,subvol=@ /dev/vda3 /target
+mkdir -p /target/home
+mkdir -p /target/.snapshots
+mount -o rw,noatime,compress=lso,space_cache,subvolid=257,subvol=@home /dev/vda3 /target/home
+mount -o rw,noatime,compress=lso,space_cache,subvolid=257,subvol=@snapshots /dev/vda3 /target/.snapshots
+ls
+mv etc/ /target
+mv media/ /target
+cd boot
+ls -a
+cd efi (as it is empty we dont move anything and remove it)
+cd ..
+rm -r boot/
+mkdir -p /target/boot/efi
+mount /dev/vda1(boot efinin oldugu yer) /target/boot/efi
+umount /mnt
+ls /target/etc(check if fstab generate)
+nano /target/etc/fstab(ctrl k ctrl u copy paste edib / home ve .spanshot ucun defaultsun yerini rw,noatime,compress=lso,space_cache,subvolid=257,subvol=@... ile evezle)
+ctrl + d, ctrl + alt + f1 return to install continue installing then timeshift will work
+delete subvolid=... from fstab for timeshift to work correctly
+
+
+(to manually create snapshot without timeshift and then put id from list to subvolid inside /etc/fstab)
+sudo btrfs subvolume snapshot / /.snapshots/timedate-root-snapshot
+sudo btrfs subvolume list /
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
