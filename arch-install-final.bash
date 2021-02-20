@@ -281,6 +281,7 @@ installTools() {
 	installAURpackageTrizen $user_name $user_password vscodium-bin
 	pacman --noconfirm -S neofetch
 	installAURpackageTrizen $user_name $user_password archey4
+	# pacman --noconfirm -S cylon #all in one tool for arch
 	
 	installCacheCleanTools  $user_name $user_password;
 
