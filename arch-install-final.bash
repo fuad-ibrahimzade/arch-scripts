@@ -163,7 +163,7 @@ createArchISO() {
 	cp -av arch-scripts-data/archiso-files/. archiso-files
 	rm -rf arch-scripts-data
 	cp archiso-files/packages.x86_64 archlive/packages.x86_64
-	repo-add archiso-files/customrepo/customrepo.db.tar.gz archiso-files/customrepo/x86_64/*
+	repo-add archiso-files/customrepo/x86_64/customrepo.db.tar.gz archiso-files/customrepo/x86_64/*
 	# repo-add archiso-files/customrepo/customrepo.db.tar.gz archiso-files/customrepo/x86_64/*.pkg.tar*
 	cat > temp << EOF
 [custom]
