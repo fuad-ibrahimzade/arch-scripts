@@ -972,6 +972,8 @@ installAURpackageTrizen() {
 	sudo pacman -Syyu
 
 	echo "$user_name ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+	rm -rf /tmp/*
+	umount -l -R /tmp
 	sudo -u "$user_name" trizen --noconfirm -S "$packageName"
 	sudo -u "$user_name" trizen --noconfirm -Scc --aur
 	paccache -ruk0
