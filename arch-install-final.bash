@@ -157,6 +157,17 @@ createArchISO() {
 	ln -s /usr/lib/systemd/system/ly.service archlive/airootfs/etc/systemd/system/display-manager.service
 	ln -s /usr/lib/systemd/system/connman.service archlive/airootfs/etc/systemd/system/multi-user.target.wants/connman.service
 	ln -s /usr/lib/systemd/system/cornie.service archlive/airootfs/etc/systemd/system/multi-user.target.wants/cornie.service
+	mkdir -p archlive/airootfs/usr/bin
+	cp -r /usr/bin/morc_menu archlive/airootfs/usr/bin
+	cp -r /usr/share/lite/plugins archlive/airootfs/usr/share/lite/plugins
+	cp /etc/systemd/system/paccache.timer archlive/airootfs/etc/systemd/system/paccache.timer
+	cp /etc/systemd/journald.conf archlive/airootfs/etc/systemd/journald.conf
+
+	cp -r /usr/share/man/morc_menu.1 archlive/airootfs/usr/share/man/morc_menu.1
+	cp -r /usr/bin/morc_menu archlive/airootfs/usr/bin/morc_menu
+	cp -r /etc/skel/.config/morc_menu_v1.conf archlive/airootfs/etc/skel/.config/morc_menu_v1.conf
+
+	cp -r /usr/bin/rofi-power-menu /usr/bin/rofi-power-menu
 
 	rm archlive/packages.x86_64
 	git clone https://github.com/fuad-ibrahimzade/arch-scripts-data 
@@ -164,6 +175,7 @@ createArchISO() {
 	rm -rf arch-scripts-data
 	cp archiso-files/packages.x86_64 archlive/packages.x86_64
 	repo-add archiso-files/customrepo/x86_64/customrepo.db.tar.gz archiso-files/customrepo/x86_64/*
+	sudo mv archiso-files/customrepo/x86_64 /archiso-files/customrepo/x86_64
 	# repo-add archiso-files/customrepo/customrepo.db.tar.gz archiso-files/customrepo/x86_64/*.pkg.tar*
 	localIP=$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')
 	cat > temp << EOF
@@ -307,7 +319,8 @@ installCacheCleanTools() {
 	user_password="$2"
 	pacman --noconfirm -S pacman-contrib
 	paccache -ruk0
-	pikaur --noconfirm -Scc --aur
+	trizen --noconfirm -Scc --aur
+	# pikaur --noconfirm -Scc --aur
 	pacman --noconfirm -S bleachbit ncdu rmlint
 	bleachbit -c system.*
 
