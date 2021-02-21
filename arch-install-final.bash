@@ -159,15 +159,17 @@ createArchISO() {
 	ln -s /usr/lib/systemd/system/cornie.service archlive/airootfs/etc/systemd/system/multi-user.target.wants/cornie.service
 	mkdir -p archlive/airootfs/usr/bin
 	cp -r /usr/bin/morc_menu archlive/airootfs/usr/bin
+	mkdir -p archlive/airootfs/usr/share/lite/plugins
 	cp -r /usr/share/lite/plugins archlive/airootfs/usr/share/lite/plugins
 	cp /etc/systemd/system/paccache.timer archlive/airootfs/etc/systemd/system/paccache.timer
 	cp /etc/systemd/journald.conf archlive/airootfs/etc/systemd/journald.conf
 
-	cp -r /usr/share/man/morc_menu.1 archlive/airootfs/usr/share/man/morc_menu.1
-	cp -r /usr/bin/morc_menu archlive/airootfs/usr/bin/morc_menu
-	cp -r /etc/skel/.config/morc_menu_v1.conf archlive/airootfs/etc/skel/.config/morc_menu_v1.conf
+	# mkdir -p archlive/airootfs/usr/share/morc_menu
+	mkdir -p archlive/airootfs/usr/bin
+	cp -r /usr/share/morc_menu archlive/airootfs/usr/share
+	cp /usr/bin/morc_menu archlive/airootfs/usr/bin/morc_menu
 
-	cp -r /usr/bin/rofi-power-menu /usr/bin/rofi-power-menu
+	cp -r /usr/bin/rofi-power-menu archlive/airootfs/usr/bin/rofi-power-menu
 
 	rm archlive/packages.x86_64
 	git clone https://github.com/fuad-ibrahimzade/arch-scripts-data 
