@@ -280,6 +280,7 @@ installTools() {
 	# wget $app_outlet_url
 	#installAURpackage pikaur
 	installAURpackage trizen
+	installCacheCleanTools  $user_name $user_password;
 	
 	installAURpackageTrizen $user_name $user_password fbcat-git
 	# installAURpackage bauh
@@ -294,8 +295,6 @@ installTools() {
 	pacman --noconfirm -S neofetch
 	installAURpackageTrizen $user_name $user_password archey4
 	# pacman --noconfirm -S cylon #all in one tool for arch
-	
-	installCacheCleanTools  $user_name $user_password;
 
 
 	# # wget https://www.slimjetbrowser.com/release/slimjet_amd64.tar.xz
@@ -975,6 +974,8 @@ installAURpackageTrizen() {
 	echo "$user_name ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 	sudo -u "$user_name" trizen --noconfirm -S "$packageName"
 	sudo -u "$user_name" trizen --noconfirm -Scc --aur
+	paccache -ruk0
+	pacman -Qdttq | sudo pacman -Rns
 	# ye 'n' | sudo -S -u "$user_name" trizen -Rcuns $(pacman -Qqdt)
 	# yes 'n' | sudo -S -u "$user_name" pacman -Rcuns $(pacman -Qqdt)
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
