@@ -322,7 +322,7 @@ installCacheCleanTools() {
 	trizen --noconfirm -Scc --aur
 	# pikaur --noconfirm -Scc --aur
 	pacman --noconfirm -S bleachbit ncdu rmlint
-	bleachbit -c system.*
+	# bleachbit -c system.*
 
 	# pacman --noconfirm -S qt5-tools qt5-charts python-pyqt5-chart && installAURpackage stacer
 	installAURpackageTrizen $user_name $user_password stacer;
@@ -974,6 +974,7 @@ installAURpackageTrizen() {
 
 	echo "$user_name ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 	sudo -u "$user_name" trizen --noconfirm -S "$packageName"
+	sudo -u "$user_name" trizen --noconfirm -Scc --aur
 	# ye 'n' | sudo -S -u "$user_name" trizen -Rcuns $(pacman -Qqdt)
 	# yes 'n' | sudo -S -u "$user_name" pacman -Rcuns $(pacman -Qqdt)
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
