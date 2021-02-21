@@ -271,6 +271,27 @@ installTools() {
 	echo "export VISUAL=nano" >> "/home/$user_name/.bashrc"
 	echo "export EDITOR=nano" >> $HOME/.bashrc
 	echo "export VISUAL=nano" >> $HOME/.bashrc
+
+	cat > temp << EOF
+bind -r '\C-s'
+stty -ixon
+EOF
+	cat temp >> $HOME/.bashrc
+	cat temp >> "/home/$user_name/.bashrc"
+	rm temp
+	cat > temp << EOF
+inoremap <C-s> <esc>:w<cr>                 " save files
+nnoremap <C-s> :w<cr>
+inoremap <C-d> <esc>:wq!<cr>               " save and exit
+nnoremap <C-d> :wq!<cr>
+inoremap <C-q> <esc>:qa!<cr>               " quit discarding changes
+nnoremap <C-q> :qa!<cr>
+EOF
+	cat temp >> $HOME/.vimrc
+	cat temp >> "/home/$user_name/.vimrc"
+	rm temp
+
+
 	# python -m pip install pikaur
 	# touch /etc/profile.d/00-aliases.sh
 	# echo "alias pikaur='python -m pikaur'" >> /etc/profile.d/00-aliases.sh 
