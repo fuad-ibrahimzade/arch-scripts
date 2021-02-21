@@ -325,7 +325,7 @@ installCacheCleanTools() {
 
 	# pacman --noconfirm -S qt5-tools qt5-charts python-pyqt5-chart && installAURpackage stacer
 	installAURpackageTrizen $user_name $user_password stacer;
-	pacman -R $(pacman -Qtdq)
+	pacman -R --noconfirm $(pacman -Qtdq)
 	# du -sh /var/cache
 
 	cat > /etc/systemd/system/paccache.timer << EOF
@@ -349,8 +349,8 @@ EOF
 	rm -rf $HOME/.cache/*
 
 	# sudo pacman -Rsn $(pacman -Qdtq)
-	pacman -Qdtq | sudo pacman -Rns # removes all unneeded packages, but leaves optional dependencies
-	pacman -Qdttq | sudo pacman -Rns # removes all unneeded packages AND optional dependencies as well
+	sudo pacman -Rns --noconfirm $(pacman -Qdtq) # removes all unneeded packages, but leaves optional dependencies
+	sudo pacman -Rns --noconfirm $(pacman -Qdttq) # removes all unneeded packages AND optional dependencies as well
 }
 
 installDesktopEnvironment() {
@@ -977,7 +977,7 @@ installAURpackageTrizen() {
 	sudo -u "$user_name" trizen --noconfirm -S "$packageName"
 	sudo -u "$user_name" trizen --noconfirm -Scc --aur
 	paccache -ruk0
-	pacman -Qdttq | sudo pacman -Rns
+	sudo pacman -Rns --noconfirm $(pacman -Qdttq)
 	# ye 'n' | sudo -S -u "$user_name" trizen -Rcuns $(pacman -Qqdt)
 	# yes 'n' | sudo -S -u "$user_name" pacman -Rcuns $(pacman -Qqdt)
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
