@@ -151,7 +151,8 @@ EOF
 
 createArchISO() {
 	pacman --noconfirm -S archiso
-	cp -r /usr/share/archiso/configs/releng/ archlive
+	mkdir -p archlive
+	cp -av /usr/share/archiso/configs/releng/. archlive
 	mkdir -p archlive/airootfs/etc/skel/.config
 	cp -av i3-seperate-install-config/. archlive/airootfs/etc/skel/.config
 	cp -av $HOME/{.bashrc,.zshrc,.vimrc} archlive/airootfs/etc/skel
