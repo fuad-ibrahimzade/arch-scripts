@@ -150,12 +150,18 @@ EOF
 }
 
 createArchISO() {
+	# TODO
+		# slow boottime
+		# boot time reflector message bug, dont wait for network initializng
+		# configurations dirs wrong
+		# cow_device for persistence
+	# end TODO
 	pacman --noconfirm -S archiso
 	mkdir -p archlive
 	cp -av /usr/share/archiso/configs/releng/. archlive
 	mkdir -p archlive/airootfs/etc/skel/.config
 	cp -av i3-seperate-install-config/. archlive/airootfs/etc/skel/.config
-	cp -av $HOME/{.bashrc,.zshrc,.vimrc} archlive/airootfs/etc/skel
+	cp -av /home/user/{.bashrc,.zshrc,.vimrc} archlive/airootfs/etc/skel
 	ln -s /usr/lib/systemd/system/ly.service archlive/airootfs/etc/systemd/system/display-manager.service
 	ln -s /usr/lib/systemd/system/connman.service archlive/airootfs/etc/systemd/system/multi-user.target.wants/connman.service
 	ln -s /usr/lib/systemd/system/cornie.service archlive/airootfs/etc/systemd/system/multi-user.target.wants/cornie.service
@@ -175,10 +181,12 @@ createArchISO() {
 
 	rm archlive/packages.x86_64
 	git clone https://github.com/fuad-ibrahimzade/arch-scripts-data 
+	mkdir archiso-files
 	cp -av arch-scripts-data/archiso-files/. archiso-files
 	rm -rf arch-scripts-data
 	cp archiso-files/packages.x86_64 archlive/packages.x86_64
 	repo-add archiso-files/customrepo/x86_64/custom.db.tar.gz archiso-files/customrepo/x86_64/*
+	sudo mkdir -p /archiso-files/customrepo
 	sudo mv archiso-files/customrepo/x86_64 /archiso-files/customrepo/x86_64
 	# repo-add archiso-files/customrepo/customrepo.db.tar.gz archiso-files/customrepo/x86_64/*.pkg.tar*
 	localIP=$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')
