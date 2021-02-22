@@ -155,3 +155,5 @@ bindsym $mod+Shift+p exec rofi -show power-menu -modi power-menu:rofi-power-menu
 bindsym $mod+z exec morc_menu
 bindsym $mod+Shift+z exec jgmenu_run
 bindsym Print exec flameshot gui
+bindsym Mod1+Tab       exec --no-startup-id i3-cycle-focus
+bindsym Mod1+Shift+Tab exec --no-startup-id i3-cycle-focus --reverse
