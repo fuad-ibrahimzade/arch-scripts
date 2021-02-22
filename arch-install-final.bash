@@ -339,7 +339,8 @@ EOF
 	# debtap -U slimjet_amd64.deb
 	# rm -rf slimjet_amd64*
 
-	installZSH $user_name $user_password;
+	installFISH $user_name $user_password;
+	# installZSH $user_name $user_password;
 	installBlackArchRepositories;
 
 	installDesktopEnvironment $user_name $user_password;
@@ -788,6 +789,30 @@ installDEarchi3linux() {
 	#echo "user2:user2" | chpasswd
 	#yes "'' y" | pacman -Sy archi3linux
 	echo "installDEarchi3linux"
+}
+
+installFISH(){
+	user_name="$1"
+	user_password="$2"
+	pacman --noconfirm -S pkgfile
+	pkgfile -u
+	pacman --noconfirm -S fish
+	# sudo chsh -s $(which fish)
+	sudo chsh -s /bin/fish
+	sudo -u "$user_name" chsh -s /bin/fish
+	fish_update_completions
+	echo "" >> 
+	cat > temp << EOF
+set -g -x fish_greeting ''
+### "vim" as manpager
+set -x MANPAGER '/bin/bash -c "vim -MRn -c \"set buftype=nofile showtabline=0 ft=man ts=8 nomod nolist norelativenumber nonu noma\" -c \"normal L\" -c \"nmap q :qa<CR>\"</dev/tty <(col -b)"'
+
+### "nvim" as manpager
+# set -x MANPAGER "nvim -c 'set ft=man' -"
+EOF
+	mkdir -p "/home/$user_name/.config/fish/"
+	cat temp >> "/home/$user_name/.config/fish/config.fish"
+	rm temp
 }
 
 installZSH() {
