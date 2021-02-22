@@ -321,7 +321,7 @@ EOF
 	installAURpackageTrizen $user_name $user_password archey4
 	# pacman --noconfirm -S cylon #all in one tool for arch
 
-
+	installAURpackageTrizen $user_name $user_password slimjet
 	# # wget https://www.slimjetbrowser.com/release/slimjet_amd64.tar.xz
 	# # tar -xvf slimjet_amd64.tar.xz
 	# wget https://www.slimjetbrowser.com/release/slimjet_amd64.deb
