@@ -1225,6 +1225,7 @@ export -f installi3Only
 export -f installi3Seperate
 export -f initCronScriptAtBootForWallpaper
 export -f writeArchIsoToSeperatePartition
+export -f installFISH
 export -f installZSH
 export -f installBlackArchRepositories
 export -f copyWallpapers
