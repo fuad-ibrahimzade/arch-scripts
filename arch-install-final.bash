@@ -358,6 +358,7 @@ installCacheCleanTools() {
 
 	# pacman --noconfirm -S qt5-tools qt5-charts python-pyqt5-chart && installAURpackage stacer
 	installAURpackageTrizen $user_name $user_password stacer;
+	installAURpackageTrizen $user_name $user_password wat-git # Show upgrades since recent -Syu
 	pacman -R --noconfirm $(pacman -Qtdq)
 	# du -sh /var/cache
 
