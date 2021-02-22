@@ -156,7 +156,8 @@ createArchISO() {
 		# configurations dirs wrong
 		# cow_device for persistence
 	# end TODO
-	pacman --noconfirm -S archiso
+	sudo pacman -Sw $(pacman -Qqn) # redownload native arch packages for caching
+	sudo pacman --noconfirm -S archiso
 	mkdir -p archlive
 	cp -av /usr/share/archiso/configs/releng/. archlive
 	mkdir -p archlive/airootfs/etc/skel/.config
