@@ -264,6 +264,7 @@ initPacmanEntropy() {
 	yes | pacman -S reflector
 	# useradd -m archie # refloctor pacman problem fix
 	ln -s /usr/lib/security/pam_loginuid.so /usr/lib/pam_loginuid.so
+	sed -i "s/#TotalDownload/TotalDownload/" /etc/pacman.conf
 }
 
 installTools() {
