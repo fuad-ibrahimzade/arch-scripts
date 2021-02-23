@@ -162,13 +162,13 @@ createArchISO() {
 	sudo pacman --noconfirm -S archiso
 	mkdir -p archlive
 	cp -av /usr/share/archiso/configs/releng/. archlive
-	# section copy users passwords
+	# region copy users passwords
 	mkdir -p archlive/airootfs/etc/skel/
 	cp /etc/passwd archlive/airootfs/etc/passwd;
 	cp /etc/shadow archlive/airootfs/etc/shadow;
 	cp /etc/group archlive/airootfs/etc/group;
 	cp /etc/gshadow archlive/airootfs/etc/gshadow;
-	# end section copy users passwords
+	# end region copy users passwords
 
 	mkdir -p archlive/airootfs/etc/skel/.config
 	cp -av i3-seperate-install-config/. archlive/airootfs/etc/skel/.config
@@ -210,7 +210,7 @@ EOF
 	mkdir -p ./{out,work}
 	mkarchiso -v -w ./work -o ./out archlive
 
-	# section virtualbox share
+	# region virtualbox share
 	pacman --noconfirm --needed -S linux-headers
 	pacman --noconfirm --needed -S virtualbox-guest-utils
 	systemctl enable now vboxservice.service
@@ -219,7 +219,7 @@ EOF
 	echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 	sudo chown -R "$user_name":users /media/sf_Public/ #create shared Public folder inside virtualbox
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
-	# end section virtualbox share
+	# end region virtualbox share
 
 }
 
