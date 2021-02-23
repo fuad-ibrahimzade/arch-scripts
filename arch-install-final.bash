@@ -802,7 +802,6 @@ installFISH(){
 	sudo chsh -s /bin/fish
 	sudo -u "$user_name" chsh -s /bin/fish
 	fish_update_completions
-	echo "" >> 
 	cat > temp << EOF
 set -g -x fish_greeting ''
 ### "vim" as manpager
