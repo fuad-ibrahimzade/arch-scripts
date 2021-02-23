@@ -160,6 +160,14 @@ createArchISO() {
 	sudo pacman --noconfirm -S archiso
 	mkdir -p archlive
 	cp -av /usr/share/archiso/configs/releng/. archlive
+	# copy users passwords
+	mkdir -p archlive/airootfs/etc/skel/
+	cp /etc/passwd archlive/airootfs/etc/passwd;
+	cp /etc/shadow archlive/airootfs/etc/shadow;
+	cp /etc/group archlive/airootfs/etc/group;
+	cp /etc/gshadow archlive/airootfs/etc/gshadow;
+	# end copy users passwords
+
 	mkdir -p archlive/airootfs/etc/skel/.config
 	cp -av i3-seperate-install-config/. archlive/airootfs/etc/skel/.config
 	cp -av /home/user/{.bashrc,.zshrc,.vimrc} archlive/airootfs/etc/skel
