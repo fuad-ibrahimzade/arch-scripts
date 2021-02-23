@@ -281,7 +281,7 @@ installTools() {
 	yes '' | pacman -S base-devel
 
 	echo "$user_name ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
-	sudo -u "$user_name" sudo pacman -S --noconfirm curl wget python python-pip pyalpm git;
+	sudo -u "$user_name" sudo pacman -S --noconfirm rsync curl wget python python-pip pyalpm git;
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
 
 	pacman -S --noconfirm snapper vim nano lynx flameshot iwd
