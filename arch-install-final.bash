@@ -798,13 +798,15 @@ installFISH(){
 	pacman --noconfirm -S pkgfile
 	pkgfile -u
 	pacman --noconfirm -S fish
-	echo "$user_name ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
-	echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+	# echo "$user_name ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+	# echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 	# sudo chsh -s $(which fish)
-	sudo chsh -s /bin/fish
-	sudo -u "$user_name" chsh -s /bin/fish
+	# sudo chsh -s /bin/fish
+	# sudo -u "$user_name" chsh -s /bin/fish
+	usermod --shell /usr/bin/fish root
+	usermod --shell /usr/bin/fish user
 	fish_update_completions
-	head -n -2 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD lines
+	# head -n -2 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD lines
 	cat > temp << EOF
 set -g -x fish_greeting ''
 ### "vim" as manpager
