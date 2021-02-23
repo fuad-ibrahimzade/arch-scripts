@@ -323,8 +323,8 @@ EOF
 	installAURpackageTrizen $user_name $user_password lite-xl
 	# git clone https://github.com/rxi/lite-plugins	# original lite plugins
 	git clone https://github.com/franko/lite-plugins # lite-xl plugins
-	mkdir -p /usr/share/lite/plugins
-	cp -av lite-plugins/plugins/. /usr/share/lite/plugins
+	mkdir -p /usr/share/lite-xl/plugins
+	cp -av lite-plugins/plugins/. /usr/share/lite-xl/plugins
 	rm -rf lite-plugins
 	installAURpackageTrizen $user_name $user_password vscodium-bin
 	pacman --noconfirm -S neofetch
