@@ -168,8 +168,8 @@ createArchISO() {
 	ln -s /usr/lib/systemd/system/cornie.service archlive/airootfs/etc/systemd/system/multi-user.target.wants/cornie.service
 	mkdir -p archlive/airootfs/usr/bin
 	cp -r /usr/bin/morc_menu archlive/airootfs/usr/bin
-	mkdir -p archlive/airootfs/usr/share/lite/plugins
-	cp -r /usr/share/lite/plugins archlive/airootfs/usr/share/lite/plugins
+	mkdir -p archlive/airootfs/usr/share/lite-xl/plugins
+	cp -r /usr/share/lite-xl/plugins archlive/airootfs/usr/share/lite-xl/plugins
 	cp /etc/systemd/system/paccache.timer archlive/airootfs/etc/systemd/system/paccache.timer
 	cp /etc/systemd/journald.conf archlive/airootfs/etc/systemd/journald.conf
 
