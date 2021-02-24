@@ -484,7 +484,7 @@ installi3Only() {
 installi3Seperate() {
 	user_name="$1"
 	user_password="$2"
-	pacman --noconfirm -S i3-gaps ranger rofi
+	pacman --noconfirm -S i3-gaps ranger rofi vifm
 	mkdir -p "/home/$user_name/.config/i3"
 	lynx --source https://gist.githubusercontent.com/fuad-ibrahimzade/266441c50e94ba9c8cecbfbdabcf0595/raw | tr -d '\r' > "/home/$user_name/.config/i3/config"
 	head -n -3 "/home/$user_name/.config/i3/config" > temp.txt ; mv temp.txt "/home/$user_name/.config/i3/config" # delete bar lines
@@ -522,6 +522,17 @@ installi3Seperate() {
 	git clone https://github.com/jluttine/rofi-power-menu
 	search="loginctl terminate-session \${XDG_SESSION_ID-}"
 	replace="i3 exit"
+	sed -i "s|\$search|\$replace|g" rofi-power-menu/rofi-power-menu
+	installAURpackageTrizen $user_name $user_password i3lock-fancy-git
+	cat > temp << EOF
+#!/bin/bash
+pkill rofi
+i3lock-fancy
+EOF
+	cat temp >> "/usr/bin/i3fancy-locker.sh"
+	rm temp
+	search="loginctl lock-session \${XDG_SESSION_ID-}"
+	replace="sh /usr/bin/i3fancy-locker.sh"
 	sed -i "s|\$search|\$replace|g" rofi-power-menu/rofi-power-menu
 	cp -av rofi-power-menu/. /usr/bin
 	echo "bindsym \$mod+Shift+p exec rofi -show power-menu -modi power-menu:rofi-power-menu" >> "/home/$user_name/.config/i3/config";
