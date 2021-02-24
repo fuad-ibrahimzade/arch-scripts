@@ -324,6 +324,8 @@ EOF
 	cat temp >> "/home/$user_name/.vimrc"
 	rm temp
 
+	pacman -S --noconfirm abiword zathura zathura-pdf-mupdf zathura-djvu pulseaudio pavucontrol
+
 
 	# python -m pip install pikaur
 	# touch /etc/profile.d/00-aliases.sh
