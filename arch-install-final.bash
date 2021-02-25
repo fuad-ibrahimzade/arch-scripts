@@ -325,6 +325,46 @@ EOF
 	rm temp
 
 	pacman -S --noconfirm abiword zathura zathura-pdf-mupdf zathura-djvu pulseaudio pavucontrol
+	# TODO remove
+	# git clone https://github.com/acaloiaro/di-tui
+	# cp di-tui/di-tui /usr/bin/di-tui 
+	# chmod a+x /usr/bin/di-tui 
+	# dunst
+	# parcellite
+	# pasystray
+	# spacefm-gtk3
+	# udiskie
+	# https://github.com/GeertJohan/tune
+	# https://github.com/carstene1ns/difmplay-mod
+	# https://github.com/acaloiaro/di-tui
+	# https://gist.github.com/hackruu/6fc318e677b899f99751
+	# https://gist.github.com/joepie91/08df1ccf3adb00dbce7c
+	# https://github.com/tb0hdan/voiceplay
+	# http://vitunes.org/
+	# https://ginglis.me/my-dotfiles/
+	# https://github.com/wtheisen/TerminusBrowser
+	# https://github.com/khanhas/spicetify-cli
+	# qt5ct
+	# # Use GTK styles for QT apps
+	# # requires qt5-style-plugins to be installed
+	# export QT_STYLE_OVERRIDE="gtk2"
+	# export QT_QPA_PLATFORMTHEME="gtk2"
+	# https://www.reddit.com/r/gnome/comments/jaqave/how_do_i_get_qt_apps_to_use_my_installed_qt_theme/
+	# https://wiki.manjaro.org/index.php/Set_all_Qt_app%27s_to_use_GTK%2B_font_%26_theme_settings
+	# https://www.linuxuprising.com/2018/05/use-custom-themes-for-qt-applications.html
+	# https://github.com/EliverLara/Nordic
+	# https://github.com/basigur/papirus-folders
+	# https://aur.archlinux.org/packages/papirus-folders-nordic/
+	# https://www.reddit.com/r/vim/comments/3tluqr/my_list_of_applications_with_vi_keybindings/
+	# https://vim.reversed.top/
+	# https://reversed.top/2016-08-13/big-list-of-vim-like-software/
+	# https://www.freecodecamp.org/news/a-guide-to-modern-web-development-with-neo-vim-333f7efbf8e2/
+	# https://github.com/ChristianChiarulli/nvim
+	# https://github.com/danielbrouwer08/i3Minimize
+	# https://faq.i3wm.org/question/2460/can-i-minimize-windows/index.html
+	# https://www.reddit.com/r/i3wm/comments/8yqpd5/how_do_i_minimize_floating_windows_in_i3/
+	# QGtkStyle vs QGnomePlatform
+	# end TODO remove
 
 
 	# python -m pip install pikaur
