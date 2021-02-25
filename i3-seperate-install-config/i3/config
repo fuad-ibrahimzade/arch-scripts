@@ -10,6 +10,7 @@
 # Please see http://i3wm.org/docs/userguide.html for a complete reference!
 
 set $mod Mod4
+#(Mod4 windows, Mod1 alt)
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -157,3 +158,5 @@ bindsym $mod+Shift+z exec jgmenu_run
 bindsym Print exec flameshot gui
 bindsym Mod1+Tab       exec --no-startup-id i3-cycle-focus
 bindsym Mod1+Shift+Tab exec --no-startup-id i3-cycle-focus --reverse
+bindsym $mod+Shift+m move scratchpad
+bindsym $mod+m scratchpad show, floating disable
