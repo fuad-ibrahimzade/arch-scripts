@@ -396,6 +396,7 @@ EOF
 	# # debtap -u slimjet_amd64.deb && pacman -U slimjet_amd64.pkg
 	# debtap -U slimjet_amd64.deb
 	# rm -rf slimjet_amd64*
+	installAURpackageTrizen $user_name $user_password freedownloadmanager
 
 	installFISH $user_name $user_password;
 	# installZSH $user_name $user_password;
