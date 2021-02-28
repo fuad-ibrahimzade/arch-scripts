@@ -297,7 +297,7 @@ installTools() {
 	sudo -u "$user_name" sudo pacman -S --noconfirm rsync curl wget python python-pip pyalpm git;
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
 
-	pacman -S --noconfirm snapper vim nano lynx flameshot iwd trash-cli speedreader uniread
+	pacman -S --noconfirm snapper vim nano lynx flameshot iwd trash-cli speedreader uniread fd
 	pacman -S --noconfirm cronie
 	systemctl enable --now cronie.service
 	echo "export EDITOR=nano" >> "/home/$user_name/.bashrc"
@@ -358,6 +358,20 @@ EOF
 	# https://www.freecodecamp.org/news/a-guide-to-modern-web-development-with-neo-vim-333f7efbf8e2/
 	# https://github.com/ChristianChiarulli/nvim
 	# QGtkStyle vs QGnomePlatform
+	# https://www.reddit.com/r/qutebrowser/comments/cc5vov/dark_mode_in_qutebrowser/
+	# :set content.user_stylesheets coolsheet.css
+	# https://github.com/Catfriend1/syncthing-android
+	# https://github.com/syncthing/syncthing-android
+	# https://github.com/classicsc/syncthingmanager
+	# https://www.reddit.com/r/qutebrowser/comments/9d4px7/sync_qutebrowser_bookmarks_across_several/
+	# https://www.reddit.com/r/qutebrowser/comments/9d4px7/sync_qutebrowser_bookmarks_across_several/
+	# https://raw.githubusercontent.com/alphapapa/solarized-everything-css/master/css/solarized-dark/solarized-dark-all-sites.css
+	# https://qutebrowser.org/doc/help/commands.html
+	# https://raw.githubusercontent.com/qutebrowser/qutebrowser/master/doc/img/cheatsheet-big.png
+	# https://qutebrowser.org/doc/install.html#_a_href_https_chocolatey_org_packages_qutebrowser_chocolatey_package_a
+	# https://www.howtogeek.com/451262/how-to-use-rclone-to-back-up-to-google-drive-on-linux/
+	# https://github.com/alichtman/deadbolt
+	# https://github.com/alichtman/malware-techniques
 	# end TODO remove
 
 
@@ -373,6 +387,7 @@ EOF
 	#installAURpackage pikaur
 	installAURpackage trizen
 	installCacheCleanTools  $user_name $user_password;
+	installBackupTools  $user_name $user_password;
 	
 	installAURpackageTrizen $user_name $user_password fbcat-git
 	# installAURpackage bauh
@@ -446,6 +461,13 @@ EOF
 	# sudo pacman -Rsn $(pacman -Qdtq)
 	# sudo pacman -Rns --noconfirm $(pacman -Qdtq) # removes all unneeded packages, but leaves optional dependencies
 	# sudo pacman -Rns --noconfirm $(pacman -Qdttq) # removes all unneeded packages AND optional dependencies as well
+}
+
+installBackupTools() {
+	user_name="$1"
+	user_password="$2"
+	pacman --noconfirm -S sparkleshare
+	# git clone https://github.com/hbons/Dazzle
 }
 
 installDesktopEnvironment() {
@@ -889,6 +911,21 @@ EOF
 	mkdir -p "/home/$user_name/.config/fish/"
 	cat temp >> "/home/$user_name/.config/fish/config.fish"
 	rm temp
+
+	# echo "$user_name ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+	# sudo -u "$user_name" python -m pip install powerline
+	# head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
+	# /usr/bin/fish set -U fish_user_paths $fish_user_paths "/home/$user_name/.local/bin" # for adding path
+	# /usr/bin/fish echo $fish_user_paths | tr " " "\n" | nl # for gettint line number
+	# /usr/bin/fish set --erase --universal fish_user_paths[5] # for removing sppecific path
+	installAURpackageTrizen $user_name $user_password nerd-fonts-fira-code
+	installAURpackageTrizen $user_name $user_password fisher
+	echo "$user_name ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+	sudo -u "$user_name" fisher install IlanCostman/tide
+	sudo -u "$user_name" fisher install jorgebucaran/gitio.fish
+	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
+
+	installAURpackageTrizen $user_name $user_password bass-fish
 }
 
 installZSH() {
@@ -1285,6 +1322,7 @@ copyWallpapers() {
 export -f initPacmanEntropy
 export -f installTools
 export -f installCacheCleanTools
+export -f installBackupTools
 export -f installDesktopEnvironment
 export -f installGitHubMakepackage
 export -f installAURpackage
