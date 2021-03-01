@@ -378,6 +378,7 @@ EOF
 	# https://ramsdenj.com/2016/06/23/arch-linux-on-zfs-part-2-installation.html
 	# https://ramsdenj.com/2016/08/29/arch-linux-on-zfs-part-3-followup.html
 	# https://github.com/dmeulen/Arch_Root_on_encrypted_ZFS
+
 	# https://ramsdenj.com/2017/06/19/switching-to-nixos-from-arch-linux.html
 	# https://www.reddit.com/r/NixOS/comments/jo6lv1/nixos_for_pentesting/
 	# https://github.com/Pamplemousse/tangerinixos
@@ -386,6 +387,7 @@ EOF
 	# https://www.trustedsec.com/blog/so-you-got-access-to-a-nix-system-now-what/
 	# https://dev.to/trusktr/why-i-moved-from-nixos-to-manjaro-linux-36j2
 	# http://www.willghatch.net/blog/2020/06/27/nixos-the-good-the-bad-and-the-ugly/
+	# trizen -S --noconfirm wyeb-git nyxt cliqz 
 	# end TODO remove
 
 
