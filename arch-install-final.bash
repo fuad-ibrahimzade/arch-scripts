@@ -372,6 +372,20 @@ EOF
 	# https://www.howtogeek.com/451262/how-to-use-rclone-to-back-up-to-google-drive-on-linux/
 	# https://github.com/alichtman/deadbolt
 	# https://github.com/alichtman/malware-techniques
+	# https://github.com/alichtman/shallow-backup
+	# https://wiki.archlinux.org/index.php/Install_Arch_Linux_on_ZFS
+	# https://ramsdenj.com/2016/06/23/arch-linux-on-zfs-part-1-embed-zfs-in-archiso.html
+	# https://ramsdenj.com/2016/06/23/arch-linux-on-zfs-part-2-installation.html
+	# https://ramsdenj.com/2016/08/29/arch-linux-on-zfs-part-3-followup.html
+	# https://github.com/dmeulen/Arch_Root_on_encrypted_ZFS
+	# https://ramsdenj.com/2017/06/19/switching-to-nixos-from-arch-linux.html
+	# https://www.reddit.com/r/NixOS/comments/jo6lv1/nixos_for_pentesting/
+	# https://github.com/Pamplemousse/tangerinixos
+	# https://github.com/NixOS/nixpkgs/issues/81418
+	# https://discourse.nixos.org/t/proposing-tangerinixos-a-nixos-tailored-for-pentesting/10538/3
+	# https://www.trustedsec.com/blog/so-you-got-access-to-a-nix-system-now-what/
+	# https://dev.to/trusktr/why-i-moved-from-nixos-to-manjaro-linux-36j2
+	# http://www.willghatch.net/blog/2020/06/27/nixos-the-good-the-bad-and-the-ugly/
 	# end TODO remove
 
 
