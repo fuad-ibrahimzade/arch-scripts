@@ -596,7 +596,7 @@ installi3Seperate() {
 
 	git clone https://github.com/jluttine/rofi-power-menu
 	search="loginctl terminate-session \${XDG_SESSION_ID-}"
-	replace="i3 exit"
+	replace="pkill X"
 	sed -i "s|\$search|\$replace|g" rofi-power-menu/rofi-power-menu
 	installAURpackageTrizen $user_name $user_password i3lock-fancy-git
 	cat > temp << EOF
