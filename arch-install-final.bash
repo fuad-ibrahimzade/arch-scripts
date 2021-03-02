@@ -934,10 +934,10 @@ EOF
 	# /usr/bin/fish set -U fish_user_paths $fish_user_paths "/home/$user_name/.local/bin" # for adding path
 	# /usr/bin/fish echo $fish_user_paths | tr " " "\n" | nl # for gettint line number
 	# /usr/bin/fish set --erase --universal fish_user_paths[5] # for removing sppecific path
-	installAURpackageTrizen $user_name $user_password nerd-fonts-fira-code
+	installAURpackageTrizen $user_name $user_password ttf-meslo-nerd-font-powerlevel10k
 	installAURpackageTrizen $user_name $user_password fisher
 	echo "$user_name ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
-	sudo -u "$user_name" fisher install IlanCostman/tide
+	sudo -u "$user_name" fisher install IlanCosman/tide
 	sudo -u "$user_name" fisher install jorgebucaran/gitio.fish
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
 
