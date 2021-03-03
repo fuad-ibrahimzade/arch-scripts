@@ -405,6 +405,8 @@ EOF
 	installCacheCleanTools  $user_name $user_password;
 	installBackupTools  $user_name $user_password;
 	
+	pacman -S --noconfirm p7zip
+	installAURpackageTrizen $user_name $user_password p7zip-gui
 	installAURpackageTrizen $user_name $user_password fbcat-git
 	# installAURpackage bauh
 	installAURpackageTrizen $user_name $user_password bauh;
