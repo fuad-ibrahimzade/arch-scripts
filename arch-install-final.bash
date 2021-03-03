@@ -297,7 +297,7 @@ installTools() {
 	sudo -u "$user_name" sudo pacman -S --noconfirm rsync curl wget python python-pip pyalpm git;
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
 
-	pacman -S --noconfirm snapper vim nano lynx flameshot iwd trash-cli speedreader uniread fd
+	pacman -S --noconfirm snapper vim nano lynx flameshot iwd trash-cli speedreader uniread fd bpytop
 	pacman -S --noconfirm cronie
 	systemctl enable --now cronie.service
 	echo "export EDITOR=nano" >> "/home/$user_name/.bashrc"
