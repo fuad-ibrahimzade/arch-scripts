@@ -324,7 +324,7 @@ EOF
 	cat temp >> "/home/$user_name/.vimrc"
 	rm temp
 
-	pacman -S --noconfirm abiword zathura zathura-pdf-mupdf zathura-djvu pulseaudio pavucontrol vlc
+	pacman -S --noconfirm abiword zathura zathura-pdf-mupdf zathura-djvu pulseaudio pavucontrol vlc xorg-xbacklight
 	# TODO remove
 	# git clone https://github.com/acaloiaro/di-tui
 	# cp di-tui/di-tui /usr/bin/di-tui 
