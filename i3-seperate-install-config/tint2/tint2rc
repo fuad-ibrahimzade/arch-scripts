@@ -98,7 +98,7 @@ border_color_pressed = #777777 30
 
 #-------------------------------------
 # Panel
-panel_items = LTSECE
+panel_items = LTSECEE
 panel_size = 100% 32
 panel_margin = 0 0
 panel_padding = 4 2 4
@@ -287,6 +287,28 @@ execp_dwheel_command = t2ec --lbrightness down
 execp_font = Monospace 9
 execp_font_color = #eeeeee 100
 execp_padding = 5 0
+execp_background_id = 0
+execp_centered = 0
+execp_icon_w = 18
+execp_icon_h = 18
+#-------------------------------------
+# Executor 3
+execp = new
+execp_command = t2ec --battery
+execp_interval = 30
+execp_has_icon = 1
+execp_cache_icon = 1
+execp_continuous = 0
+execp_markup = 1
+execp_tooltip = 
+execp_lclick_command = b=$(acpi -b) && notify-send "$b"
+execp_rclick_command = 
+execp_mclick_command = 
+execp_uwheel_command = 
+execp_dwheel_command = 
+execp_font = Monospace 9
+execp_font_color = #eeeeee 100
+execp_padding = 0 0
 execp_background_id = 0
 execp_centered = 0
 execp_icon_w = 18
