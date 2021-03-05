@@ -37,7 +37,7 @@ initPacmanEntropy;
 
 # AREA section OLD2
 
-pacman --noconfirm --needed -S sudo
+pacman --noconfirm --needed -S sudo glibc git
 search="# %wheel ALL=(ALL) ALL"
 replace=" %wheel ALL=(ALL) ALL"
 sed -i "s|\$search|\$replace|g" /etc/sudoers;
