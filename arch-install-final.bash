@@ -300,6 +300,10 @@ installTools() {
 	pacman -S --noconfirm snapper vim nano lynx flameshot iwd trash-cli speedreader uniread fd bpytop micro
 	pacman -S --noconfirm cronie
 	systemctl enable --now cronie.service
+	#region additional tools
+	pacman -S --noconfirm nmon atop nethogs net-tools
+	installAURpackageTrizen $user_name $user_password netatop;
+	# endregion
 	echo "export EDITOR=nano" >> "/home/$user_name/.bashrc"
 	echo "export VISUAL=nano" >> "/home/$user_name/.bashrc"
 	echo "export EDITOR=nano" >> $HOME/.bashrc
@@ -325,7 +329,7 @@ EOF
 	rm temp
 
 	pacman -S --noconfirm abiword zathura zathura-pdf-mupdf zathura-djvu pulseaudio pavucontrol vlc xorg-xbacklight acpi
-	# TODO remove
+	# region TODO remove
 	# git clone https://github.com/acaloiaro/di-tui
 	# cp di-tui/di-tui /usr/bin/di-tui 
 	# chmod a+x /usr/bin/di-tui 
@@ -388,9 +392,10 @@ EOF
 	# https://dev.to/trusktr/why-i-moved-from-nixos-to-manjaro-linux-36j2
 	# http://www.willghatch.net/blog/2020/06/27/nixos-the-good-the-bad-and-the-ugly/
 	# trizen -S --noconfirm wyeb-git nyxt cliqz 
-	# end TODO remove
+	# endregion
 
 
+	#region old aur helper pikaur
 	# python -m pip install pikaur
 	# touch /etc/profile.d/00-aliases.sh
 	# echo "alias pikaur='python -m pikaur'" >> /etc/profile.d/00-aliases.sh 
@@ -401,6 +406,7 @@ EOF
 	# app_outlet_url=$( curl -s https://api.github.com/repos/app-outlet/app-outlet/releases/latest | grep "browser_download_url.*tar.gz" | cut -d : -f 2,3 | tr -d \" )
 	# wget $app_outlet_url
 	#installAURpackage pikaur
+	#endregion
 	installAURpackage trizen
 	installCacheCleanTools  $user_name $user_password;
 	installBackupTools  $user_name $user_password;
@@ -408,7 +414,6 @@ EOF
 	pacman -S --noconfirm p7zip
 	installAURpackageTrizen $user_name $user_password p7zip-gui
 	installAURpackageTrizen $user_name $user_password fbcat-git
-	# installAURpackage bauh
 	installAURpackageTrizen $user_name $user_password bauh;
 	installAURpackageTrizen $user_name $user_password lite-xl
 	# git clone https://github.com/rxi/lite-plugins	# original lite plugins
@@ -422,6 +427,7 @@ EOF
 	# pacman --noconfirm -S cylon #all in one tool for arch
 
 	installAURpackageTrizen $user_name $user_password slimjet
+	#region old debtap slimjet install
 	# # wget https://www.slimjetbrowser.com/release/slimjet_amd64.tar.xz
 	# # tar -xvf slimjet_amd64.tar.xz
 	# wget https://www.slimjetbrowser.com/release/slimjet_amd64.deb
@@ -429,6 +435,7 @@ EOF
 	# # debtap -u slimjet_amd64.deb && pacman -U slimjet_amd64.pkg
 	# debtap -U slimjet_amd64.deb
 	# rm -rf slimjet_amd64*
+	#endregion
 	installAURpackageTrizen $user_name $user_password freedownloadmanager
 
 	installFISH $user_name $user_password;
