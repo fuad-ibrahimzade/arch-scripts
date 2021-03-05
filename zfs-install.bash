@@ -23,7 +23,7 @@ main() {
 
 	pacman -Syy
 	mount -o remount,size=1G /run/archiso/cowspace
-	pacman --noconfirm -S linux linux-headers curl
+	pacman --noconfirm -S linux-headers curl
 	curl -O http://archzfs.com/archzfs/x86_64/zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
 	pacman --noconfirm -U zfs-utils-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
 	curl -O http://archzfs.com/archzfs/x86_64/zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
