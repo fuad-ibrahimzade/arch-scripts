@@ -590,6 +590,7 @@ installi3Seperate() {
 	sed -i 's|bindsym $mod+d exec dmenu_run|bindsym $mod+d exec rofi -show drun -show-icons -modi drun|g' "/home/$user_name/.config/i3/config";
 	pacman --noconfirm --needed -S xcompmgr feh
 	# picom vs xcompmgr
+	installAURpackageTrizen $user_name $user_password quickswitch-i3
 	installAURpackageTrizen $user_name $user_password wmfocus;
 
 	pacman --noconfirm -S dmenu
