@@ -23,6 +23,7 @@ main() {
 
 	pacman -Syy
 	pacman --noconfirm -S glibc git curl
+	mount -o remount,size=1G /run/archiso/cowspace
 	installAURpackage trizen
 	installAURpackageTrizen $user_name $user_password zfs-dkms;
 	installAURpackageTrizen $user_name $user_password zfs-utils;
