@@ -301,7 +301,7 @@ installTools() {
 	pacman -S --noconfirm cronie
 	systemctl enable --now cronie.service
 	#region additional tools
-	pacman -S --noconfirm nmon atop nethogs net-tools
+	pacman -S --noconfirm thefuck nmon atop nethogs net-tools
 	installAURpackageTrizen $user_name $user_password netatop;
 	# endregion
 	echo "export EDITOR=nano" >> "/home/$user_name/.bashrc"
