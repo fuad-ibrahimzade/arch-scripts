@@ -300,10 +300,6 @@ installTools() {
 	pacman -S --noconfirm snapper vim nano lynx flameshot iwd trash-cli speedreader uniread fd bpytop micro
 	pacman -S --noconfirm cronie
 	systemctl enable --now cronie.service
-	#region additional tools
-	pacman -S --noconfirm thefuck python-pywal nmon atop nethogs net-tools
-	installAURpackageTrizen $user_name $user_password netatop;
-	# endregion
 	echo "export EDITOR=nano" >> "/home/$user_name/.bashrc"
 	echo "export VISUAL=nano" >> "/home/$user_name/.bashrc"
 	echo "export EDITOR=nano" >> $HOME/.bashrc
@@ -408,6 +404,10 @@ EOF
 	#installAURpackage pikaur
 	#endregion
 	installAURpackage trizen
+	#region additional tools
+	pacman -S --noconfirm thefuck python-pywal nmon atop nethogs net-tools
+	installAURpackageTrizen $user_name $user_password netatop;
+	# endregion
 	installCacheCleanTools  $user_name $user_password;
 	installBackupTools  $user_name $user_password;
 	
