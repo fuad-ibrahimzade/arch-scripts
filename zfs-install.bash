@@ -22,11 +22,12 @@ main() {
 	echo $user_password
 
 	pacman -Syy
-	pacman --noconfirm -S glibc git curl
+	pacman --noconfirm -S curl
 	mount -o remount,size=1G /run/archiso/cowspace
-	installAURpackage trizen
-	installAURpackageTrizen $user_name $user_password zfs-dkms;
-	installAURpackageTrizen $user_name $user_password zfs-utils;
+	curl -O http://archzfs.com/archzfs/x86_64/zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
+	pacman --noconfirm -U zfs-utils-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
+	curl -O http://archzfs.com/archzfs/x86_64/zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
+	pacman -U zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
 	modprobe zfs
 	createAndMountPartitions $Output_Device;
 	installArchLinuxWithUnsquashfs;
@@ -55,10 +56,11 @@ configureUsers $root_password $user_name $user_password;
 pacman --noconfirm -S glibc git curl
 pacman -S --noconfirm connman cmst
 systemctl enable connman.service
-pacman --noconfirm -S linux linux-headers git
-installAURpackage trizen
-installAURpackageTrizen $user_name $user_password zfs-dkms;
-installAURpackageTrizen $user_name $user_password zfs-utils;
+pacman --noconfirm -S linux linux-headers curl
+curl -O http://archzfs.com/archzfs/x86_64/zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
+pacman --noconfirm -U zfs-utils-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
+curl -O http://archzfs.com/archzfs/x86_64/zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
+pacman -U zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
 cp /usr/lib/initcpio/hooks/zfs /usr/lib/initcpio/hooks/zfs.org
 curl -s https://aur.archlinux.org/cgit/aur.git/plain/zfs-utils.initcpio.hook?h=zfs-utils-common > /usr/lib/initcpio/hooks/zfs
 
