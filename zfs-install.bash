@@ -21,6 +21,12 @@ main() {
 	user_password=${user_password:-user}
 	echo $user_password
 
+	pacman -Syy
+	pacman --noconfirm -S glibc git curl
+	installAURpackage trizen
+	installAURpackageTrizen $user_name $user_password zfs-dkms;
+	installAURpackageTrizen $user_name $user_password zfs-utils;
+	modprobe zfs
 	createAndMountPartitions $Output_Device;
 	installArchLinuxWithUnsquashfs;
 	# installArchLinuxWithPacstrap;
@@ -45,6 +51,21 @@ configureUsers $root_password $user_name $user_password;
 
 # installTools $user_name $user_password && # fix without subsequent && script exists after installDesktopEnvironment
 
+pacman --noconfirm -S glibc git curl
+pacman -S --noconfirm connman cmst
+systemctl enable connman.service
+pacman --noconfirm -S linux linux-headers git
+installAURpackage trizen
+installAURpackageTrizen $user_name $user_password zfs-dkms;
+installAURpackageTrizen $user_name $user_password zfs-utils;
+cp /usr/lib/initcpio/hooks/zfs /usr/lib/initcpio/hooks/zfs.org
+curl -s https://aur.archlinux.org/cgit/aur.git/plain/zfs-utils.initcpio.hook?h=zfs-utils-common > /usr/lib/initcpio/hooks/zfs
+
+search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
+replace="HOOKS=(base udev autodetect modconf keyboard keymap consolefont block zfs filesystems)"
+sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
+mkinitcpio -p linux
+
 pacman --noconfirm -S grub efibootmgr &&
 #yes | pacman -S grub efibootmgr os-prober intel-ucode amd-ucode
 
@@ -53,11 +74,11 @@ mkinitcpio -g /boot/initramfs-linux.img && # when unsquashfs used
 
 # AREA section OLD3
 
-grub-install --target=x86_64-efi --efi-directory=/boot &&
+ZPOOL_VDEV_NAME_PATH=1 grub-install --target=x86_64-efi --efi-directory=/boot &&
 #grub-install --target=x86_64-efi --efi-directory=/efi --boot-directory=/boot
-grub-mkconfig -o /boot/grub/grub.cfg &&
+ZPOOL_VDEV_NAME_PATH=1 grub-mkconfig -o /boot/grub/grub.cfg &&
 
-writeArchIsoToSeperatePartition;
+# writeArchIsoToSeperatePartition;
 
 # AREA section OLD4
 
@@ -65,6 +86,9 @@ exit
 EOF
 
 copyWallpapers;
+cp /etc/zfs/zpool.cache /mnt/etc/zfs
+umount /mnt/boot
+zpool export zroot
 # cp -av .config/. "/mnt/home/$user_name/.config"
 # createArchISO $user_name $user_password;
 
