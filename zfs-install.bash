@@ -22,19 +22,22 @@ main() {
 	echo $user_password
 
 	pacman -Syy
-	curl -s https://eoli3n.github.io/archzfs/init | bash
-	mount -o remount,size=2G /run/archiso/cowspace
-	pacman --noconfirm -S linux linux-headers curl
-	curl -O http://archzfs.com/archzfs/x86_64/zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
-	pacman --noconfirm -U zfs-utils-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
-	curl -O http://archzfs.com/archzfs/x86_64/zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
-	pacman --noconfirm -U zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
+	# curl -s https://eoli3n.github.io/archzfs/init | bash
+	# mount -o remount,size=2G /run/archiso/cowspace
+	# pacman --noconfirm -S linux linux-headers curl
+	# curl -O http://archzfs.com/archzfs/x86_64/zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
+	# pacman --noconfirm -U zfs-utils-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
+	# curl -O http://archzfs.com/archzfs/x86_64/zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
+	# pacman --noconfirm -U zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
 	modprobe zfs
 	createAndMountPartitions $Output_Device;
-	installArchLinuxWithUnsquashfs;
-	# installArchLinuxWithPacstrap;
+	# installArchLinuxWithUnsquashfs;
+	installArchLinuxWithPacstrap;
 
 	genfstab -U -p /mnt >> /mnt/etc/fstab
+
+	# echo "/dev/zvol/zroot/encr/swap none swap discard 0 0" >> /mnt/etc/fstab
+	# echo "zroot/encr/data/home /home zfs rw,xattr,posixacl 0 0" >> /mnt/etc/fstab
 
 arch-chroot /mnt << EOF
 echo "Entering chroot"
@@ -73,8 +76,8 @@ mkinitcpio -p linux
 pacman --noconfirm -S grub efibootmgr &&
 #yes | pacman -S grub efibootmgr os-prober intel-ucode amd-ucode
 
-# mkinitcpio -p linux && # when pacstrap used
-mkinitcpio -g /boot/initramfs-linux.img && # when unsquashfs used
+mkinitcpio -p linux && # when pacstrap used
+# mkinitcpio -g /boot/initramfs-linux.img && # when unsquashfs used
 
 # AREA section OLD3
 
@@ -327,7 +330,7 @@ sed  -i 's/\#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen;
 locale-gen;
 echo "LANG=en_US.UTF-8" >> /etc/locale.conf;
 #yes | pacman -S networkmanager;
-sudo pacman -S --noconfirm connman
+pacman -S --noconfirm connman
 
 echo "localhost" >> /etc/hostname;# Replace your-hostname with your value;
 echo "127.0.0.1 localhost" >> /etc/hosts;
