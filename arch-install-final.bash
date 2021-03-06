@@ -579,8 +579,8 @@ installi3Seperate() {
 	echo "bindsym Print exec flameshot gui" >> "/home/$user_name/.config/i3/config";
 	pacman --noconfirm --needed -S npm
 	sudo npm i -g i3-cycle-focus
-	echp "bindsym Mod1+Tab       exec --no-startup-id i3-cycle-focus" >> "/home/$user_name/.config/i3/config";
-	echp "bindsym Mod1+Shift+Tab exec --no-startup-id i3-cycle-focus --reverse" >> "/home/$user_name/.config/i3/config";
+	echo "bindsym Mod1+Tab       exec --no-startup-id i3-cycle-focus" >> "/home/$user_name/.config/i3/config";
+	echo "bindsym Mod1+Shift+Tab exec --no-startup-id i3-cycle-focus --reverse" >> "/home/$user_name/.config/i3/config";
 	#installAURpackageTrizen rofi-dmenu
 	# search="bindsym \$mod+d exec --no-startup-id dmenu_run"
 	# search="bindsym \$mod+d exec dmenu_run"
