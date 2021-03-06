@@ -43,6 +43,8 @@ arch-chroot /mnt << EOF
 echo "Entering chroot"
 EOF
 arch-chroot /mnt << EOF
+curl -s https://eoli3n.github.io/archzfs/init | bash
+
 pacman -Sy
 
 initPacmanEntropy;
