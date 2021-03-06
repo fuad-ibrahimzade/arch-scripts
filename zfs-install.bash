@@ -1345,9 +1345,10 @@ EOF
 
 copyWallpapers() {
 	mkdir -p /mnt/usr/share/backgrounds/archlinux
-	git clone https://github.com/fuad-ibrahimzade/arch-scripts-data
-	cp -av arch-scripts-data/arch-wallpapers/. /mnt/usr/share/backgrounds/archlinux
-	rm -rf arch-scripts-data
+	cp -av selected-arch-wallpapers/. /mnt/usr/share/backgrounds/archlinux
+	# git clone https://github.com/fuad-ibrahimzade/arch-scripts-data
+	# cp -av arch-scripts-data/arch-wallpapers/. /mnt/usr/share/backgrounds/archlinux
+	# rm -rf arch-scripts-data
 }
 
 
