@@ -22,8 +22,8 @@ main() {
 	echo $user_password
 
 	pacman -Syy
-	# curl -s https://eoli3n.github.io/archzfs/init | bash
-	# mount -o remount,size=2G /run/archiso/cowspace
+	curl -s https://eoli3n.github.io/archzfs/init | bash
+	mount -o remount,size=2G /run/archiso/cowspace
 	# pacman --noconfirm -S linux linux-headers curl
 	# curl -O http://archzfs.com/archzfs/x86_64/zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
 	# pacman --noconfirm -U zfs-utils-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
@@ -149,7 +149,7 @@ createAndMountPartitions() {
 	# swapon "$swappart"
 
 
-	parted $(echo $Output_Device) \
+	parted --script $(echo $Output_Device) \
 	  mklabel gpt \
 	  mkpart ESP fat32 1 513 \
 	  set 1 boot on \
@@ -321,7 +321,7 @@ installArchLinuxWithUnsquashfs() {
 } 
 
 installArchLinuxWithPacstrap() {
-	yes '' | pacstrap -i /mnt base linux
+	yes '' | pacstrap -i /mnt base zfs-linux
 	arch-chroot /mnt << EOF
 #!/usr/bin/bash
 ln -s /usr/share/zoneinfo/Asia/Baku /etc/localtime;
