@@ -22,7 +22,7 @@ main() {
 	echo $user_password
 
 	pacman -Syy
-	mount -o remount,size=1G /run/archiso/cowspace
+	mount -o remount,size=2G /run/archiso/cowspace
 	pacman --noconfirm -S linux linux-headers curl
 	curl -O http://archzfs.com/archzfs/x86_64/zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
 	pacman --noconfirm -U zfs-utils-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
