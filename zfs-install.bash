@@ -1232,7 +1232,7 @@ installAURpackageTrizen() {
 					optionalDeps=$(echo $optionalDeps | sed 's/Provides//g' | sed 's/None//g' | sed 's/://g')
 					#echo "optionallllll $optionalDeps"
 					pacman --noconfirm -U "$packageNameWithExt"
-					sudo -u "$user_name" trizen -S --noconfirm --asdeps --needed "$optionalDeps"
+					# sudo -u "$user_name" trizen -S --noconfirm --asdeps --needed flatpak snapd
 				;;
 				*)
 					pacman --noconfirm -U "$packageNameWithExt"
