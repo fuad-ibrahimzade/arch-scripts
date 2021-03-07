@@ -379,7 +379,7 @@ installTools() {
 	sudo -u "$user_name" sudo pacman -S --noconfirm rsync curl wget python python-pip pyalpm git;
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
 
-	pacman -S --noconfirm snapper vim nano lynx flameshot iwd trash-cli speedreader uniread fd bpytop micro
+	pacman -S --noconfirm snapper vim nano lynx flameshot iwd trash-cli fd bpytop micro
 	pacman -S --noconfirm cronie
 	systemctl enable --now cronie.service
 	echo "export EDITOR=nano" >> "/home/$user_name/.bashrc"
@@ -412,6 +412,7 @@ EOF
 	# #region additional tools
 	pacman -S --noconfirm thefuck python-pywal nmon atop nethogs net-tools
 	installAURpackageTrizen $user_name $user_password netatop;
+	installAURpackageTrizen $user_name $user_password speedreader uniread
 	# # endregion
 	installCacheCleanTools  $user_name $user_password;
 	installBackupTools  $user_name $user_password;
@@ -1213,14 +1214,14 @@ installAURpackageTrizen() {
 	githubPackageUrl=""
 	for item in "${githubPackages[@]}"; do
 		if [[ $item == *"$packageName"* ]]; then
-			githubPackageUrl="https://github.com/fuad-ibrahimzade/arch-scripts-data/archiso-files/customrepo/x86_64/$item"
+			githubPackageUrl="https://github.com/fuad-ibrahimzade/arch-scripts-data/archiso-files/customrepo/x86_64/$item?raw=true"
 		fi
 	done
 
 	if [ "$packageName" == "lite-xl" ]; then
 		for item in "${githubPackages[@]}"; do
 			if [[ $item == *"agg"* ]]; then
-				wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/archiso-files/customrepo/x86_64/$item"
+				wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/archiso-files/customrepo/x86_64/$item?raw=true"
 				pacman --noconfirm -U "$item"
 				rm "$item"
 			fi
