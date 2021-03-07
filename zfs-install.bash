@@ -1216,13 +1216,13 @@ installAURpackageTrizen() {
 			if [ "$packageName" == "lite-xl" ]; then
 				for item2 in "${githubPackages[@]}"; do
 					if [[ $item2 == *"agg"* ]]; then
-						wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/archiso-files/customrepo/x86_64/$item2?raw=true"
+						wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$item2"
 						pacman --noconfirm -U "$item2"
 						rm "$item2"
 					fi
 				done
 			fi
-			wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/archiso-files/customrepo/x86_64/$item?raw=true"
+			wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$item"
 			pacman --noconfirm -U "$item"
 			rm "$item"
 		fi
