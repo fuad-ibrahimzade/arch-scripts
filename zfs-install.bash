@@ -1228,7 +1228,7 @@ installAURpackageTrizen() {
 					pacman --noconfirm -U "$packageNameWithExt"
 				;;
 				"bauh")
-					optionalDeps=$(sudo -u "$user_name" trizen -Si "$packageName" | sed -n '/^Opt/,/^Conf/p' | sed '\$d' | sed 's/^Opt.*://g' | sed 's/^\s*//g' | tr '\n' ' ')
+					optionalDeps=$(sudo -u "$user_name" trizen -Si "$packageName" | sed -n '/^Opt/,/^Conf/p' | sed '$d' | sed 's/^Opt.*://g' | sed 's/^\s*//g' | tr '\n' ' ')
 					#echo "optionallllll $optionalDeps"
 					pacman --noconfirm -U "$packageNameWithExt"
 					sudo -u "$user_name" trizen -S --noconfirm --asdeps --needed "$optionalDeps"
