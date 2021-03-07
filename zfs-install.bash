@@ -412,7 +412,8 @@ EOF
 	# #region additional tools
 	pacman -S --noconfirm thefuck python-pywal nmon atop nethogs net-tools
 	installAURpackageTrizen $user_name $user_password netatop;
-	installAURpackageTrizen $user_name $user_password speedreader uniread
+	installAURpackageTrizen $user_name $user_password speedreader
+	installAURpackageTrizen $user_name $user_password uniread
 	# # endregion
 	installCacheCleanTools  $user_name $user_password;
 	installBackupTools  $user_name $user_password;
