@@ -1211,25 +1211,22 @@ installAURpackageTrizen() {
 		'wat-git-r29.0861966-1-x86_64.pkg.tar.zst', 
 		'wmfocus-1.1.5-1-x86_64.pkg.tar.zst'
 	)
-	githubPackageUrl=""
 	for item in "${githubPackages[@]}"; do
 		if [[ $item == *"$packageName"* ]]; then
-			githubPackageUrl="https://github.com/fuad-ibrahimzade/arch-scripts-data/archiso-files/customrepo/x86_64/$item?raw=true"
+			if [ "$packageName" == "lite-xl" ]; then
+				for item2 in "${githubPackages[@]}"; do
+					if [[ $item2 == *"agg"* ]]; then
+						wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/archiso-files/customrepo/x86_64/$item2?raw=true"
+						pacman --noconfirm -U "$item2"
+						rm "$item2"
+					fi
+				done
+			fi
+			wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/archiso-files/customrepo/x86_64/$item?raw=true"
+			pacman --noconfirm -U "$item"
+			rm "$item"
 		fi
 	done
-
-	if [ "$packageName" == "lite-xl" ]; then
-		for item in "${githubPackages[@]}"; do
-			if [[ $item == *"agg"* ]]; then
-				wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/archiso-files/customrepo/x86_64/$item?raw=true"
-				pacman --noconfirm -U "$item"
-				rm "$item"
-			fi
-		done
-	fi
-	wget "$githubPackageUrl"
-	pacman --noconfirm -U "$packageName*.pkg.tar*"
-	rm "$packageName*.pkg.tar*"
 	# paccache -ruk0
 	# sudo pacman -Rns --noconfirm $(pacman -Qdttq)
 	
