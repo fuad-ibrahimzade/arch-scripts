@@ -1213,19 +1213,27 @@ installAURpackageTrizen() {
 	)
 	for item in "${githubPackages[@]}"; do
 		if [[ $item == *"$packageName"* ]]; then
-			if [ "$packageName" == "lite-xl" ]; then
-				for item2 in "${githubPackages[@]}"; do
-					if [[ $item2 == *"agg"* ]]; then
-						packageNameWithExt=$(echo "$item2" | sed -e "s/,$//")
-						wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$packageNameWithExt"
-						pacman --noconfirm -U "$packageNameWithExt"
-						rm "$packageNameWithExt"
-					fi
-				done
-			fi
 			packageNameWithExt=$(echo "$item" | sed -e "s/,$//")
 			wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$packageNameWithExt"
-			pacman --noconfirm -U "$packageNameWithExt"
+			case "$packageName" in
+				"lite-xl")
+					for item2 in "${githubPackages[@]}"; do
+						if [[ $item2 == *"agg"* ]]; then
+							depPackageNameWithExt=$(echo "$item2" | sed -e "s/,$//")
+							wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$depPackageNameWithExt"
+							pacman --noconfirm -U "$depPackageNameWithExt"
+							rm "$depPackageNameWithExt"
+						fi
+					done
+					pacman --noconfirm -U "$packageNameWithExt"
+				;;
+				"bauh")
+					pacman --noconfirm --asdeps -U "$packageNameWithExt"
+				;;
+				*)
+					pacman --noconfirm -U "$packageNameWithExt"
+				;;
+			esac
 			rm "$packageNameWithExt"
 		fi
 	done
