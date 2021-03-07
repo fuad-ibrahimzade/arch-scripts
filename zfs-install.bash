@@ -1177,7 +1177,7 @@ installAURpackageTrizen() {
 	packageName="$3"
 	
 
-	pacman --noconfirm --needed -S git
+	pacman --noconfirm --needed -S wget
 	sed -z -i "s|\#\[multilib\]\n#Include = /etc/pacman.d/mirrorlist|\[multilib\]\nInclude = /etc/pacman.d/mirrorlist|g" /etc/pacman.conf;
 	sudo pacman -Syyu
 
@@ -1186,13 +1186,49 @@ installAURpackageTrizen() {
 	umount -l -R /tmp
 	# sudo -u "$user_name" trizen --noconfirm -S "$packageName"
 	sudo -u "$user_name" trizen --noconfirm -Scc --aur
-	mkdir -p /home/tmp && cd /home/tmp
-	git clone https://github.com/fuad-ibrahimzade/arch-scripts-data
-	pacman --noconfirm -U "/home/tmp/arch-scripts-data/archiso-files/customrepo/x86_64/$packageName*.pkg.tar*"
-	# last aur package
-	if [ $strval1 == "i3lock-fancy-git" ]; then
-		rm -rf /home/tmp
+	githubPackages=(
+		'agg-2.5-11-x86_64.pkg.tar.zst', 
+		'archey4-v4.10.0-1-any.pkg.tar.zst', 
+		'bass-fish-1.0-1-any.pkg.tar.zst', 
+		'bauh-0.9.14-1-any.pkg.tar.zst', 
+		'fbcat-git-r243.99a9aae-1-x86_64.pkg.tar.zst', 
+		'fisher-4.2.0-2-any.pkg.tar.zst', 
+		'freedownloadmanager-6.13.4.3616-1-x86_64.pkg.tar.zst', 
+		'i3lock-fancy-git-r181.997e6a4-1-x86_64.pkg.tar.zst', 
+		'lite-xl-1.15.3-1-x86_64.pkg.tar.zst', 
+		'ly-git-0.5.2.r1.g77f6958-1-x86_64.pkg.tar.zst', 
+		'netatop-3.1-1-x86_64.pkg.tar.zst', 
+		'nyxt-2.pre.release.5-2-x86_64.pkg.tar.zst', 
+		'p7zip-gui-16.02-5-x86_64.pkg.tar.zst', 
+		'quickswitch-i3-2.7.0-5-any.pkg.tar.zst', 
+		'rofi-power-menu-3.0.1-1-any.pkg.tar.zst', 
+		'slimjet-29.0.2.0-1-x86_64.pkg.tar.zst', 
+		'stacer-1.1.0-1-x86_64.pkg.tar.zst', 
+		'trizen-1_1.64-1-any.pkg.tar.zst', 
+		'ttf-meslo-nerd-font-powerlevel10k-1.000-3-any.pkg.tar.zst', 
+		'vscodium-bin-1.53.2-1-x86_64.pkg.tar.zst', 
+		'wat-git-r29.0861966-1-x86_64.pkg.tar.zst', 
+		'wmfocus-1.1.5-1-x86_64.pkg.tar.zst'
+	)
+	githubPackageUrl=""
+	for item in "${githubPackages[@]}"; do
+		if [[ $item == *"$packageName"* ]]; then
+			githubPackageUrl="https://github.com/fuad-ibrahimzade/arch-scripts-data/archiso-files/customrepo/x86_64/$item"
+		fi
+	done
+
+	if [ "$packageName" == "lite-xl" ]; then
+		for item in "${githubPackages[@]}"; do
+			if [[ $item == *"agg"* ]]; then
+				wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/archiso-files/customrepo/x86_64/$item"
+				pacman --noconfirm -U "$item"
+				rm "$item"
+			fi
+		done
 	fi
+	wget "$githubPackageUrl"
+	pacman --noconfirm -U "$packageName*.pkg.tar*"
+	rm "$packageName*.pkg.tar*"
 	# paccache -ruk0
 	# sudo pacman -Rns --noconfirm $(pacman -Qdttq)
 	
