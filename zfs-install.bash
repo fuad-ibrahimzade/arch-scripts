@@ -1218,15 +1218,15 @@ installAURpackageTrizen() {
 					if [[ $item2 == *"agg"* ]]; then
 						packageNameWithExt=$(echo "$item2" | sed -e "s/,$//")
 						wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$packageNameWithExt"
-						pacman --noconfirm -U "$item2"
-						rm "$item2"
+						pacman --noconfirm -U "$packageNameWithExt"
+						rm "$packageNameWithExt"
 					fi
 				done
 			fi
 			packageNameWithExt=$(echo "$item" | sed -e "s/,$//")
 			wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$packageNameWithExt"
-			pacman --noconfirm -U "$item"
-			rm "$item"
+			pacman --noconfirm -U "$packageNameWithExt"
+			rm "$packageNameWithExt"
 		fi
 	done
 	# paccache -ruk0
