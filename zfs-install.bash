@@ -411,38 +411,38 @@ EOF
 
 	installAURpackage trizen
 	# #region additional tools
-	# pacman -S --noconfirm thefuck python-pywal nmon atop nethogs net-tools
-	# installAURpackageTrizen $user_name $user_password netatop;
+	pacman -S --noconfirm thefuck python-pywal nmon atop nethogs net-tools
+	installAURpackageTrizen $user_name $user_password netatop;
 	# # endregion
-	# installCacheCleanTools  $user_name $user_password;
-	# installBackupTools  $user_name $user_password;
+	installCacheCleanTools  $user_name $user_password;
+	installBackupTools  $user_name $user_password;
 	
-	# pacman -S --noconfirm p7zip
-	# installAURpackageTrizen $user_name $user_password p7zip-gui
-	# installAURpackageTrizen $user_name $user_password fbcat-git
-	# installAURpackageTrizen $user_name $user_password bauh;
-	# installAURpackageTrizen $user_name $user_password lite-xl
-	# # git clone https://github.com/rxi/lite-plugins	# original lite plugins
-	# git clone https://github.com/franko/lite-plugins # lite-xl plugins
-	# mkdir -p /usr/share/lite-xl/plugins
-	# cp -av lite-plugins/plugins/. /usr/share/lite-xl/plugins
-	# rm -rf lite-plugins
-	# installAURpackageTrizen $user_name $user_password vscodium-bin
-	# pacman --noconfirm -S neofetch
-	# installAURpackageTrizen $user_name $user_password archey4
-	# # pacman --noconfirm -S cylon #all in one tool for arch
+	pacman -S --noconfirm p7zip
+	installAURpackageTrizen $user_name $user_password p7zip-gui
+	installAURpackageTrizen $user_name $user_password fbcat-git
+	installAURpackageTrizen $user_name $user_password bauh;
+	installAURpackageTrizen $user_name $user_password lite-xl
+	# git clone https://github.com/rxi/lite-plugins	# original lite plugins
+	git clone https://github.com/franko/lite-plugins # lite-xl plugins
+	mkdir -p /usr/share/lite-xl/plugins
+	cp -av lite-plugins/plugins/. /usr/share/lite-xl/plugins
+	rm -rf lite-plugins
+	installAURpackageTrizen $user_name $user_password vscodium-bin
+	pacman --noconfirm -S neofetch
+	installAURpackageTrizen $user_name $user_password archey4
+	# pacman --noconfirm -S cylon #all in one tool for arch
 
-	# installAURpackageTrizen $user_name $user_password slimjet
-	# #region old debtap slimjet install
-	# # # wget https://www.slimjetbrowser.com/release/slimjet_amd64.tar.xz
-	# # # tar -xvf slimjet_amd64.tar.xz
-	# # wget https://www.slimjetbrowser.com/release/slimjet_amd64.deb
-	# # installAURpackage debtap
-	# # # debtap -u slimjet_amd64.deb && pacman -U slimjet_amd64.pkg
-	# # debtap -U slimjet_amd64.deb
-	# # rm -rf slimjet_amd64*
-	# #endregion
-	# installAURpackageTrizen $user_name $user_password freedownloadmanager
+	installAURpackageTrizen $user_name $user_password slimjet
+	#region old debtap slimjet install
+	# # wget https://www.slimjetbrowser.com/release/slimjet_amd64.tar.xz
+	# # tar -xvf slimjet_amd64.tar.xz
+	# wget https://www.slimjetbrowser.com/release/slimjet_amd64.deb
+	# installAURpackage debtap
+	# # debtap -u slimjet_amd64.deb && pacman -U slimjet_amd64.pkg
+	# debtap -U slimjet_amd64.deb
+	# rm -rf slimjet_amd64*
+	#endregion
+	installAURpackageTrizen $user_name $user_password freedownloadmanager
 
 	installFISH $user_name $user_password;
 	# installZSH $user_name $user_password;
@@ -957,7 +957,7 @@ EOF
 	sudo -u "$user_name" fisher install jorgebucaran/gitio.fish
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
 
-	# installAURpackageTrizen $user_name $user_password bass-fish
+	installAURpackageTrizen $user_name $user_password bass-fish
 }
 
 installZSH() {
@@ -1183,8 +1183,15 @@ installAURpackageTrizen() {
 	echo "$user_name ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 	rm -rf /tmp/*
 	umount -l -R /tmp
-	sudo -u "$user_name" trizen --noconfirm -S "$packageName"
+	# sudo -u "$user_name" trizen --noconfirm -S "$packageName"
 	sudo -u "$user_name" trizen --noconfirm -Scc --aur
+	mkdir -p /home/tmp && cd /home/tmp
+	git clone https://github.com/fuad-ibrahimzade/arch-scripts-data
+	pacman --noconfirm -U "/home/tmp/arch-scripts-data/archiso-files/customrepo/x86_64/$packageName*.pkg.tar*"
+	# last aur package
+	if [ $strval1 == "i3lock-fancy-git" ]; then
+		rm -rf /home/tmp
+	fi
 	# paccache -ruk0
 	# sudo pacman -Rns --noconfirm $(pacman -Qdttq)
 	
