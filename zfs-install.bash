@@ -43,32 +43,30 @@ arch-chroot /mnt << EOF
 echo "Entering chroot"
 EOF
 arch-chroot /mnt << EOF
-curl -s https://eoli3n.github.io/archzfs/init | bash
-
 pacman -Sy
 
 initPacmanEntropy;
 
 # AREA section OLD2
 
-pacman --noconfirm --needed -S sudo glibc git
+pacman --noconfirm --needed -S sudo
 search="# %wheel ALL=(ALL) ALL"
 replace=" %wheel ALL=(ALL) ALL"
 sed -i "s|\$search|\$replace|g" /etc/sudoers;
 configureUsers $root_password $user_name $user_password;
 
-# installTools $user_name $user_password && # fix without subsequent && script exists after installDesktopEnvironment
+installTools $user_name $user_password && # fix without subsequent && script exists after installDesktopEnvironment
 
-pacman --noconfirm -S glibc git curl
-pacman -S --noconfirm connman cmst
-systemctl enable connman.service
-pacman --noconfirm -S linux linux-headers curl
-curl -O http://archzfs.com/archzfs/x86_64/zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
-pacman --noconfirm -U zfs-utils-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
-curl -O http://archzfs.com/archzfs/x86_64/zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
-pacman -U zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
-cp /usr/lib/initcpio/hooks/zfs /usr/lib/initcpio/hooks/zfs.org
-curl -s https://aur.archlinux.org/cgit/aur.git/plain/zfs-utils.initcpio.hook?h=zfs-utils-common > /usr/lib/initcpio/hooks/zfs
+# pacman --noconfirm -S glibc git curl
+# pacman -S --noconfirm connman cmst
+# systemctl enable connman.service
+# pacman --noconfirm -S linux linux-headers curl
+# curl -O http://archzfs.com/archzfs/x86_64/zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
+# pacman --noconfirm -U zfs-utils-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
+# curl -O http://archzfs.com/archzfs/x86_64/zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
+# pacman -U zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
+# cp /usr/lib/initcpio/hooks/zfs /usr/lib/initcpio/hooks/zfs.org
+# curl -s https://aur.archlinux.org/cgit/aur.git/plain/zfs-utils.initcpio.hook?h=zfs-utils-common > /usr/lib/initcpio/hooks/zfs
 
 search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
 replace="HOOKS=(base udev autodetect modconf keyboard keymap consolefont block zfs filesystems)"
@@ -326,6 +324,7 @@ installArchLinuxWithPacstrap() {
 	yes '' | pacstrap -i /mnt base zfs-linux
 	arch-chroot /mnt << EOF
 #!/usr/bin/bash
+curl -s https://eoli3n.github.io/archzfs/init | bash
 ln -s /usr/share/zoneinfo/Asia/Baku /etc/localtime;
 hwclock --systohc;
 sed  -i 's/\#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen;
@@ -1139,6 +1138,7 @@ installGitHubMakepackage() {
 }
 
 installAURpackage() {
+	pacman --noconfirm --needed -S git
 	#usermod --append --groups wheel nobody
 	usermod -aG wheel nobody
 	echo "nobody ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
@@ -1177,6 +1177,7 @@ installAURpackageTrizen() {
 	packageName="$3"
 	
 
+	pacman --noconfirm --needed -S git
 	sed -z -i "s|\#\[multilib\]\n#Include = /etc/pacman.d/mirrorlist|\[multilib\]\nInclude = /etc/pacman.d/mirrorlist|g" /etc/pacman.conf;
 	sudo pacman -Syyu
 
