@@ -1228,7 +1228,9 @@ installAURpackageTrizen() {
 					pacman --noconfirm -U "$packageNameWithExt"
 				;;
 				"bauh")
-					pacman --noconfirm --asdeps -U "$packageNameWithExt"
+					optionalDeps=$(pacman -Si "$packageNameWithExt" | sed -n '/^Opt/,/^Conf/p' | sed '$d' | sed 's/^Opt.*://g' | sed 's/^\s*//g' | tr '\n' ' ')
+					echo "optionallllll $optionalDeps"
+					pacman --noconfirm -U "$packageNameWithExt"
 				;;
 				*)
 					pacman --noconfirm -U "$packageNameWithExt"
