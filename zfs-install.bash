@@ -483,6 +483,27 @@ EOF
 	# https://thacoon.com/posts/arch-linux-hardened-kernel/
 	# https://www.reddit.com/r/privacy/comments/7jdr9m/lineageos_vs_copperheados_vs_replicant/
 	# https://github.com/getstream/winds/	#rss reader
+	# https://github.com/iamaziz/TermFeed
+	# https://www.autohotkey.com/
+	# https://www.reddit.com/r/linux4noobs/comments/dh277f/whats_a_better_lightweight_email_client/
+	# https://opensource.com/article/17/7/email-alternatives-thunderbird
+	# https://www.linuxlinks.com/lightweight-email-clients/
+	# https://itsfoss.com/best-email-clients-linux/
+	# https://github.com/gumieri/note
+	# https://github.com/pimterry/notes
+	# https://lifehacker.com/turn-your-command-line-into-a-fast-and-simple-note-taki-5592047
+	# https://www.youtube.com/watch?v=T5zJ8Q4R8tI
+	# https://github.com/xwmx/nb
+	# https://www.youtube.com/watch?v=NasPBjSev88
+	# https://opensource.com/article/18/3/command-line-note-taking-applications
+	# https://www.reddit.com/r/linux/comments/87igfx/4_command_line_notetaking_applications_for_linux/
+	# https://github.com/MarkHedleyJones/dmenu-extended/blob/master/README.md
+	# https://www.qownnotes.org/
+	# https://archlinux.org/packages/community/x86_64/canto-curses/
+	# https://archlinux.org/packages/community/any/canto-daemon/
+	# https://wiki.archlinux.org/index.php/System_maintenance
+	# https://webfpga.io/
+	# https://github.com/webfpga
 	# endregion
 
 
@@ -500,7 +521,7 @@ EOF
 	#endregion
 	installAURpackage trizen
 	# #region additional tools
-	pacman -S --noconfirm thefuck aria2 python-pywal nmon atop nethogs net-tools powertop feedreader
+	pacman -S --noconfirm thefuck aria2 python-pywal nmon atop nethogs net-tools powertop feedreader newsboat
 	installAURpackageTrizen $user_name $user_password netatop;
 	installAURpackageTrizen $user_name $user_password speedreader
 	installAURpackageTrizen $user_name $user_password uniread
