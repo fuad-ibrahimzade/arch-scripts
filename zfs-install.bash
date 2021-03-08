@@ -410,7 +410,7 @@ EOF
 
 	installAURpackage trizen
 	# #region additional tools
-	pacman -S --noconfirm thefuck aria2 python-pywal nmon atop nethogs net-tools
+	pacman -S --noconfirm thefuck aria2 python-pywal nmon atop nethogs net-tools powertop
 	installAURpackageTrizen $user_name $user_password netatop;
 	installAURpackageTrizen $user_name $user_password speedreader
 	installAURpackageTrizen $user_name $user_password uniread
