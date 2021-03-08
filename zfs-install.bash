@@ -1210,7 +1210,9 @@ installAURpackageTrizen() {
 		"ttf-meslo-nerd-font-powerlevel10k-1.000-3-any.pkg.tar.zst", 
 		"vscodium-bin-1.53.2-1-x86_64.pkg.tar.zst", 
 		"wat-git-r29.0861966-1-x86_64.pkg.tar.zst", 
-		"wmfocus-1.1.5-1-x86_64.pkg.tar.zst"
+		"wmfocus-1.1.5-1-x86_64.pkg.tar.zst",
+		"snapd-2.48.2-1-x86_64.pkg.tar.zst",
+		"flatpak-1.10.1-1-x86_64.pkg.tar.zst"
 	)
 	for item in "${githubPackages[@]}"; do
 		if [[ $item == *"$packageName"* ]]; then
@@ -1222,7 +1224,7 @@ installAURpackageTrizen() {
 						if [[ $item2 == *"agg"* ]]; then
 							depPackageNameWithExt=$(echo "$item2" | sed -e "s/,$//")
 							wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$depPackageNameWithExt"
-							pacman --noconfirm -U "$depPackageNameWithExt"
+							pacman --noconfirm --asdeps -U "$depPackageNameWithExt"
 							rm "$depPackageNameWithExt"
 						fi
 					done
@@ -1232,6 +1234,14 @@ installAURpackageTrizen() {
 					optionalDeps=$(sudo -u "$user_name" trizen -Si "$packageName" | sed -n '/^Opt/,/^Conf/p' | sed '$d' | sed 's/^Opt.*://g' | sed 's/^\s*//g' | tr '\n' ' ')
 					optionalDeps=$(echo $optionalDeps | sed 's/Provides//g' | sed 's/None//g' | sed 's/://g')
 					#echo "optionallllll $optionalDeps"
+					for item2 in "${githubPackages[@]}"; do
+						if [[ $item2 == *"snapd"* || $item2 == *"flatpak"* ]]; then
+							depPackageNameWithExt=$(echo "$item2" | sed -e "s/,$//")
+							wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$depPackageNameWithExt"
+							pacman --noconfirm --asdeps -U "$depPackageNameWithExt"
+							rm "$depPackageNameWithExt"
+						fi
+					done
 					pacman --noconfirm -U "$packageNameWithExt"
 					# sudo -u "$user_name" trizen -S --noconfirm --asdeps --needed flatpak snapd
 				;;
