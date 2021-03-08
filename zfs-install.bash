@@ -1073,8 +1073,10 @@ EOF
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
 
 	installAURpackageTrizen $user_name $user_password bass-fish
+	#copy bash and xiki configs
 	wget https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts-data/main/xiki/xiki.tar
-	tar -xvf xiki.tar -C xiki
+	tar -xvf xiki.tar
+	cp -av xiki/. "/home/$user_name"
 }
 
 installZSH() {
