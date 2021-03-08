@@ -198,8 +198,11 @@ createAndMountPartitions() {
 	mkfs.fat -F32 "$efipart"
 	mount "$efipart" /mnt/boot
 
-	#region TODO continue
+	#region TODO continue zfs
 	# https://github.com/dmeulen/Arch_Root_on_encrypted_ZFS
+	# 1) encrypton kernel panic
+	# 2) 2.1) home data sets legacy vs current in fstab, 2.2) home user dataset creation
+	# 3) zedenv, zectl dataset structure
 	#endregion
 
 } 
