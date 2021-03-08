@@ -388,6 +388,12 @@ EOF
 	# https://dev.to/trusktr/why-i-moved-from-nixos-to-manjaro-linux-36j2
 	# http://www.willghatch.net/blog/2020/06/27/nixos-the-good-the-bad-and-the-ugly/
 	# trizen -S --noconfirm wyeb-git nyxt cliqz 
+
+	# https://www.reddit.com/r/archlinux/comments/gyhyhr/is_bubblewrap_a_good_replacement_for_firejail/
+	# https://www.reddit.com/r/archlinux/comments/gpqbxc/linuxhardened_lts_zen_with_signed_kernel_modules/
+	# https://gitlab.com/madaidan/arch-hardening-script
+	# https://thacoon.com/posts/arch-linux-hardened-kernel/
+	# https://www.reddit.com/r/privacy/comments/7jdr9m/lineageos_vs_copperheados_vs_replicant/
 	# endregion
 
 

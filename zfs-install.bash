@@ -24,11 +24,13 @@ main() {
 	pacman -Syy
 	curl -s https://eoli3n.github.io/archzfs/init | bash
 	mount -o remount,size=2G /run/archiso/cowspace
+	#region old zfs-dkms
 	# pacman --noconfirm -S linux linux-headers curl
 	# curl -O http://archzfs.com/archzfs/x86_64/zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
 	# pacman --noconfirm -U zfs-utils-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
 	# curl -O http://archzfs.com/archzfs/x86_64/zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
 	# pacman --noconfirm -U zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
+	#endregion 
 	modprobe zfs
 	createAndMountPartitions $Output_Device;
 	# installArchLinuxWithUnsquashfs;
@@ -57,6 +59,7 @@ configureUsers $root_password $user_name $user_password;
 
 installTools $user_name $user_password && # fix without subsequent && script exists after installDesktopEnvironment
 
+#region old zfs-dkms
 # pacman --noconfirm -S glibc git curl
 # pacman -S --noconfirm connman cmst
 # systemctl enable connman.service
@@ -67,6 +70,7 @@ installTools $user_name $user_password && # fix without subsequent && script exi
 # pacman -U zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
 # cp /usr/lib/initcpio/hooks/zfs /usr/lib/initcpio/hooks/zfs.org
 # curl -s https://aur.archlinux.org/cgit/aur.git/plain/zfs-utils.initcpio.hook?h=zfs-utils-common > /usr/lib/initcpio/hooks/zfs
+#endregion
 
 search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
 replace="HOOKS=(base udev autodetect modconf keyboard keymap consolefont block zfs filesystems)"
@@ -119,6 +123,7 @@ createAndMountPartitions() {
 	#wipefs --all "$Output_Device";
 	#dd if=/dev/zero of="$Output_Device" bs=512 count=1
 	partprobe;
+	#region old without zfs
 	# (echo g; echo n; echo p; echo 1; echo ""; echo +$(echo $ISO_MB)M; echo t; echo 0c; echo n; echo p; echo 2; echo ""; echo +1024M; echo t; echo 2; echo 19; echo n; echo p; echo 3; echo ""; echo +512M; echo t; echo 3; echo 1; echo n; echo p; echo 4; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
 	# # (echo g; echo n; echo p; echo 1; echo ""; echo +$(echo $ISO_MB)M; echo t; echo 0c; echo n; echo p; echo 2; echo ""; echo +512M; echo t; echo 2; echo 1; echo n; echo p; echo 3; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
 	# # (echo g; echo n; echo p; echo 1; echo ""; echo +1000M; echo t; echo 0c; echo n; echo p; echo 2; echo ""; echo +512M; echo t; echo 2; echo 1; echo n; echo p; echo 3; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
@@ -147,6 +152,7 @@ createAndMountPartitions() {
 	# mount "$isopart" /mnt/iso
 	# mkswap "$swappart"
 	# swapon "$swappart"
+	#endregion
 
 
 	parted --script $(echo $Output_Device) \
@@ -407,7 +413,90 @@ EOF
 	rm temp
 
 	pacman -S --noconfirm abiword zathura zathura-pdf-mupdf zathura-djvu pulseaudio pavucontrol vlc xorg-xbacklight acpi
+	# region TODO remove
+	# git clone https://github.com/acaloiaro/di-tui
+	# cp di-tui/di-tui /usr/bin/di-tui 
+	# chmod a+x /usr/bin/di-tui 
+	# dunst
+	# parcellite
+	# pasystray
+	# spacefm-gtk3
+	# udiskie
+	# https://github.com/GeertJohan/tune
+	# https://github.com/carstene1ns/difmplay-mod
+	# https://github.com/acaloiaro/di-tui
+	# https://gist.github.com/hackruu/6fc318e677b899f99751
+	# https://gist.github.com/joepie91/08df1ccf3adb00dbce7c
+	# https://github.com/wtheisen/TerminusBrowser
+	# https://github.com/khanhas/spicetify-cli
+	# qt5ct
+	# # Use GTK styles for QT apps
+	# # requires qt5-style-plugins to be installed
+	# export QT_STYLE_OVERRIDE="gtk2"
+	# export QT_QPA_PLATFORMTHEME="gtk2"
+	# https://www.reddit.com/r/gnome/comments/jaqave/how_do_i_get_qt_apps_to_use_my_installed_qt_theme/
+	# https://wiki.manjaro.org/index.php/Set_all_Qt_app%27s_to_use_GTK%2B_font_%26_theme_settings
+	# https://www.linuxuprising.com/2018/05/use-custom-themes-for-qt-applications.html
+	# https://github.com/EliverLara/Nordic
+	# https://github.com/basigur/papirus-folders
+	# https://aur.archlinux.org/packages/papirus-folders-nordic/
+	# https://www.reddit.com/r/vim/comments/3tluqr/my_list_of_applications_with_vi_keybindings/
+	# https://vim.reversed.top/
+	# https://reversed.top/2016-08-13/big-list-of-vim-like-software/
+	# https://www.freecodecamp.org/news/a-guide-to-modern-web-development-with-neo-vim-333f7efbf8e2/
+	# https://github.com/ChristianChiarulli/nvim
+	# QGtkStyle vs QGnomePlatform
+	# https://www.reddit.com/r/qutebrowser/comments/cc5vov/dark_mode_in_qutebrowser/
+	# :set content.user_stylesheets coolsheet.css
+	# https://github.com/Catfriend1/syncthing-android
+	# https://github.com/syncthing/syncthing-android
+	# https://github.com/classicsc/syncthingmanager
+	# https://www.reddit.com/r/qutebrowser/comments/9d4px7/sync_qutebrowser_bookmarks_across_several/
+	# https://www.reddit.com/r/qutebrowser/comments/9d4px7/sync_qutebrowser_bookmarks_across_several/
+	# https://raw.githubusercontent.com/alphapapa/solarized-everything-css/master/css/solarized-dark/solarized-dark-all-sites.css
+	# https://qutebrowser.org/doc/help/commands.html
+	# https://raw.githubusercontent.com/qutebrowser/qutebrowser/master/doc/img/cheatsheet-big.png
+	# https://qutebrowser.org/doc/install.html#_a_href_https_chocolatey_org_packages_qutebrowser_chocolatey_package_a
+	# https://www.howtogeek.com/451262/how-to-use-rclone-to-back-up-to-google-drive-on-linux/
+	# https://github.com/alichtman/deadbolt
+	# https://github.com/alichtman/malware-techniques
+	# https://github.com/alichtman/shallow-backup
+	# https://wiki.archlinux.org/index.php/Install_Arch_Linux_on_ZFS
+	# https://ramsdenj.com/2016/06/23/arch-linux-on-zfs-part-1-embed-zfs-in-archiso.html
+	# https://ramsdenj.com/2016/06/23/arch-linux-on-zfs-part-2-installation.html
+	# https://ramsdenj.com/2016/08/29/arch-linux-on-zfs-part-3-followup.html
+	# https://github.com/dmeulen/Arch_Root_on_encrypted_ZFS
 
+	# https://ramsdenj.com/2017/06/19/switching-to-nixos-from-arch-linux.html
+	# https://www.reddit.com/r/NixOS/comments/jo6lv1/nixos_for_pentesting/
+	# https://github.com/Pamplemousse/tangerinixos
+	# https://github.com/NixOS/nixpkgs/issues/81418
+	# https://discourse.nixos.org/t/proposing-tangerinixos-a-nixos-tailored-for-pentesting/10538/3
+	# https://www.trustedsec.com/blog/so-you-got-access-to-a-nix-system-now-what/
+	# https://dev.to/trusktr/why-i-moved-from-nixos-to-manjaro-linux-36j2
+	# http://www.willghatch.net/blog/2020/06/27/nixos-the-good-the-bad-and-the-ugly/
+	# trizen -S --noconfirm wyeb-git nyxt cliqz 
+
+	# https://www.reddit.com/r/archlinux/comments/gyhyhr/is_bubblewrap_a_good_replacement_for_firejail/
+	# https://www.reddit.com/r/archlinux/comments/gpqbxc/linuxhardened_lts_zen_with_signed_kernel_modules/
+	# https://gitlab.com/madaidan/arch-hardening-script
+	# https://thacoon.com/posts/arch-linux-hardened-kernel/
+	# https://www.reddit.com/r/privacy/comments/7jdr9m/lineageos_vs_copperheados_vs_replicant/
+	# endregion
+
+
+	#region old aur helper pikaur
+	# python -m pip install pikaur
+	# touch /etc/profile.d/00-aliases.sh
+	# echo "alias pikaur='python -m pikaur'" >> /etc/profile.d/00-aliases.sh 
+	# source /etc/profile.d/00-aliases.sh
+
+	# source ~/.bash_aliases.sh
+	# . ~/.bash_aliases.sh
+	# app_outlet_url=$( curl -s https://api.github.com/repos/app-outlet/app-outlet/releases/latest | grep "browser_download_url.*tar.gz" | cut -d : -f 2,3 | tr -d \" )
+	# wget $app_outlet_url
+	#installAURpackage pikaur
+	#endregion
 	installAURpackage trizen
 	# #region additional tools
 	pacman -S --noconfirm thefuck aria2 python-pywal nmon atop nethogs net-tools powertop
@@ -447,7 +536,7 @@ EOF
 
 	installFISH $user_name $user_password;
 	# installZSH $user_name $user_password;
-	# installBlackArchRepositories;
+	installBlackArchRepositories;
 
 	installDesktopEnvironment $user_name $user_password;
 	#initScriptAtBoot $user_name $user_password;
@@ -959,6 +1048,8 @@ EOF
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
 
 	installAURpackageTrizen $user_name $user_password bass-fish
+	wget https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts-data/main/xiki/xiki.tar
+	tar -xvf xiki.tar -C xiki
 }
 
 installZSH() {

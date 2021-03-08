@@ -5,3 +5,6 @@ set -x MANPAGER '/bin/bash -c "vim -MRn -c \"set buftype=nofile showtabline=0 ft
 ### "nvim" as manpager
 # set -x MANPAGER "nvim -c 'set ft=man' -"
 #xcompmgr -c -f -n
+function xsh
+	bass source $HOME/.xsh ';' xsh --d $argv
+end
