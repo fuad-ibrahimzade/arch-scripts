@@ -1331,6 +1331,10 @@ installAURpackageTrizen() {
 							wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$depPackageNameWithExt"
 							pacman --noconfirm --asdeps -U "$depPackageNameWithExt"
 							rm "$depPackageNameWithExt"
+							if [[ $item2 == *"snapd"* ]]; then
+								systemctl enable --now snapd.socket
+								ln -s /var/lib/snapd/snap /snap
+							fi
 						fi
 					done
 					pacman --noconfirm -U "$packageNameWithExt"
