@@ -93,6 +93,8 @@ ZPOOL_VDEV_NAME_PATH=1 grub-mkconfig -o /boot/grub/grub.cfg &&
 
 # AREA section OLD4
 
+umount -l /home
+
 exit
 EOF
 
@@ -333,6 +335,8 @@ installArchLinuxWithPacstrap() {
 	yes '' | pacstrap -i /mnt base zfs-linux
 	arch-chroot /mnt << EOF
 #!/usr/bin/bash
+mount /home
+
 curl -s https://eoli3n.github.io/archzfs/init | bash
 ln -s /usr/share/zoneinfo/Asia/Baku /etc/localtime;
 hwclock --systohc;
