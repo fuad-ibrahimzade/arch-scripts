@@ -72,6 +72,7 @@ installTools $user_name $user_password && # fix without subsequent && script exi
 # curl -s https://aur.archlinux.org/cgit/aur.git/plain/zfs-utils.initcpio.hook?h=zfs-utils-common > /usr/lib/initcpio/hooks/zfs
 #endregion
 
+initZFSBootTimeUnlockService;
 search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
 replace="HOOKS=(base udev autodetect modconf keyboard keymap consolefont block zfs filesystems)"
 sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
@@ -111,6 +112,32 @@ zpool export zroot
 #umount -l -R /mnt
 #reboot
 }
+
+
+initZFSBootTimeUnlockService() {
+	cat > temp << EOF
+[Unit]
+Description=Load encryption keys
+DefaultDependencies=no
+After=zfs-import.target
+Before=zfs-mount.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/zfs load-key -a
+StandardInput=tty-force
+
+[Install]
+WantedBy=zfs-mount.service
+EOF
+	cat temp >> /etc/systemd/system/zfs-load-key.service
+	rm temp
+
+	systemctl enable now zfs-load-key.service
+
+}
+
 
 createAndMountPartitions() {
 	Output_Device="$1"
@@ -1571,6 +1598,7 @@ export -f installZSH
 export -f installBlackArchRepositories
 export -f copyWallpapers
 export -f createArchISO
+export -f initZFSBootTimeUnlockService
 
 
 #chroot /mnt /bin/bash -c "installAURpackage ly-git""
