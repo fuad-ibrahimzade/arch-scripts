@@ -555,10 +555,11 @@ EOF
 	#endregion
 	installAURpackage trizen
 	# #region additional tools
-	pacman -S --noconfirm clipit thefuck aria2 python-pywal nmon atop nethogs net-tools powertop feedreader newsboat
+	pacman -S --noconfirm thefuck aria2 python-pywal nmon atop nethogs net-tools powertop feedreader newsboat
 	installAURpackageTrizen $user_name $user_password netatop;
 	installAURpackageTrizen $user_name $user_password speedreader
 	installAURpackageTrizen $user_name $user_password uniread
+	installAURpackageTrizen $user_name $user_password clipit
 	# # endregion
 	installCacheCleanTools  $user_name $user_password;
 	installBackupTools  $user_name $user_password;
@@ -1361,7 +1362,9 @@ installAURpackageTrizen() {
 		"wat-git-r29.0861966-1-x86_64.pkg.tar.zst", 
 		"wmfocus-1.1.5-1-x86_64.pkg.tar.zst",
 		"snapd-2.48.2-1-x86_64.pkg.tar.zst",
-		"flatpak-1.10.1-1-x86_64.pkg.tar.zst"
+		"flatpak-1.10.1-1-x86_64.pkg.tar.zst",
+		"clipit-1.4.5-3-x86_64.pkg.tar.zst",
+		"speedreader-1.4.0-3-x86_64.pkg.tar.zst"
 	)
 	for item in "${githubPackages[@]}"; do
 		if [[ $item == *"$packageName"* ]]; then
