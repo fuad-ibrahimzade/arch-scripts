@@ -134,7 +134,7 @@ EOF
 	cat temp >> /etc/systemd/system/zfs-load-key.service
 	rm temp
 
-	systemctl enable now zfs-load-key.service
+	systemctl enable --now zfs-load-key.service
 
 }
 
