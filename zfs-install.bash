@@ -1364,7 +1364,8 @@ installAURpackageTrizen() {
 		"snapd-2.48.2-1-x86_64.pkg.tar.zst",
 		"flatpak-1.10.1-1-x86_64.pkg.tar.zst",
 		"clipit-1.4.5-3-x86_64.pkg.tar.zst",
-		"speedreader-1.4.0-3-x86_64.pkg.tar.zst"
+		"speedreader-1.4.0-3-x86_64.pkg.tar.zst",
+		"uniread-0.1.22-1-any.pkg.tar.zst"
 	)
 	for item in "${githubPackages[@]}"; do
 		if [[ $item == *"$packageName"* ]]; then
