@@ -36,10 +36,7 @@ main() {
 	# installArchLinuxWithUnsquashfs;
 	installArchLinuxWithPacstrap;
 
-	genfstab -U -p /mnt | grep boot >> /mnt/etc/fstab
-
-	echo "/dev/zvol/zroot/encr/swap none swap discard 0 0" >> /mnt/etc/fstab
-	echo "zroot/encr/data/home /home zfs rw,xattr,posixacl 0 0" >> /mnt/etc/fstab
+	# genfstabNormal;
 
 arch-chroot /mnt << EOF
 echo "Entering chroot"
@@ -111,6 +108,17 @@ zpool export zroot
 #umount -l -R /mnt
 #umount -l -R /mnt
 #reboot
+}
+
+genfstabNormal() {
+	genfstab -U -p /mnt >> /mnt/etc/fstab
+}
+
+genfstabZfs() {
+	genfstab -U -p /mnt | grep boot >> /mnt/etc/fstab
+
+	echo "/dev/zvol/zroot/encr/swap none swap discard 0 0" >> /mnt/etc/fstab
+	echo "zroot/encr/data/home /home zfs rw,xattr,posixacl 0 0" >> /mnt/etc/fstab
 }
 
 
@@ -360,6 +368,7 @@ installArchLinuxWithUnsquashfs() {
 
 installArchLinuxWithPacstrap() {
 	yes '' | pacstrap -i /mnt base zfs-linux
+	genfstabZfs;
 	arch-chroot /mnt << EOF
 #!/usr/bin/bash
 mount /home
