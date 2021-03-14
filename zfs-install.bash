@@ -87,8 +87,8 @@ ZPOOL_VDEV_NAME_PATH=1 grub-install --target=x86_64-efi --efi-directory=/boot &&
 #grub-install --target=x86_64-efi --efi-directory=/efi --boot-directory=/boot
 ZPOOL_VDEV_NAME_PATH=1 grub-mkconfig -o /boot/grub/grub.cfg &&
 
-search="linux	/vmlinuz-linux root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
-replace="linux	/vmlinuz-linux zfs=bootfs root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
+search="linux\\t/vmlinuz-linux root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
+replace="linux\\t/vmlinuz-linux zfs=bootfs root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
 sed -i "s|\$search|\$replace|g" /boot/grub/grub.cfg;
 
 # writeArchIsoToSeperatePartition;
