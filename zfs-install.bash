@@ -1383,13 +1383,13 @@ installAURpackageTrizen() {
 	for item in "${githubPackages[@]}"; do
 		if [[ $item == *"$packageName"* ]]; then
 			packageNameWithExt=$(echo "$item" | sed -e "s/,$//")
-			wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$packageNameWithExt"
+			wget --no-check-certificate "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$packageNameWithExt"
 			case "$packageName" in
 				"lite-xl")
 					for item2 in "${githubPackages[@]}"; do
 						if [[ $item2 == *"agg"* ]]; then
 							depPackageNameWithExt=$(echo "$item2" | sed -e "s/,$//")
-							wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$depPackageNameWithExt"
+							wget --no-check-certificate "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$depPackageNameWithExt"
 							pacman --noconfirm --asdeps -U "$depPackageNameWithExt"
 							rm "$depPackageNameWithExt"
 						fi
@@ -1403,7 +1403,7 @@ installAURpackageTrizen() {
 					for item2 in "${githubPackages[@]}"; do
 						if [[ $item2 == *"snapd"* || $item2 == *"flatpak"* ]]; then
 							depPackageNameWithExt=$(echo "$item2" | sed -e "s/,$//")
-							wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$depPackageNameWithExt"
+							wget --no-check-certificate "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$depPackageNameWithExt"
 							pacman --noconfirm --asdeps -U "$depPackageNameWithExt"
 							rm "$depPackageNameWithExt"
 							if [[ $item2 == *"snapd"* ]]; then
