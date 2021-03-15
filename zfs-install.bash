@@ -7,6 +7,8 @@ main() {
     # else
     #     do_task_that
     # fi
+	# temporary git clone ssl problem fix
+	# git config --global http.sslVerify false
 
 	read -p "Output Device (default: /dev/sda):" Output_Device
 	Output_Device=${Output_Device:-/dev/sda}
