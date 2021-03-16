@@ -1164,6 +1164,7 @@ EOF
 	tar -xvf --one-top-level xiki.tar
 	cp -av xiki/. "/home/$user_name"
 	rm -rf xiki
+	pacman -S --noconfirm --asdeps emacs ruby
 }
 
 installZSH() {
