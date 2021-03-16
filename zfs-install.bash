@@ -7,6 +7,9 @@ main() {
     # else
     #     do_task_that
     # fi
+	# temporary git clone ssl problem fix
+	# git config --global http.sslVerify false
+	# git config http.sslVerify false # for one repository
 
 	read -p "Output Device (default: /dev/sda):" Output_Device
 	Output_Device=${Output_Device:-/dev/sda}
@@ -1411,13 +1414,13 @@ installAURpackageTrizen() {
 	for item in "${githubPackages[@]}"; do
 		if [[ $item == *"$packageName"* ]]; then
 			packageNameWithExt=$(echo "$item" | sed -e "s/,$//")
-			wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$packageNameWithExt"
+			wget --no-check-certificate "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$packageNameWithExt"
 			case "$packageName" in
 				"lite-xl")
 					for item2 in "${githubPackages[@]}"; do
 						if [[ $item2 == *"agg"* ]]; then
 							depPackageNameWithExt=$(echo "$item2" | sed -e "s/,$//")
-							wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$depPackageNameWithExt"
+							wget --no-check-certificate "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$depPackageNameWithExt"
 							pacman --noconfirm --asdeps -U "$depPackageNameWithExt"
 							rm "$depPackageNameWithExt"
 						fi
@@ -1431,7 +1434,7 @@ installAURpackageTrizen() {
 					for item2 in "${githubPackages[@]}"; do
 						if [[ $item2 == *"snapd"* || $item2 == *"flatpak"* ]]; then
 							depPackageNameWithExt=$(echo "$item2" | sed -e "s/,$//")
-							wget "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$depPackageNameWithExt"
+							wget --no-check-certificate "https://github.com/fuad-ibrahimzade/arch-scripts-data/raw/main/archiso-files/customrepo/x86_64/$depPackageNameWithExt"
 							pacman --noconfirm --asdeps -U "$depPackageNameWithExt"
 							rm "$depPackageNameWithExt"
 							if [[ $item2 == *"snapd"* ]]; then
