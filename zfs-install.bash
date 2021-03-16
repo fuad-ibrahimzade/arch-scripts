@@ -27,19 +27,11 @@ main() {
 	pacman -Syy
 	curl -s https://eoli3n.github.io/archzfs/init | bash
 	mount -o remount,size=2G /run/archiso/cowspace
-	#region old zfs-dkms
-	# pacman --noconfirm -S linux linux-headers curl
-	# curl -O http://archzfs.com/archzfs/x86_64/zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
-	# pacman --noconfirm -U zfs-utils-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
-	# curl -O http://archzfs.com/archzfs/x86_64/zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
-	# pacman --noconfirm -U zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
-	#endregion 
+	# AREA section OLD5
 	modprobe zfs
 	createAndMountPartitions $Output_Device;
 	# installArchLinuxWithUnsquashfs;
 	installArchLinuxWithPacstrap;
-
-	# genfstabNormal;
 
 arch-chroot /mnt << EOF
 echo "Entering chroot"
@@ -59,18 +51,7 @@ configureUsers $root_password $user_name $user_password;
 
 installTools $user_name $user_password && # fix without subsequent && script exists after installDesktopEnvironment
 
-#region old zfs-dkms
-# pacman --noconfirm -S glibc git curl
-# pacman -S --noconfirm connman cmst
-# systemctl enable connman.service
-# pacman --noconfirm -S linux linux-headers curl
-# curl -O http://archzfs.com/archzfs/x86_64/zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
-# pacman --noconfirm -U zfs-utils-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
-# curl -O http://archzfs.com/archzfs/x86_64/zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
-# pacman -U zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
-# cp /usr/lib/initcpio/hooks/zfs /usr/lib/initcpio/hooks/zfs.org
-# curl -s https://aur.archlinux.org/cgit/aur.git/plain/zfs-utils.initcpio.hook?h=zfs-utils-common > /usr/lib/initcpio/hooks/zfs
-#endregion
+# AREA section OLD5
 
 initZFSBootTimeUnlockService;
 search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
@@ -78,10 +59,10 @@ replace="HOOKS=(base udev autodetect modconf keyboard keymap consolefont block z
 sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
 mkinitcpio -p linux
 
-installSystemdBoot;
-# installGrub;
+installUEFISystemdBoot;
+#installUEFIGrub;
 
-# writeArchIsoToSeperatePartition;
+#writeArchIsoToSeperatePartition;
 
 # AREA section OLD4
 
@@ -141,7 +122,7 @@ EOF
 
 }
 
-installSystemdBoot() {
+installUEFISystemdBoot() {
 	bootctl --path=/boot install
 	cat > temp << EOF
 default arch
@@ -168,7 +149,7 @@ EOF
 	rm temp
 }
 
-installGrub() {
+installUEFIGrub() {
 	pacman --noconfirm -S grub efibootmgr &&
 	#yes | pacman -S grub efibootmgr os-prober intel-ucode amd-ucode
 
@@ -404,6 +385,8 @@ installArchLinuxWithUnsquashfs() {
 } 
 
 installArchLinuxWithPacstrap() {
+	# yes '' | pacstrap -i /mnt base linux
+	# genfstabNormal;
 	yes '' | pacstrap -i /mnt base zfs-linux
 	genfstabZfs;
 	arch-chroot /mnt << EOF
@@ -1664,8 +1647,8 @@ export -f installBlackArchRepositories
 export -f copyWallpapers
 export -f createArchISO
 export -f initZFSBootTimeUnlockService
-export -f installSystemdBoot
-export -f installGrub
+export -f installUEFISystemdBoot
+export -f installUEFIGrub
 
 
 #chroot /mnt /bin/bash -c "installAURpackage ly-git""
@@ -1740,3 +1723,18 @@ main "$@"; exit
 	##half worked without entry with extendetd boot partition type 38 as for boot path nd then formatin 38 partition with mksfs.fat then bootctl --esp-path=/efi --boot-path=/boot install
 	#bootctl --esp-path=/efi --boot-path=/boot install
 # end section OLD4
+
+# section OLD5
+	#old zfs-dkms
+	# pacman --noconfirm -S glibc git curl
+	# pacman -S --noconfirm connman cmst
+	# systemctl enable connman.service
+	# pacman --noconfirm -S linux linux-headers curl
+	# curl -O http://archzfs.com/archzfs/x86_64/zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
+	# pacman --noconfirm -U zfs-utils-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-utils-2.0.3-1-x86_64.pkg.tar.zst
+	# curl -O http://archzfs.com/archzfs/x86_64/zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
+	# pacman -U zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst && rm zfs-dkms-2.0.3-1-x86_64.pkg.tar.zst
+	# cp /usr/lib/initcpio/hooks/zfs /usr/lib/initcpio/hooks/zfs.org
+	# curl -s https://aur.archlinux.org/cgit/aur.git/plain/zfs-utils.initcpio.hook?h=zfs-utils-common > /usr/lib/initcpio/hooks/zfs
+	#
+# end section OLD5
