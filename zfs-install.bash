@@ -805,23 +805,28 @@ installi3Seperate() {
 
 	installAURpackageTrizen $user_name $user_password rofi-power-menu
 	# git clone https://github.com/jluttine/rofi-power-menu
-	search="loginctl terminate-session \${XDG_SESSION_ID-}"
-	replace="pkill X"
-	sed -i "s|\$search|\$replace|g" /usr/bin/rofi-power-menu
 	installAURpackageTrizen $user_name $user_password i3lock-fancy-git
-	cat > temp << EOF
-#!/bin/bash
-pkill rofi
-i3lock-fancy
-EOF
-	cat temp >> "/usr/bin/i3fancy-locker.sh"
-	rm temp
-	search="loginctl lock-session \${XDG_SESSION_ID-}"
-	replace="sh /usr/bin/i3fancy-locker.sh"
-	sed -i "s|\$search|\$replace|g" /usr/bin/rofi-power-menu
+	wget --no-check-certificate "https://github.com/fuad-ibrahimzade/arch-scripts/raw/main/i3-seperate-install-files/i3fancy-locker.sh"
+	wget --no-check-certificate "https://github.com/fuad-ibrahimzade/arch-scripts/blob/main/i3-seperate-install-files/rofi_power_menu"
+	mv i3fancy-locker.sh rofi_power_menu -t /usr/bin
+	#region old rofi-power-menu
+# 	search="loginctl terminate-session \${XDG_SESSION_ID-}"
+# 	replace="pkill X"
+# 	sed -i "s|\$search|\$replace|g" /usr/bin/rofi-power-menu
+# 	cat > temp << EOF
+# #!/bin/bash
+# pkill rofi
+# i3lock-fancy
+# EOF
+# 	cat temp >> "/usr/bin/i3fancy-locker.sh"
+# 	rm temp
+# 	search="loginctl lock-session \${XDG_SESSION_ID-}"
+# 	replace="sh /usr/bin/i3fancy-locker.sh"
+# 	sed -i "s|\$search|\$replace|g" /usr/bin/rofi-power-menu
 	# cp -av rofi-power-menu/. /usr/bin
-	echo "bindsym \$mod+Shift+p exec rofi -show power-menu -modi power-menu:rofi-power-menu" >> "/home/$user_name/.config/i3/config";
 	# rm -rf rofi-power-menu
+	#endregion
+	echo "bindsym \$mod+Shift+p exec rofi -show power-menu -modi power-menu:rofi-power-menu" >> "/home/$user_name/.config/i3/config";
 
 	# pacman -S --noconfirm ttf-fira-code otf-font-awesome
 	# installAURpackageTrizen $user_name $user_password nerd-fonts-fira-code
