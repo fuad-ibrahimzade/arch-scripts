@@ -79,24 +79,7 @@ sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
 mkinitcpio -p linux
 
 installSystemdBoot;
-
-#region old grub
-# pacman --noconfirm -S grub efibootmgr &&
-# #yes | pacman -S grub efibootmgr os-prober intel-ucode amd-ucode
-
-# mkinitcpio -p linux && # when pacstrap used
-# # mkinitcpio -g /boot/initramfs-linux.img && # when unsquashfs used
-
-# # AREA section OLD3
-
-# ZPOOL_VDEV_NAME_PATH=1 grub-install --target=x86_64-efi --efi-directory=/boot &&
-# #grub-install --target=x86_64-efi --efi-directory=/efi --boot-directory=/boot
-# ZPOOL_VDEV_NAME_PATH=1 grub-mkconfig -o /boot/grub/grub.cfg &&
-
-# search="linux\\t/vmlinuz-linux root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
-# replace="linux\\t/vmlinuz-linux zfs=bootfs root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
-# sed -i "s|\$search|\$replace|g" /boot/grub/grub.cfg;
-#endregion
+# installGrub;
 
 # writeArchIsoToSeperatePartition;
 
@@ -183,6 +166,24 @@ options zfs=bootfs rw
 EOF
 	cat temp >> /boot/loader/entries/arch-fallback.conf
 	rm temp
+}
+
+installGrub() {
+	pacman --noconfirm -S grub efibootmgr &&
+	#yes | pacman -S grub efibootmgr os-prober intel-ucode amd-ucode
+
+	mkinitcpio -p linux && # when pacstrap used
+	# mkinitcpio -g /boot/initramfs-linux.img && # when unsquashfs used
+
+	# AREA section OLD3
+
+	ZPOOL_VDEV_NAME_PATH=1 grub-install --target=x86_64-efi --efi-directory=/boot &&
+	#grub-install --target=x86_64-efi --efi-directory=/efi --boot-directory=/boot
+	ZPOOL_VDEV_NAME_PATH=1 grub-mkconfig -o /boot/grub/grub.cfg &&
+
+	search="linux\\t/vmlinuz-linux root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
+	replace="linux\\t/vmlinuz-linux zfs=bootfs root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
+	sed -i "s|\$search|\$replace|g" /boot/grub/grub.cfg;
 }
 
 
@@ -1664,6 +1665,7 @@ export -f copyWallpapers
 export -f createArchISO
 export -f initZFSBootTimeUnlockService
 export -f installSystemdBoot
+export -f installGrub
 
 
 #chroot /mnt /bin/bash -c "installAURpackage ly-git""
