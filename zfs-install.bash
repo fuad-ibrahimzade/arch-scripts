@@ -102,12 +102,13 @@ installSystemdBoot;
 
 # AREA section OLD4
 
+copyWallpapers;
+
 umount -l /home
 
 exit
 EOF
 
-copyWallpapers;
 cp /etc/zfs/zpool.cache /mnt/etc/zfs
 umount /mnt/boot
 zpool export zroot
@@ -1625,8 +1626,10 @@ EOF
 }
 
 copyWallpapers() {
-	mkdir -p /mnt/usr/share/backgrounds/archlinux
-	cp -av selected-arch-wallpapers/. /mnt/usr/share/backgrounds/archlinux
+	mkdir -p /usr/share/backgrounds/archlinux
+	git clone https://github.com/fuad-ibrahimzade/arch-scripts
+	cp -av arch-scripts/selected-arch-wallpapers/. /usr/share/backgrounds/archlinux
+	rm -rf arch-scripts
 	# git clone https://github.com/fuad-ibrahimzade/arch-scripts-data
 	# cp -av arch-scripts-data/arch-wallpapers/. /mnt/usr/share/backgrounds/archlinux
 	# rm -rf arch-scripts-data
