@@ -802,6 +802,7 @@ installi3Seperate() {
 	cp /usr/share/tint2/horizontal-dark-opaque.tint2rc >> "/home/$user_name/.config/tint2/tint2rc";
 	echo "exec --no-startup-id tint2 /home/$user_name/.config/tint2/tint2rc" >> "/home/$user_name/.config/i3/config";
 	# echo "exec --no-startup-id tint2 --disable-wm-check /home/$user_name/.config/tint2/tint2rc" >> "/home/$user_name/.config/i3/config";
+	installAURpackageTrizen $user_name $user_password t2ec
 
 	# installAURpackageTrizen $user_name $user_password rofi-power-menu
 	git clone https://github.com/jluttine/rofi-power-menu
@@ -1418,7 +1419,8 @@ installAURpackageTrizen() {
 		"flatpak-1.10.1-1-x86_64.pkg.tar.zst",
 		"clipit-1.4.5-3-x86_64.pkg.tar.zst",
 		"speedreader-1.4.0-3-x86_64.pkg.tar.zst",
-		"uniread-0.1.22-1-any.pkg.tar.zst"
+		"uniread-0.1.22-1-any.pkg.tar.zst",
+		"t2ec-1.4-1-x86_64.pkg.tar.zst"
 	)
 	for item in "${githubPackages[@]}"; do
 		if [[ $item == *"$packageName"* ]]; then
