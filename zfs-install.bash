@@ -808,8 +808,9 @@ installi3Seperate() {
 	installAURpackageTrizen $user_name $user_password i3lock-fancy-git
 	wget --no-check-certificate "https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts/main/i3-seperate-install-files/i3fancy-locker.sh"
 	wget --no-check-certificate "https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts/main/i3-seperate-install-files/rofi-power-menu"
-	mv i3fancy-locker.sh rofi_power_menu -t /usr/bin
+	mv i3fancy-locker.sh rofi-power-menu -t /usr/bin
 	rm rofi-power-menu/rofi-power-menu
+	# wget --no-check-certificate https://raw.githubusercontent.com/tostiheld/dotfiles/master/bin/power-menu.sh #old without icons
 	#region old rofi-power-menu
 # 	search="loginctl terminate-session \${XDG_SESSION_ID-}"
 # 	replace="pkill X"
@@ -826,6 +827,7 @@ installi3Seperate() {
 # 	sed -i "s|\$search|\$replace|g" /usr/bin/rofi-power-menu
 	cp -av rofi-power-menu/. /usr/bin
 	rm -rf rofi-power-menu
+	chmod a+x /usr/bin/rofi-power-menu
 	#endregion
 	echo "bindsym \$mod+Shift+p exec rofi -show power-menu -modi power-menu:rofi-power-menu" >> "/home/$user_name/.config/i3/config";
 
