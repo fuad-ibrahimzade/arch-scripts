@@ -375,7 +375,7 @@ EOF
 	# region virtualbox share
 	pacman --noconfirm --needed -S linux-headers
 	pacman --noconfirm --needed -S virtualbox-guest-utils
-	systemctl enable now vboxservice.service
+	systemctl enable --now vboxservice.service
 	usermod -a -G vboxsf "$user_name"
 	
 	echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
@@ -1161,8 +1161,9 @@ EOF
 	installAURpackageTrizen $user_name $user_password bass-fish
 	#copy bash and xiki configs
 	wget https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts-data/main/xiki/xiki.tar
-	tar -xvf xiki.tar
+	tar -xvf --one-top-level xiki.tar
 	cp -av xiki/. "/home/$user_name"
+	rm -rf xiki
 }
 
 installZSH() {
