@@ -803,12 +803,13 @@ installi3Seperate() {
 	echo "exec --no-startup-id tint2 /home/$user_name/.config/tint2/tint2rc" >> "/home/$user_name/.config/i3/config";
 	# echo "exec --no-startup-id tint2 --disable-wm-check /home/$user_name/.config/tint2/tint2rc" >> "/home/$user_name/.config/i3/config";
 
-	installAURpackageTrizen $user_name $user_password rofi-power-menu
-	# git clone https://github.com/jluttine/rofi-power-menu
+	# installAURpackageTrizen $user_name $user_password rofi-power-menu
+	git clone https://github.com/jluttine/rofi-power-menu
 	installAURpackageTrizen $user_name $user_password i3lock-fancy-git
 	wget --no-check-certificate "https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts/main/i3-seperate-install-files/i3fancy-locker.sh"
 	wget --no-check-certificate "https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts/main/i3-seperate-install-files/rofi_power_menu"
 	mv i3fancy-locker.sh rofi_power_menu -t /usr/bin
+	rm rofi-power-menu/rofi-power-menu
 	#region old rofi-power-menu
 # 	search="loginctl terminate-session \${XDG_SESSION_ID-}"
 # 	replace="pkill X"
@@ -823,8 +824,8 @@ installi3Seperate() {
 # 	search="loginctl lock-session \${XDG_SESSION_ID-}"
 # 	replace="sh /usr/bin/i3fancy-locker.sh"
 # 	sed -i "s|\$search|\$replace|g" /usr/bin/rofi-power-menu
-	# cp -av rofi-power-menu/. /usr/bin
-	# rm -rf rofi-power-menu
+	cp -av rofi-power-menu/. /usr/bin
+	rm -rf rofi-power-menu
 	#endregion
 	echo "bindsym \$mod+Shift+p exec rofi -show power-menu -modi power-menu:rofi-power-menu" >> "/home/$user_name/.config/i3/config";
 
