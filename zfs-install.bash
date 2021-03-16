@@ -807,7 +807,7 @@ installi3Seperate() {
 	git clone https://github.com/jluttine/rofi-power-menu
 	installAURpackageTrizen $user_name $user_password i3lock-fancy-git
 	wget --no-check-certificate "https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts/main/i3-seperate-install-files/i3fancy-locker.sh"
-	wget --no-check-certificate "https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts/main/i3-seperate-install-files/rofi_power_menu"
+	wget --no-check-certificate "https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts/main/i3-seperate-install-files/rofi-power-menu"
 	mv i3fancy-locker.sh rofi_power_menu -t /usr/bin
 	rm rofi-power-menu/rofi-power-menu
 	#region old rofi-power-menu
