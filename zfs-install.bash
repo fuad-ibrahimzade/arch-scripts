@@ -589,6 +589,8 @@ EOF
 	installAURpackageTrizen $user_name $user_password speedreader
 	installAURpackageTrizen $user_name $user_password uniread
 	installAURpackageTrizen $user_name $user_password clipit
+	installAURpackageTrizen $user_name $user_password zectl
+	installAURpackageTrizen $user_name $user_password zectl-pacman-hook
 	# # endregion
 	installCacheCleanTools  $user_name $user_password;
 	installBackupTools  $user_name $user_password;
@@ -1407,7 +1409,9 @@ installAURpackageTrizen() {
 		"clipit-1.4.5-3-x86_64.pkg.tar.zst",
 		"speedreader-1.4.0-3-x86_64.pkg.tar.zst",
 		"uniread-0.1.22-1-any.pkg.tar.zst",
-		"t2ec-1.4-1-x86_64.pkg.tar.zst"
+		"t2ec-1.4-1-x86_64.pkg.tar.zst",
+		"zectl-0.1.3-1-any.pkg.tar.zst",
+		"zectl-pacman-hook-0.1.3-1-any.pkg.tar.zst"
 	)
 	for item in "${githubPackages[@]}"; do
 		if [[ $item == *"$packageName"* ]]; then
