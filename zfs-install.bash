@@ -287,6 +287,7 @@ createAndMountPartitions() {
 
 	#region TODO continue zfs
 	# 1) zedenv, zectl dataset structure, create boot environment for legacy /home dataset
+	# 2) pacman -U /var/cache/pacman/pkg/linux-4.0.7-2-*.pkg.tar.xz after zectl pacman hook or zectl-systemd-boot configure
 	#endregion
 
 } 
