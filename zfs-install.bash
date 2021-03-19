@@ -25,10 +25,8 @@ main() {
 	echo $user_password
 
 	pacman -Syy
-	curl -s https://eoli3n.github.io/archzfs/init | bash
-	mount -o remount,size=2G /run/archiso/cowspace
+	initZFSrequirements;
 	# AREA section OLD5
-	modprobe zfs
 	createAndMountPartitions $Output_Device;
 	# installArchLinuxWithUnsquashfs;
 	installArchLinuxWithPacstrap;
@@ -97,6 +95,16 @@ genfstabZfs() {
 	echo "zroot/encr/data/home /home zfs rw,xattr,posixacl 0 0" >> /mnt/etc/fstab
 }
 
+initZFSrequirements() {
+	curl -s https://eoli3n.github.io/archzfs/init | bash
+	if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
+		echo "initZFSrequirements inside chroot finished!"
+	else
+		mount -o remount,size=2G /run/archiso/cowspace
+		modprobe zfs
+	fi
+	
+}
 
 initZFSBootTimeUnlockService() {
 	cat > temp << EOF
@@ -393,7 +401,7 @@ installArchLinuxWithPacstrap() {
 #!/usr/bin/bash
 mount /home
 
-curl -s https://eoli3n.github.io/archzfs/init | bash
+initZFSrequirements;
 ln -s /usr/share/zoneinfo/Asia/Baku /etc/localtime;
 hwclock --systohc;
 sed  -i 's/\#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen;
@@ -1651,6 +1659,7 @@ export -f installBlackArchRepositories
 export -f copyWallpapers
 export -f createArchISO
 export -f initZFSBootTimeUnlockService
+export -f initZFSrequirements
 export -f installUEFISystemdBoot
 export -f installUEFIGrub
 
