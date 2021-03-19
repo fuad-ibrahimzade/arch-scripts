@@ -98,6 +98,25 @@ genfstabZfs() {
 initZFSrequirements() {
 	curl -s https://eoli3n.github.io/archzfs/init | bash
 	if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
+		mount /home
+		declare file="/etc/pacman.conf"
+		declare regex="zfs"
+
+		declare file_content=$( cat "${file}" )
+		if [[ " $file_content " =~ $regex ]] # please note the space before and after the file content
+			then
+				echo "archzfs found in pacman.conf"
+			else
+				cat > temp << EOF
+
+[archzfs]
+Server = http://archzfs.com/\$repo/x86_64
+SigLevel = Optional TrustAll
+EOF
+				cat temp >> /etc/pacman.conf
+				# echo user | sudo -S cat temp | sudo tee -a /etc/pacman.conf
+				rm temp
+		fi
 		echo "initZFSrequirements inside chroot finished!"
 	else
 		mount -o remount,size=2G /run/archiso/cowspace
@@ -189,6 +208,8 @@ createAndMountPartitions() {
 	#wipefs --all "$Output_Device";
 	#dd if=/dev/zero of="$Output_Device" bs=512 count=1
 	partprobe;
+
+
 	#region old without zfs
 	# (echo g; echo n; echo p; echo 1; echo ""; echo +$(echo $ISO_MB)M; echo t; echo 0c; echo n; echo p; echo 2; echo ""; echo +1024M; echo t; echo 2; echo 19; echo n; echo p; echo 3; echo ""; echo +512M; echo t; echo 3; echo 1; echo n; echo p; echo 4; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
 	# # (echo g; echo n; echo p; echo 1; echo ""; echo +$(echo $ISO_MB)M; echo t; echo 0c; echo n; echo p; echo 2; echo ""; echo +512M; echo t; echo 2; echo 1; echo n; echo p; echo 3; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
@@ -399,7 +420,6 @@ installArchLinuxWithPacstrap() {
 	genfstabZfs;
 	arch-chroot /mnt << EOF
 #!/usr/bin/bash
-mount /home
 
 initZFSrequirements;
 ln -s /usr/share/zoneinfo/Asia/Baku /etc/localtime;
