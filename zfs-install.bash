@@ -596,6 +596,21 @@ EOF
 	# https://wiki.archlinux.org/index.php/System_maintenance
 	# https://webfpga.io/
 	# https://github.com/webfpga
+
+	# https://github.com/oetiker/znapzend/
+	# https://github.com/adamjansen/snapper
+	# https://www.zfsnap.org/docs.html
+	# https://gist.github.com/Frederick888/374643f09454350b78e48c28f27946c0	#zfs snap
+	# https://aur.archlinux.org/packages/zrepl/
+	# https://aur.archlinux.org/packages/sanoid/
+	# https://aur.archlinux.org/packages/zfs-auto-snapshot-git/
+	# https://github.com/zbm-dev/zfsbootmenu
+	# https://docs.oracle.com/cd/E18752_01/html/819-5461/ghzvz.html
+	# https://insanity.industries/post/simple-networking/
+	# https://www.linuxsecrets.com/2898-manually-setup-archlinux-networking
+	# https://www.howtoforge.com/tutorial/how-to-use-snapshots-clones-and-replication-in-zfs-on-linux/
+	# https://xai.sh/2018/08/27/zfs-incremental-backups.html
+	# https://superuser.com/questions/1235243/how-do-i-set-up-a-bootable-incremental-zfs-on-root-backup-on-a-seperate-drive
 	# endregion
 
 
