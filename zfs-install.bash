@@ -1710,6 +1710,27 @@ EOF
 	sudo systemctl enable temp-script.service
 }
 
+recoverPartitionTableFromMemory() {
+	# https://unix.stackexchange.com/questions/43922/how-to-read-the-in-memory-kernel-partition-table-of-dev-sda
+	pacman --noconfirm -S testdisk
+	# dd if=/dev/zero of=/dev/sda	#wiping disk
+	cat > repart.sh << "EOF"
+#!/bin/bash
+echo "unit: sectors" 
+for i in /sys/block/$1/$1?/; do
+    printf '/dev/%s : start=%d, size=%d, type=XX\n' "$(basename $i)" "$(<$i/start)" "$(<$i/size)"
+done
+EOF
+	bash repart.sh >> temp
+
+	cat repart.sfdisk | sfdisk -f /dev/sda
+	partprobe 
+	/sbin/blockdev --rereadpt
+
+	grub-install /dev/sda
+
+}
+
 copyWallpapers() {
 	mkdir -p /usr/share/backgrounds/archlinux
 	git clone https://github.com/fuad-ibrahimzade/arch-scripts
