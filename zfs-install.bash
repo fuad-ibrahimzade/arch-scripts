@@ -66,6 +66,8 @@ installUEFISystemdBoot;
 
 copyWallpapers;
 
+configureZectlSystemdBoot $user_name $user_password;;
+
 umount -l /home
 
 exit
@@ -147,6 +149,59 @@ EOF
 
 	systemctl enable --now zfs-load-key.service
 
+}
+
+configureZectlSystemdBoot() {
+	user_name="$1"
+	user_password="$2"
+	installAURpackageTrizen $user_name $user_password zectl
+	installAURpackageTrizen $user_name $user_password zectl-pacman-hook
+
+	echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+
+	#configuring zectl-pacman-hook
+	boot_size=$(du /boot | grep -o '[0-9]*' | sort -nr | head -1) 
+	efi_size=$(df /boot/efi --output=avail | sed '1d')
+	# echo "$efi_size / $boot_size" | bc
+	size=$((efi_size / boot_size))
+	zectl set pacmanhook-prunecount="$size"
+
+
+	#configuring zectl systemdboot plugin refactoring esp partition
+	zectl set bootloader=systemdboot
+	# efipart=$(eval $(lsblk -oMOUNTPOINT,PATH -P -M | grep 'MOUNTPOINT="/boot"'); echo $PATH | sed 's/[0-9]*$//')
+	efipart=$(eval $(lsblk -oMOUNTPOINT,PATH -P -M | grep 'MOUNTPOINT="/boot"'); echo $PATH )
+	efipartUUID=$( findmnt /boot -o UUID -n )
+	umount /boot
+	mkdir /efi
+	mount "$efipart" /efi
+	zectl set systemdboot:efi=/efi
+	# echo "UUID=$efipartUUID    /efi    vfat    rw,defaults,errors=remount-ro  0 2" >> /etc/fstab
+	sed -i "s|/boot|/efi|g" /etc/fstab;
+
+	mkdir -p /efi/{loader/entries,env/org.zectl-default}
+	cp /efi/initramfs-linux.img /efi/env/org.zectl-default
+	# cp /efi/initramfs-linux-fallback.img /efi/env/org.zectl-default
+	cp /efi/vmlinuz-linux /efi/env/org.zectl-default
+	
+	cat > temp << EOF
+title           Arch Linux
+linux           /env/org.zectl-default/vmlinuz-linux
+initrd          /env/org.zectl-default/initramfs-linux.img
+options         zfs=bootfs rw
+EOF
+# initrd          /env/org.zectl-default/intel-ucode.img
+# options         zfs=zpool/ROOT/default rw
+	sudo cat temp | sudo tee -a /efi/loader/entries/org.zectl-default.conf
+	rm temp
+
+	zectl set systemdboot:boot=/boot
+	echo "/efi/env/org.zectl-default   /boot     none    rw,defaults,errors=remount-ro,bind    0 0" >> /etc/fstab
+
+	current_boot_env=$(cat /proc/cmdline | awk -F\\ '{print $(NF-1)}' | sed 's/org.zectl-//g')
+	zectl activate $(zectl list | grep $current_boot_env | awk '{print $1}')
+
+	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
 }
 
 installUEFISystemdBoot() {
@@ -287,7 +342,7 @@ createAndMountPartitions() {
 
 	#region TODO continue zfs
 	# 1) zedenv, zectl dataset structure, create boot environment for legacy /home dataset
-	# 2) pacman -U /var/cache/pacman/pkg/linux-4.0.7-2-*.pkg.tar.xz after zectl pacman hook or zectl-systemd-boot configure
+	# 2) pacman -U /var/cache/pacman/pkg/zfs-linux-*.pkg.tar.xz after zectl pacman hook or zectl-systemd-boot configure
 	#endregion
 
 } 
@@ -633,8 +688,6 @@ EOF
 	installAURpackageTrizen $user_name $user_password speedreader
 	installAURpackageTrizen $user_name $user_password uniread
 	installAURpackageTrizen $user_name $user_password clipit
-	installAURpackageTrizen $user_name $user_password zectl
-	installAURpackageTrizen $user_name $user_password zectl-pacman-hook
 	# # endregion
 	installCacheCleanTools  $user_name $user_password;
 	installBackupTools  $user_name $user_password;
@@ -1695,6 +1748,7 @@ export -f installBlackArchRepositories
 export -f copyWallpapers
 export -f createArchISO
 export -f initZFSBootTimeUnlockService
+export -f configureZectlSystemdBoot
 export -f initZFSrequirements
 export -f installUEFISystemdBoot
 export -f installUEFIGrub
