@@ -773,7 +773,7 @@ EOF
 installBackupTools() {
 	user_name="$1"
 	user_password="$2"
-	pacman --noconfirm -S sparkleshare
+	pacman --noconfirm -S testdisk sparkleshare
 	# git clone https://github.com/hbons/Dazzle
 }
 
@@ -1716,7 +1716,8 @@ EOF
 recoverPartitionTableFromMemory() {
 	Output_Device="$1"
 	# https://unix.stackexchange.com/questions/43922/how-to-read-the-in-memory-kernel-partition-table-of-dev-sda
-	pacman --noconfirm -S testdisk hdparm
+	pacman --noconfirm -S testdisk 
+	pacman --noconfirm -S hdparm
 	# dd if=/dev/zero of=/dev/sda	#wiping disk
 	cat > repart.sh << "EOF"
 #!/bin/bash
