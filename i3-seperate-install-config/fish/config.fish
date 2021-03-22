@@ -8,3 +8,6 @@ set -x MANPAGER '/bin/bash -c "vim -MRn -c \"set buftype=nofile showtabline=0 ft
 function xsh
 	bass source $HOME/.xsh ';' xsh --d $argv
 end
+function dd
+	sudo /usr/local/bin/dd $argv
+end

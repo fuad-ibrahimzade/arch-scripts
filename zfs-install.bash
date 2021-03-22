@@ -774,6 +774,7 @@ installBackupTools() {
 	user_name="$1"
 	user_password="$2"
 	pacman --noconfirm -S testdisk sparkleshare
+	set PATH /usr/local/bin $PATH # for protectivedd
 	wget --no-check-certificate "https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts/main/i3-seperate-install-files/protectivedd"
 	mv protectivedd -t /usr/local/bin/dd
 	echo "$user_password" | sudo -S -u "$user_name" chmod +x /usr/local/bin/dd
