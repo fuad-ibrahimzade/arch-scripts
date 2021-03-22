@@ -774,6 +774,9 @@ installBackupTools() {
 	user_name="$1"
 	user_password="$2"
 	pacman --noconfirm -S testdisk sparkleshare
+	wget --no-check-certificate "https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts/main/i3-seperate-install-files/protectivedd"
+	mv protectivedd -t /usr/local/bin/dd
+	echo "$user_password" | sudo -S -u "$user_name" chmod +x /usr/local/bin/dd
 	# git clone https://github.com/hbons/Dazzle
 }
 
@@ -1719,6 +1722,17 @@ recoverPartitionTableFromMemory() {
 	pacman --noconfirm -S testdisk 
 	pacman --noconfirm -S hdparm
 	# dd if=/dev/zero of=/dev/sda	#wiping disk
+	# file -s /dev/sda1
+	# sudo sgdisk --backup/location /dev/sda
+	# sudo sgdisk --load-backup/location /dev/sda
+	# dd if=/dev/sda of=/root/sda.header bs=512 count=1 #save header
+	# dd if=/root/sda.header of=/dev/sda bs=512 count=1 #recover header
+	# sfdisk -d /dev/sda > /root/table_of_a ; sfdisk /dev/sdb < root/table_of_a
+	# sgdisk -b - [SOURCE] > [part_table]
+	# sgdisk -l - -Gg [DESTINATION] < [part_table]
+	# sgdisk -b [part_table] [SOURCE]
+	# sgdisk -l [part_table] -Gg [DESTINATION]
+	# sfdisk --delete "$Output_Device";
 	cat > repart.sh << "EOF"
 #!/bin/bash
 echo "unit: sectors" 
