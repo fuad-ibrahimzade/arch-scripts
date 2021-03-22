@@ -1753,6 +1753,8 @@ EOF
 	sudo hdparm -z "$Output_Device"
 	sudo partx -a "$Output_Device"
 	sudo partx -u "$Output_Device"
+	sudo kpartx -u "$Output_Device"
+	sudo sfdisk -R "$Output_Device"
 	
 	cat /proc/partitions
 	ls -l "$Output_Device"*
