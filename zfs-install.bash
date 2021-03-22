@@ -25,6 +25,7 @@ main() {
 	echo $user_password
 
 	pacman -Syy
+	# recoverPartitionTableFromMemory $Output_Device;
 	initZFSrequirements;
 	# AREA section OLD5
 	createAndMountPartitions $Output_Device;
@@ -938,6 +939,8 @@ Name=i3related
 Type=Application
 Version=1.0
 EOF
+	pacman -S --noconfirm hsetroot
+	echo "exec --no-startup-id hsetroot -solid '#000000'" >> "/home/$user_name/.config/i3/config";
 
 	# Kitty terminal - one dark theme
 	mkdir -p "/home/$user_name/.config/kitty"
@@ -1711,8 +1714,9 @@ EOF
 }
 
 recoverPartitionTableFromMemory() {
+	Output_Device="$1"
 	# https://unix.stackexchange.com/questions/43922/how-to-read-the-in-memory-kernel-partition-table-of-dev-sda
-	pacman --noconfirm -S testdisk
+	pacman --noconfirm -S testdisk hdparm
 	# dd if=/dev/zero of=/dev/sda	#wiping disk
 	cat > repart.sh << "EOF"
 #!/bin/bash
@@ -1723,11 +1727,24 @@ done
 EOF
 	bash repart.sh >> temp
 
-	cat repart.sfdisk | sfdisk -f /dev/sda
+	sudo dmesg | grep "$Output_Device"
+
+	cat repart.sfdisk | sfdisk -f "$Output_Device"
 	partprobe 
 	/sbin/blockdev --rereadpt
+	
+	sudo partprobe "$Output_Device"
+	sudo blockdev --rereadpt -v "$Output_Device"
+	sudo hdparm -z "$Output_Device"
+	sudo partx -a "$Output_Device"
+	sudo partx -u "$Output_Device"
+	
+	cat /proc/partitions
+	ls -l "$Output_Device"*
+	sudo partx -l "$Output_Device"
 
-	grub-install /dev/sda
+	bootctl --path=/boot install
+	# grub-install "$Output_Device"
 
 }
 

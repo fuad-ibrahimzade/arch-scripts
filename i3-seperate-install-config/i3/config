@@ -161,5 +161,6 @@ bindsym Mod1+Shift+Tab exec --no-startup-id i3-cycle-focus --reverse
 bindsym $mod+Shift+m move scratchpad
 bindsym $mod+m scratchpad show, floating disable
 exec_always --no-startup-id xcompmgr -c -f -n
-exec_always --no-startup-id feh --bg-fill /usr/share/backgrounds/archlinux/1403423502665.png
+#exec_always --no-startup-id feh --bg-fill /usr/share/backgrounds/archlinux/1403423502665.png
 #exec_always --no-startup-id feh --bg-fill /usr/share/backgrounds/archlinux/xx14sh3bx3q41.png
+exec --no-startup-id hsetroot -solid '#000000'
