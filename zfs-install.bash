@@ -1721,6 +1721,7 @@ recoverPartitionTableFromMemory() {
 	# https://unix.stackexchange.com/questions/43922/how-to-read-the-in-memory-kernel-partition-table-of-dev-sda
 	pacman --noconfirm -S testdisk 
 	pacman --noconfirm -S hdparm
+	pacman --noconfirm -S multipath-tools # for kpartx
 	# dd if=/dev/zero of=/dev/sda	#wiping disk
 	# file -s /dev/sda1
 	# sudo sgdisk --backup/location /dev/sda
