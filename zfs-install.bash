@@ -686,8 +686,8 @@ EOF
 	# #region additional tools
 	pacman -S --noconfirm thefuck aria2 python-pywal nmon atop nethogs net-tools powertop feedreader newsboat
 	installAURpackageTrizen $user_name $user_password netatop;
-	installAURpackageTrizen $user_name $user_password speedreader
-	installAURpackageTrizen $user_name $user_password uniread
+	pacman -S --noconfirm tk && python -m pip install --user speedread
+	pacman -S --noconfirm xsel
 	installAURpackageTrizen $user_name $user_password clipit
 	# # endregion
 	installCacheCleanTools  $user_name $user_password;
@@ -1511,8 +1511,6 @@ installAURpackageTrizen() {
 		"snapd-2.48.2-1-x86_64.pkg.tar.zst",
 		"flatpak-1.10.1-1-x86_64.pkg.tar.zst",
 		"clipit-1.4.5-3-x86_64.pkg.tar.zst",
-		"speedreader-1.4.0-3-x86_64.pkg.tar.zst",
-		"uniread-0.1.22-1-any.pkg.tar.zst",
 		"t2ec-1.4-1-x86_64.pkg.tar.zst",
 		"zectl-0.1.3-1-any.pkg.tar.zst",
 		"zectl-pacman-hook-0.1.3-1-any.pkg.tar.zst"
