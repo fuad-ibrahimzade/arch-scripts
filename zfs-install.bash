@@ -667,6 +667,16 @@ EOF
 	# https://www.howtoforge.com/tutorial/how-to-use-snapshots-clones-and-replication-in-zfs-on-linux/
 	# https://xai.sh/2018/08/27/zfs-incremental-backups.html
 	# https://superuser.com/questions/1235243/how-do-i-set-up-a-bootable-incremental-zfs-on-root-backup-on-a-seperate-drive
+	
+	# https://www.dnsstuff.com/network-vulnerability-scanner
+	# https://awesomeopensource.com/projects/vulnerability-detection
+	# https://awesomeopensource.com/projects/vulnerability-scanners
+	# https://cwatch.comodo.com/blog/website-security/top-10-vulnerability-assessment-scanning-tools/
+	# https://www.comparitech.com/net-admin/free-network-vulnerability-scanners/
+	# https://linuxhint.com/top_vulnerability_scanning_tools
+	# https://www.networkworld.com/article/2176429/security-6-free-network-vulnerability-scanners.html
+	# https://www.tek-tools.com/network/top-10-vulnerability-scanners
+	# https://www.softwaretestinghelp.com/vulnerability-assessment-tools/
 	# endregion
 
 
