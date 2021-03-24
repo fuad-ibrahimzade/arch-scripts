@@ -687,6 +687,7 @@ EOF
 	# https://linuxsecurity.expert/security-tools/linux-vulnerability-scanning-tools
 	# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/vulnerability-scanning_scanning-the-system-for-configuration-compliance-and-vulnerabilities
 	# https://en.wikipedia.org/wiki/Ksplice
+	# https://github.com/enaqx/awesome-pentest
 	# endregion
 
 
