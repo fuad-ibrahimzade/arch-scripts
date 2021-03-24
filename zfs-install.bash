@@ -677,6 +677,16 @@ EOF
 	# https://www.networkworld.com/article/2176429/security-6-free-network-vulnerability-scanners.html
 	# https://www.tek-tools.com/network/top-10-vulnerability-scanners
 	# https://www.softwaretestinghelp.com/vulnerability-assessment-tools/
+	# https://forums.cpanel.net/threads/firewalld-clamav-and-lmd.651677/
+	# https://wpbeaches.com/set-lmd-maldet-clamav-runcloud/
+	# https://geekflare.com/linux-security-scanner/
+	# https://archlinux.org/packages/community/any/vulscan/
+	# https://github.com/scipag/vulscan
+	# https://github.com/s0wr0b1ndef/Vulnerability-scanner-for-Linux
+	# https://github.com/future-architect/vuls
+	# https://linuxsecurity.expert/security-tools/linux-vulnerability-scanning-tools
+	# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/vulnerability-scanning_scanning-the-system-for-configuration-compliance-and-vulnerabilities
+	# https://en.wikipedia.org/wiki/Ksplice
 	# endregion
 
 
