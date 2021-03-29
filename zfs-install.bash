@@ -748,6 +748,10 @@ EOF
 	installDesktopEnvironment $user_name $user_password;
 	#initScriptAtBoot $user_name $user_password;
 	#initScriptAtBoot2;
+	
+	# check integrity of packages
+	pacman --noconfirm --needed -S pacutils
+	paccheck --md5sum --quiet
 }
 
 installCacheCleanTools() {
