@@ -713,6 +713,7 @@ EOF
 	# # endregion
 	installCacheCleanTools  $user_name $user_password;
 	installBackupTools  $user_name $user_password;
+	installPackageScanners $user_name $user_password;
 	
 	pacman -S --noconfirm p7zip
 	installAURpackageTrizen $user_name $user_password p7zip-gui
@@ -748,10 +749,7 @@ EOF
 	installDesktopEnvironment $user_name $user_password;
 	#initScriptAtBoot $user_name $user_password;
 	#initScriptAtBoot2;
-	
-	# check integrity of packages
-	pacman --noconfirm --needed -S pacutils
-	paccheck --md5sum --quiet
+
 }
 
 installCacheCleanTools() {
@@ -804,6 +802,18 @@ installBackupTools() {
 	mv protectivedd -t /usr/local/bin/dd
 	echo "$user_password" | sudo -S -u "$user_name" chmod +x /usr/local/bin/dd
 	# git clone https://github.com/hbons/Dazzle
+}
+
+installPackageScanners() {
+	user_name="$1"
+	user_password="$2"
+	#PKGBUILD Security Analysis
+	installAURpackageTrizen $user_name $user_password aura
+	aura -Pa
+	# aura -Ap aura | aura -P #for individual package
+	#check integrity of packages
+	pacman --noconfirm --needed -S pacutils
+	paccheck --md5sum --quiet
 }
 
 installDesktopEnvironment() {
@@ -1274,7 +1284,8 @@ EOF
 	sudo -u "$user_name" fisher install jorgebucaran/gitio.fish
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
 
-	installAURpackageTrizen $user_name $user_password bass-fish
+	fisher install edc/bass
+	# installAURpackageTrizen $user_name $user_password bass-fish
 	#copy bash and xiki configs
 	wget https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts-data/main/xiki/xiki.tar
 	tar -xvf --one-top-level xiki.tar
@@ -1538,7 +1549,8 @@ installAURpackageTrizen() {
 		"clipit-1.4.5-3-x86_64.pkg.tar.zst",
 		"t2ec-1.4-1-x86_64.pkg.tar.zst",
 		"zectl-0.1.3-1-any.pkg.tar.zst",
-		"zectl-pacman-hook-0.1.3-1-any.pkg.tar.zst"
+		"zectl-pacman-hook-0.1.3-1-any.pkg.tar.zst",
+		"aura-3.2.4-1-x86_64.pkg.tar.zst"
 	)
 	for item in "${githubPackages[@]}"; do
 		if [[ $item == *"$packageName"* ]]; then
@@ -1805,6 +1817,7 @@ export -f initPacmanEntropy
 export -f installTools
 export -f installCacheCleanTools
 export -f installBackupTools
+export -f installPackageScanners
 export -f installDesktopEnvironment
 export -f installGitHubMakepackage
 export -f installAURpackage
