@@ -535,10 +535,10 @@ installTools() {
 	pacman -S --noconfirm snapper vim nano lynx flameshot iwd trash-cli fd bpytop micro
 	pacman -S --noconfirm cronie
 	systemctl enable --now cronie.service
-	echo "export EDITOR=nano" >> "/home/$user_name/.bashrc"
-	echo "export VISUAL=nano" >> "/home/$user_name/.bashrc"
-	echo "export EDITOR=nano" >> $HOME/.bashrc
-	echo "export VISUAL=nano" >> $HOME/.bashrc
+	echo "export EDITOR=vim" >> "/home/$user_name/.bashrc"
+	echo "export VISUAL=vim" >> "/home/$user_name/.bashrc"
+	echo "export EDITOR=vim" >> $HOME/.bashrc
+	echo "export VISUAL=vim" >> $HOME/.bashrc
 
 	cat > temp << EOF
 bind -r '\C-s'
