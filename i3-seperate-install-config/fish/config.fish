@@ -10,3 +10,15 @@ function xsh
 end
 set -gx EDITOR vim
 set -gx VISUAL vim
+function dd
+	sudo /usr/local/bin/dd $argv
+end
+function speedread
+	python -m speedread $argv
+end
+function pbcopy
+	xsel --clipboard --input $argv
+end
+function pbpaste
+	xsel --clipboard --output $argv
+end

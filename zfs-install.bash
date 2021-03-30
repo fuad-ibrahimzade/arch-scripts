@@ -25,6 +25,7 @@ main() {
 	echo $user_password
 
 	pacman -Syy
+	# recoverPartitionTableFromMemory $Output_Device;
 	initZFSrequirements;
 	# AREA section OLD5
 	createAndMountPartitions $Output_Device;
@@ -651,6 +652,42 @@ EOF
 	# https://wiki.archlinux.org/index.php/System_maintenance
 	# https://webfpga.io/
 	# https://github.com/webfpga
+
+	# https://github.com/oetiker/znapzend/
+	# https://github.com/adamjansen/snapper
+	# https://www.zfsnap.org/docs.html
+	# https://gist.github.com/Frederick888/374643f09454350b78e48c28f27946c0	#zfs snap
+	# https://aur.archlinux.org/packages/zrepl/
+	# https://aur.archlinux.org/packages/sanoid/
+	# https://aur.archlinux.org/packages/zfs-auto-snapshot-git/
+	# https://github.com/zbm-dev/zfsbootmenu
+	# https://docs.oracle.com/cd/E18752_01/html/819-5461/ghzvz.html
+	# https://insanity.industries/post/simple-networking/
+	# https://www.linuxsecrets.com/2898-manually-setup-archlinux-networking
+	# https://www.howtoforge.com/tutorial/how-to-use-snapshots-clones-and-replication-in-zfs-on-linux/
+	# https://xai.sh/2018/08/27/zfs-incremental-backups.html
+	# https://superuser.com/questions/1235243/how-do-i-set-up-a-bootable-incremental-zfs-on-root-backup-on-a-seperate-drive
+	
+	# https://www.dnsstuff.com/network-vulnerability-scanner
+	# https://awesomeopensource.com/projects/vulnerability-detection
+	# https://awesomeopensource.com/projects/vulnerability-scanners
+	# https://cwatch.comodo.com/blog/website-security/top-10-vulnerability-assessment-scanning-tools/
+	# https://www.comparitech.com/net-admin/free-network-vulnerability-scanners/
+	# https://linuxhint.com/top_vulnerability_scanning_tools
+	# https://www.networkworld.com/article/2176429/security-6-free-network-vulnerability-scanners.html
+	# https://www.tek-tools.com/network/top-10-vulnerability-scanners
+	# https://www.softwaretestinghelp.com/vulnerability-assessment-tools/
+	# https://forums.cpanel.net/threads/firewalld-clamav-and-lmd.651677/
+	# https://wpbeaches.com/set-lmd-maldet-clamav-runcloud/
+	# https://geekflare.com/linux-security-scanner/
+	# https://archlinux.org/packages/community/any/vulscan/
+	# https://github.com/scipag/vulscan
+	# https://github.com/s0wr0b1ndef/Vulnerability-scanner-for-Linux
+	# https://github.com/future-architect/vuls
+	# https://linuxsecurity.expert/security-tools/linux-vulnerability-scanning-tools
+	# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/vulnerability-scanning_scanning-the-system-for-configuration-compliance-and-vulnerabilities
+	# https://en.wikipedia.org/wiki/Ksplice
+	# https://github.com/enaqx/awesome-pentest
 	# endregion
 
 
@@ -670,12 +707,13 @@ EOF
 	# #region additional tools
 	pacman -S --noconfirm thefuck aria2 python-pywal nmon atop nethogs net-tools powertop feedreader newsboat
 	installAURpackageTrizen $user_name $user_password netatop;
-	installAURpackageTrizen $user_name $user_password speedreader
-	installAURpackageTrizen $user_name $user_password uniread
+	pacman -S --noconfirm tk && python -m pip install --user speedread
+	pacman -S --noconfirm xsel
 	installAURpackageTrizen $user_name $user_password clipit
 	# # endregion
 	installCacheCleanTools  $user_name $user_password;
 	installBackupTools  $user_name $user_password;
+	installPackageScanners $user_name $user_password;
 	
 	pacman -S --noconfirm p7zip
 	installAURpackageTrizen $user_name $user_password p7zip-gui
@@ -711,6 +749,7 @@ EOF
 	installDesktopEnvironment $user_name $user_password;
 	#initScriptAtBoot $user_name $user_password;
 	#initScriptAtBoot2;
+
 }
 
 installCacheCleanTools() {
@@ -757,8 +796,24 @@ EOF
 installBackupTools() {
 	user_name="$1"
 	user_password="$2"
-	pacman --noconfirm -S sparkleshare
+	pacman --noconfirm -S testdisk sparkleshare
+	set PATH /usr/local/bin $PATH # for protectivedd
+	wget --no-check-certificate "https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts/main/i3-seperate-install-files/protectivedd"
+	mv protectivedd -t /usr/local/bin/dd
+	echo "$user_password" | sudo -S -u "$user_name" chmod +x /usr/local/bin/dd
 	# git clone https://github.com/hbons/Dazzle
+}
+
+installPackageScanners() {
+	user_name="$1"
+	user_password="$2"
+	#PKGBUILD Security Analysis
+	installAURpackageTrizen $user_name $user_password aura
+	aura -Pa
+	# aura -Ap aura | aura -P #for individual package
+	#check integrity of packages
+	pacman --noconfirm --needed -S pacutils
+	paccheck --md5sum --quiet
 }
 
 installDesktopEnvironment() {
@@ -923,6 +978,8 @@ Name=i3related
 Type=Application
 Version=1.0
 EOF
+	pacman -S --noconfirm hsetroot
+	echo "exec --no-startup-id hsetroot -solid '#000000'" >> "/home/$user_name/.config/i3/config";
 
 	# Kitty terminal - one dark theme
 	mkdir -p "/home/$user_name/.config/kitty"
@@ -1227,7 +1284,8 @@ EOF
 	sudo -u "$user_name" fisher install jorgebucaran/gitio.fish
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
 
-	installAURpackageTrizen $user_name $user_password bass-fish
+	fisher install edc/bass
+	# installAURpackageTrizen $user_name $user_password bass-fish
 	#copy bash and xiki configs
 	wget https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts-data/main/xiki/xiki.tar
 	tar -xvf --one-top-level xiki.tar
@@ -1489,11 +1547,10 @@ installAURpackageTrizen() {
 		"snapd-2.48.2-1-x86_64.pkg.tar.zst",
 		"flatpak-1.10.1-1-x86_64.pkg.tar.zst",
 		"clipit-1.4.5-3-x86_64.pkg.tar.zst",
-		"speedreader-1.4.0-3-x86_64.pkg.tar.zst",
-		"uniread-0.1.22-1-any.pkg.tar.zst",
 		"t2ec-1.4-1-x86_64.pkg.tar.zst",
 		"zectl-0.1.3-1-any.pkg.tar.zst",
-		"zectl-pacman-hook-0.1.3-1-any.pkg.tar.zst"
+		"zectl-pacman-hook-0.1.3-1-any.pkg.tar.zst",
+		"aura-3.2.4-1-x86_64.pkg.tar.zst"
 	)
 	for item in "${githubPackages[@]}"; do
 		if [[ $item == *"$packageName"* ]]; then
@@ -1695,6 +1752,56 @@ EOF
 	sudo systemctl enable temp-script.service
 }
 
+recoverPartitionTableFromMemory() {
+	Output_Device="$1"
+	# https://unix.stackexchange.com/questions/43922/how-to-read-the-in-memory-kernel-partition-table-of-dev-sda
+	pacman --noconfirm -S testdisk 
+	pacman --noconfirm -S hdparm
+	pacman --noconfirm -S multipath-tools # for kpartx
+	# dd if=/dev/zero of=/dev/sda	#wiping disk
+	# file -s /dev/sda1
+	# sudo sgdisk --backup/location /dev/sda
+	# sudo sgdisk --load-backup/location /dev/sda
+	# dd if=/dev/sda of=/root/sda.header bs=512 count=1 #save header
+	# dd if=/root/sda.header of=/dev/sda bs=512 count=1 #recover header
+	# sfdisk -d /dev/sda > /root/table_of_a ; sfdisk /dev/sdb < root/table_of_a
+	# sgdisk -b - [SOURCE] > [part_table]
+	# sgdisk -l - -Gg [DESTINATION] < [part_table]
+	# sgdisk -b [part_table] [SOURCE]
+	# sgdisk -l [part_table] -Gg [DESTINATION]
+	# sfdisk --delete "$Output_Device";
+	cat > repart.sh << "EOF"
+#!/bin/bash
+echo "unit: sectors" 
+for i in /sys/block/$1/$1?/; do
+    printf '/dev/%s : start=%d, size=%d, type=XX\n' "$(basename $i)" "$(<$i/start)" "$(<$i/size)"
+done
+EOF
+	bash repart.sh >> temp
+
+	sudo dmesg | grep "$Output_Device"
+
+	cat repart.sfdisk | sfdisk -f "$Output_Device"
+	partprobe 
+	/sbin/blockdev --rereadpt
+	
+	sudo partprobe "$Output_Device"
+	sudo blockdev --rereadpt -v "$Output_Device"
+	sudo hdparm -z "$Output_Device"
+	sudo partx -a "$Output_Device"
+	sudo partx -u "$Output_Device"
+	sudo kpartx -u "$Output_Device"
+	sudo sfdisk -R "$Output_Device"
+	
+	cat /proc/partitions
+	ls -l "$Output_Device"*
+	sudo partx -l "$Output_Device"
+
+	bootctl --path=/boot install
+	# grub-install "$Output_Device"
+
+}
+
 copyWallpapers() {
 	mkdir -p /usr/share/backgrounds/archlinux
 	git clone https://github.com/fuad-ibrahimzade/arch-scripts
@@ -1710,6 +1817,7 @@ export -f initPacmanEntropy
 export -f installTools
 export -f installCacheCleanTools
 export -f installBackupTools
+export -f installPackageScanners
 export -f installDesktopEnvironment
 export -f installGitHubMakepackage
 export -f installAURpackage
