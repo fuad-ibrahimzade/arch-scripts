@@ -204,6 +204,7 @@ launcher_item_app = /usr/share/applications/org.kde.krusader.desktop
 launcher_item_app = /usr/share/applications/lite-xl.desktop
 launcher_item_app = /usr/share/applications/VSCodium.desktop
 launcher_item_app = /usr/share/applications/slimjet.desktop
+launcher_item_app = /usr/share/applications/org.qutebrowser.qutebrowser.desktop
 
 #-------------------------------------
 # Clock
