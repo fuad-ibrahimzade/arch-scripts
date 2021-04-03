@@ -402,7 +402,7 @@ createArchISO() {
 	# end region copy users passwords
 
 	mkdir -p archlive/airootfs/etc/skel/.config
-	cp -av i3-seperate-install-config/. archlive/airootfs/etc/skel/.config
+	cp -av i3-seperate-install-skel/. archlive/airootfs/etc/skel
 	cp -av /home/user/{.bashrc,.zshrc,.vimrc} archlive/airootfs/etc/skel
 	ln -s /usr/lib/systemd/system/ly.service archlive/airootfs/etc/systemd/system/display-manager.service
 	ln -s /usr/lib/systemd/system/connman.service archlive/airootfs/etc/systemd/system/multi-user.target.wants/connman.service
@@ -986,7 +986,7 @@ EOF
 	https://gist.githubusercontent.com/ggsalas/29ba32e71e313b384d1a887250cd102a/raw/d84f37b1e341c72de5ea4849309bf2b1e084a173/kitty.conf | tr -d '\r' > "/home/$user_name/.config/kitty/kitty.conf"
 
 	git clone https://github.com/fuad-ibrahimzade/arch-scripts
-	cp -av arch-scripts/i3-seperate-install-config/. "/home/$user_name/.config"
+	cp -av arch-scripts/i3-seperate-install-skel/. "/home/$user_name"
 	rm -rf arch-scripts
 
 	echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
