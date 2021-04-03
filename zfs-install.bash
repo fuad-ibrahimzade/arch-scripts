@@ -449,6 +449,7 @@ EOF
 	
 	echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 	sudo chown -R "$user_name":users /media/sf_Public/ #create shared Public folder inside virtualbox
+	sudo /usr/bin/VBoxClient-all #needed for sharing clipboard
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
 	# end region virtualbox share
 
