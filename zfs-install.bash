@@ -880,6 +880,7 @@ installi3Only() {
 	pacman --noconfirm --needed -S archlinux-wallpaper
 	pacman --noconfirm -Syu 
 	pacman --noconfirm -S xorg xorg-xinit krusader kitty
+	installAURpackageTrizen $user_name $user_password kitti3;
 	pacman --noconfirm --needed -S xdg-utils ttf-freefont ttf-dejavu
 	pacman -S --noconfirm cmst
 	systemctl enable connman.service
@@ -1552,7 +1553,8 @@ installAURpackageTrizen() {
 		"t2ec-1.4-1-x86_64.pkg.tar.zst",
 		"zectl-0.1.3-1-any.pkg.tar.zst",
 		"zectl-pacman-hook-0.1.3-1-any.pkg.tar.zst",
-		"aura-3.2.4-1-x86_64.pkg.tar.zst"
+		"aura-3.2.4-1-x86_64.pkg.tar.zst",
+		"kitti3-0.2.6-1-any.pkg.tar.zst"
 	)
 	for item in "${githubPackages[@]}"; do
 		if [[ $item == *"$packageName"* ]]; then
