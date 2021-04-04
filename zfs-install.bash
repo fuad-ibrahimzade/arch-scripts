@@ -1337,7 +1337,7 @@ installZSH() {
 	# 	rm temp
 
 	search="plugins=(git)"
-	replace="plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-completions history-substring-search)"
+	replace="plugins=(git zsh-completions zsh-autosuggestions zsh-syntax-highlighting history-substring-search)"
 	sed -i "s|\$search|\$replace|g" $HOME/.zshrc
 
 	echo "autoload -U compinit && compinit" >> $HOME/.zshrc
@@ -1365,7 +1365,7 @@ installZSH() {
 		sudo git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search
 
 		search="plugins=(git)"
-		replace="plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-completions history-substring-search)"
+		replace="plugins=(git zsh-completions zsh-autosuggestions zsh-syntax-highlighting history-substring-search)"
 		sudo sed -i "s|\\$search|\\$replace|g" $HOME/.zshrc
 
 		echo "autoload -U compinit && compinit" >> $HOME/.zshrc
