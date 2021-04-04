@@ -1305,7 +1305,8 @@ installZSH() {
 	installAURpackageTrizen $user_name $user_password ttf-meslo-nerd-font-powerlevel10k;
 	# installAURpackageTrizen $user_name $user_password oh-my-zsh-git;
 
-	chsh -s $(which zsh)
+	# chsh -s $(which zsh)
+	chsh -s /usr/bin/zsh
 	sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 	mkdir ~/.local/share/fonts
@@ -1321,6 +1322,9 @@ installZSH() {
 
 	git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 	git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+	git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/plugins/zsh-completions
+	git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search
+
 
 
 	# 	cat > temp << EOF
@@ -1333,8 +1337,11 @@ installZSH() {
 	# 	rm temp
 
 	search="plugins=(git)"
-	replace="plugins=(git zsh-autosuggestions zsh-syntax-highlighting)"
+	replace="plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-completions history-substring-search)"
 	sed -i "s|\$search|\$replace|g" $HOME/.zshrc
+
+	echo "autoload -U compinit && compinit" >> $HOME/.zshrc
+
 
 	echo "$user_name ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 	echo "$user_password" | sudo -S -u "$user_name" /bin/bash -c '
@@ -1354,10 +1361,14 @@ installZSH() {
 
 		sudo git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 		sudo git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-	
+		sudo git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/plugins/zsh-completions
+		sudo git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search
+
 		search="plugins=(git)"
-		replace="plugins=(git zsh-autosuggestions zsh-syntax-highlighting)"
+		replace="plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-completions history-substring-search)"
 		sudo sed -i "s|\\$search|\\$replace|g" $HOME/.zshrc
+
+		echo "autoload -U compinit && compinit" >> $HOME/.zshrc
 	'
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
 	
