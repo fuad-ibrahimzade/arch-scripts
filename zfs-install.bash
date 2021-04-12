@@ -765,6 +765,7 @@ installCacheCleanTools() {
 	# bleachbit -c system.*
 
 	# pacman --noconfirm -S qt5-tools qt5-charts python-pyqt5-chart && installAURpackage stacer
+	installAURpackageTrizen $user_name $user_password bleachbit-cli;
 	installAURpackageTrizen $user_name $user_password stacer;
 	installAURpackageTrizen $user_name $user_password wat-git # Show upgrades since recent -Syu
 	# pacman -R --noconfirm $(pacman -Qtdq)
@@ -1565,7 +1566,8 @@ installAURpackageTrizen() {
 		"zectl-0.1.3-1-any.pkg.tar.zst",
 		"zectl-pacman-hook-0.1.3-1-any.pkg.tar.zst",
 		"aura-3.2.4-1-x86_64.pkg.tar.zst",
-		"kitti3-0.2.6-1-any.pkg.tar.zst"
+		"kitti3-0.2.6-1-any.pkg.tar.zst",
+		"bleachbit-cli-4.2.0-1-any.pkg.tar.zst"
 	)
 	for item in "${githubPackages[@]}"; do
 		if [[ $item == *"$packageName"* ]]; then
