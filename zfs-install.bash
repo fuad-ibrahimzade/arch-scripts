@@ -922,6 +922,8 @@ installi3Seperate() {
 	installGitHubMakepackage "morc_menu" "https://github.com/Boruch-Baum/morc_menu"
 	echo "bindsym \$mod+z exec morc_menu" >> "/home/$user_name/.config/i3/config"
 
+	installAURpackageTrizen $user_name $user_password pmenu
+
 	pacman --noconfirm -S jgmenu
 	echo "bindsym \$mod+Shift+z exec jgmenu_run" >> "/home/$user_name/.config/i3/config"
 
@@ -1567,7 +1569,8 @@ installAURpackageTrizen() {
 		"zectl-pacman-hook-0.1.3-1-any.pkg.tar.zst",
 		"aura-3.2.4-1-x86_64.pkg.tar.zst",
 		"kitti3-0.2.6-1-any.pkg.tar.zst",
-		"bleachbit-cli-4.2.0-1-any.pkg.tar.zst"
+		"bleachbit-cli-4.2.0-1-any.pkg.tar.zst",
+		"pmenu-0.3.3-1-any.pkg.tar.zst"
 	)
 	for item in "${githubPackages[@]}"; do
 		if [[ $item == *"$packageName"* ]]; then
