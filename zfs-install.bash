@@ -707,7 +707,7 @@ EOF
 	#endregion
 	installAURpackage trizen
 	# #region additional tools
-	pacman -S --noconfirm thefuck aria2 python-pywal nmon atop nethogs net-tools powertop feedreader newsboat
+	pacman -S --noconfirm thefuck aria2 shellcheck python-pywal nmon atop nethogs net-tools powertop feedreader newsboat
 	installAURpackageTrizen $user_name $user_password netatop;
 	pacman -S --noconfirm tk && python -m pip install --user speedread
 	pacman -S --noconfirm xsel
