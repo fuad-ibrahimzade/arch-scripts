@@ -10,3 +10,4 @@ if $TERM =~ 'xterm-256color'
     set noek
 endif
 :set number relativenumber
+set nocompatible
