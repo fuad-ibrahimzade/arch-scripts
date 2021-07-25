@@ -25,12 +25,24 @@ main() {
 	user_password=${user_password:-user}
 	echo $user_password
 
+	filesystem="ext4"
+	PS3="Choose root file system: "
+	options=(zfs ext4)
+	select menu in "${options[@]}";
+	do
+		filesystem="$menu"
+		break;
+	done
+
 	pacman -Syy
 	# recoverPartitionTableFromMemory $Output_Device;
-	initZFSrequirements;
+	if [[ $filesystem == "zfs" ]]; then
+		initZFSrequirements;
+		createAndMountPartitionsZFS $Output_Device;
+	elif [[ $filesystem == "ext4" ]]; then
+		createAndMountPartitions $Output_Device;
+	fi
 	# AREA section OLD5
-	# createAndMountPartitions $Output_Device;
-	createAndMountPartitionsZFS $Output_Device;
 	# installArchLinuxWithUnsquashfs;
 	installArchLinuxWithPacstrap;
 
@@ -54,10 +66,12 @@ installTools $user_name $user_password && # fix without subsequent && script exi
 
 # AREA section OLD5
 
-initZFSBootTimeUnlockService;
-search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
-replace="HOOKS=(base udev autodetect modconf keyboard keymap consolefont block zfs filesystems)"
-sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
+if [[ $filesystem == "zfs" ]]; then
+	initZFSBootTimeUnlockService;
+	search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
+	replace="HOOKS=(base udev autodetect modconf keyboard keymap consolefont block zfs filesystems)"
+	sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
+fi
 mkinitcpio -p linux
 
 installUEFISystemdBoot;
@@ -69,23 +83,28 @@ installUEFISystemdBoot;
 
 copyWallpapers;
 
-configureZectlSystemdBoot $user_name $user_password;;
-
-umount -l /home
+if [[ $filesystem == "zfs" ]]; then
+	configureZectlSystemdBoot $user_name $user_password;;
+	umount -l /home
+fi
 
 exit
 EOF
 
-cp /etc/zfs/zpool.cache /mnt/etc/zfs
-umount /mnt/boot
-zpool export zroot
+if [[ $filesystem == "zfs" ]]; then
+	cp /etc/zfs/zpool.cache /mnt/etc/zfs
+	umount /mnt/boot
+	zpool export zroot
+fi
 # cp -av .config/. "/mnt/home/$user_name/.config"
 # createArchISO $user_name $user_password;
 
-#umount /mnt/boot
-#umount /mnt -l
-#umount -l -R /mnt
-#umount -l -R /mnt
+if [[ $filesystem == "ext4" ]]; then
+umount /mnt/boot
+umount /mnt -l
+umount -l -R /mnt
+umount -l -R /mnt
+fi
 #reboot
 }
 
