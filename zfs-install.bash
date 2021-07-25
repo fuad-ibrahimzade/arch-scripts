@@ -12,45 +12,68 @@ main() {
 	# git config http.sslVerify false # for one repository
 	iwctl --passphrase "passphrase" station wlan0 connect-hidden "ssid"
 
-	read -p "Output Device (default: /dev/sda):" Output_Device
-	Output_Device=${Output_Device:-/dev/sda}
-	echo $Output_Device
-	read -p "Root Password (default: root):" root_password;
-	root_password=${root_password:-root}
-	echo $root_password
-	read -p "User Name (default: user):" user_name;
-	user_name=${user_name:-user}
-	echo $user_name
-	read -p "User Password (default: user):" user_password;
-	user_password=${user_password:-user}
-	echo $user_password
+	default_Output_Device="/dev/sda"
+	default_root_password="root"
+	default_user_name="user"
+	default_user_password="user"
+	default_filesystem="btrfs"
+	default_offlineInstallUnsquashfs="n"
+	default_bootsystem="systemd"
 
-	filesystem="ext4"
-	PS3="Choose root file system: "
-	options=(btrfs zfs ext4)
-	select menu in "${options[@]}";
-	do
-		filesystem="$menu"
-		break;
-	done
+	read -p "Accept Defaults default: y, [select y or n](Output Device: $default_Output_Device, root_password: $default_root_password, user_name: $default_user_name, user_password: $default_user_password, filesystem: $default_filesystem, offlineInstallUnsquashfs: $default_offlineInstallUnsquashfs, bootsystem: $default_bootsystem):" defaults_accepted
+	defaults_accepted=${defaults_accepted:-y}
+	echo $defaults_accepted
 
-	offlineInstallUnsquashfs="n"
-	PS3="Choose root file system: "
-	options=(y n)
-	select menu in "${options[@]}";
-	do
-		offlineInstallUnsquashfs="$menu"
-		break;
-	done
-	
-	bootsystem="systemd"
-	PS3="Choose boot system system: "
-	options=(systemd grub)
-	select menu in "${options[@]}";
-	do
-		bootsystem="$menu"
-		break;
-	done
+	Output_Device="$default_Output_Device"
+	root_password="$default_root_password"
+	user_name="$default_user_name"
+	user_password="$default_user_password"
+	filesystem="$default_filesystem"
+	offlineInstallUnsquashfs="$default_offlineInstallUnsquashfs"
+	bootsystem="$default_bootsystem"
+
+	if [[ $defaults_accepted == "n" ]]; then
+		read -p "Output Device (default: /dev/sda):" Output_Device
+		Output_Device=${Output_Device:-/dev/sda}
+		echo $Output_Device
+		read -p "Root Password (default: root):" root_password;
+		root_password=${root_password:-root}
+		echo $root_password
+		read -p "User Name (default: user):" user_name;
+		user_name=${user_name:-user}
+		echo $user_name
+		read -p "User Password (default: user):" user_password;
+		user_password=${user_password:-user}
+		echo $user_password
+
+		filesystem="ext4"
+		PS3="Choose root file system: "
+		options=(btrfs zfs ext4)
+		select menu in "${options[@]}";
+		do
+			filesystem="$menu"
+			break;
+		done
+
+		offlineInstallUnsquashfs="n"
+		PS3="Choose root file system: "
+		options=(y n)
+		select menu in "${options[@]}";
+		do
+			offlineInstallUnsquashfs="$menu"
+			break;
+		done
+		
+		bootsystem="systemd"
+		PS3="Choose boot system system: "
+		options=(systemd grub)
+		select menu in "${options[@]}";
+		do
+			bootsystem="$menu"
+			break;
+		done
+	fi
+
 
 	pacman -Syy
 
