@@ -19,8 +19,9 @@ main() {
 	default_filesystem="btrfs"
 	default_offlineInstallUnsquashfs="n"
 	default_bootsystem="systemd"
+	default_install_tools="n"
 
-	read -p "Accept Defaults default: y, [select y or n](Output Device: $default_Output_Device, root_password: $default_root_password, user_name: $default_user_name, user_password: $default_user_password, filesystem: $default_filesystem, offlineInstallUnsquashfs: $default_offlineInstallUnsquashfs, bootsystem: $default_bootsystem):" defaults_accepted
+	read -p "Accept Defaults default: y, [select y or n](Output Device: $default_Output_Device, root_password: $default_root_password, user_name: $default_user_name, user_password: $default_user_password, filesystem: $default_filesystem, offlineInstallUnsquashfs: $default_offlineInstallUnsquashfs, bootsystem: $default_bootsystem, install_tools: $default_install_tools):" defaults_accepted
 	defaults_accepted=${defaults_accepted:-y}
 	echo $defaults_accepted
 
@@ -31,6 +32,7 @@ main() {
 	filesystem="$default_filesystem"
 	offlineInstallUnsquashfs="$default_offlineInstallUnsquashfs"
 	bootsystem="$default_bootsystem"
+	install_tools="$default_install_tools"
 
 	if [[ $defaults_accepted == "n" ]]; then
 		read -p "Output Device (default: /dev/sda):" Output_Device
@@ -72,6 +74,15 @@ main() {
 			bootsystem="$menu"
 			break;
 		done
+		
+		install_tools="n"
+		PS3="Choose to install tools or not: "
+		options=(y n)
+		select menu in "${options[@]}";
+		do
+			install_tools="$menu"
+			break;
+		done
 	fi
 
 
@@ -109,7 +120,9 @@ replace=" %wheel ALL=(ALL) ALL"
 sed -i "s|\$search|\$replace|g" /etc/sudoers;
 configureUsers $root_password $user_name $user_password;
 
-installTools $user_name $user_password && # fix without subsequent && script exists after installDesktopEnvironment
+if [[ $install_tools == "y" ]]; then
+	installTools $user_name $user_password && # fix without subsequent && script exists after installDesktopEnvironment
+fi
 
 # AREA section OLD5
 
@@ -161,7 +174,7 @@ fi
 # cp -av .config/. "/mnt/home/$user_name/.config"
 # createArchISO $user_name $user_password;
 
-if [[ $filesystem == "ext4" ] || [ $filesystem == "btrfs" ]]; then
+if [[ $filesystem == "ext4" || $filesystem == "btrfs" ]]; then
 	umount /mnt/boot
 	umount /mnt/home
 	umount /mnt -l
@@ -320,20 +333,20 @@ EOF
 installUEFIGrub() {
 	offlineInstallUnsquashfs="$1"
 	filesystem="$2"
-	pacman --noconfirm -S grub efibootmgr &&
+	pacman --noconfirm -S grub efibootmgr
 	#yes | pacman -S grub efibootmgr os-prober intel-ucode amd-ucode
 
 	if [[ $offlineInstallUnsquashfs == "y" ]]; then
-		mkinitcpio -g /boot/initramfs-linux.img && # when unsquashfs used
+		mkinitcpio -g /boot/initramfs-linux.img # when unsquashfs used
 	else
-		mkinitcpio -p linux && # when pacstrap used
+		mkinitcpio -p linux # when pacstrap used
 	fi
 
 
 	if [[ $filesystem == "zfs" ]]; then
-		ZPOOL_VDEV_NAME_PATH=1 grub-install --target=x86_64-efi --efi-directory=/boot &&
+		ZPOOL_VDEV_NAME_PATH=1 grub-install --target=x86_64-efi --efi-directory=/boot
 		#grub-install --target=x86_64-efi --efi-directory=/efi --boot-directory=/boot
-		ZPOOL_VDEV_NAME_PATH=1 grub-mkconfig -o /boot/grub/grub.cfg &&
+		ZPOOL_VDEV_NAME_PATH=1 grub-mkconfig -o /boot/grub/grub.cfg
 
 		search="linux\\t/vmlinuz-linux root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
 		replace="linux\\t/vmlinuz-linux zfs=bootfs root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
