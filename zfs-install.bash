@@ -41,6 +41,14 @@ main() {
 		offlineInstallUnsquashfs="$menu"
 		break;
 	done
+	bootsystem="systemd"
+	PS3="Choose boot system system: "
+	options=(systemd grub)
+	select menu in "${options[@]}";
+	do
+		bootsystem="$menu"
+		break;
+	done
 
 	pacman -Syy
 
@@ -84,10 +92,18 @@ if [[ $filesystem == "zfs" ]]; then
 	replace="HOOKS=(base udev autodetect modconf keyboard keymap consolefont block zfs filesystems)"
 	sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
 fi
-mkinitcpio -p linux
 
-installUEFISystemdBoot;
-#installUEFIGrub;
+if [[ $offlineInstallUnsquashfs == "y" ]]; then
+	mkinitcpio -g /boot/initramfs-linux.img
+else
+	mkinitcpio -p linux
+fi
+
+if [[ $bootsystem == "systemd" ]]; then
+	installUEFISystemdBoot;
+elif [[ $bootsystem == "grub" ]]; then
+	installUEFIGrub $offlineInstallUnsquashfs;
+fi
 
 #writeArchIsoToSeperatePartition;
 
@@ -108,15 +124,17 @@ if [[ $filesystem == "zfs" ]]; then
 	umount /mnt/boot
 	zpool export zroot
 fi
+
 # cp -av .config/. "/mnt/home/$user_name/.config"
 # createArchISO $user_name $user_password;
 
 if [[ $filesystem == "ext4" ]]; then
-umount /mnt/boot
-umount /mnt -l
-umount -l -R /mnt
-umount -l -R /mnt
+	umount /mnt/boot
+	umount /mnt -l
+	umount -l -R /mnt
+	umount -l -R /mnt
 fi
+
 #reboot
 }
 
@@ -266,11 +284,15 @@ EOF
 }
 
 installUEFIGrub() {
+	offlineInstallUnsquashfs="$1"
 	pacman --noconfirm -S grub efibootmgr &&
 	#yes | pacman -S grub efibootmgr os-prober intel-ucode amd-ucode
 
-	mkinitcpio -p linux && # when pacstrap used
-	# mkinitcpio -g /boot/initramfs-linux.img && # when unsquashfs used
+	if [[ $offlineInstallUnsquashfs == "y" ]]; then
+		mkinitcpio -g /boot/initramfs-linux.img && # when unsquashfs used
+	else
+		mkinitcpio -p linux && # when pacstrap used
+	fi
 
 	# AREA section OLD3
 
