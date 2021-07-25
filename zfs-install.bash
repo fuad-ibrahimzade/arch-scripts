@@ -66,14 +66,18 @@ main() {
 			break;
 		done
 		
-		bootsystem="systemd"
-		PS3="Choose boot system system: "
-		options=(systemd grub)
-		select menu in "${options[@]}";
-		do
-			bootsystem="$menu"
-			break;
-		done
+		if [[ $filesystem == "btrfs" ]]; then
+			bootsystem="grub"
+		else
+			PS3="Choose boot system system: "
+			options=(systemd grub)
+			select menu in "${options[@]}";
+			do
+				bootsystem="$menu"
+				break;
+			done
+		fi
+		
 		
 		install_tools="n"
 		PS3="Choose to install tools or not: "
