@@ -33,8 +33,17 @@ main() {
 		filesystem="$menu"
 		break;
 	done
+	offlineInstallUnsquashfs="n"
+	PS3="Choose root file system: "
+	options=(y n)
+	select menu in "${options[@]}";
+	do
+		offlineInstallUnsquashfs="$menu"
+		break;
+	done
 
 	pacman -Syy
+
 	# recoverPartitionTableFromMemory $Output_Device;
 	if [[ $filesystem == "zfs" ]]; then
 		initZFSrequirements;
@@ -43,8 +52,11 @@ main() {
 		createAndMountPartitions $Output_Device;
 	fi
 	# AREA section OLD5
-	# installArchLinuxWithUnsquashfs;
-	installArchLinuxWithPacstrap;
+	if [[ $offlineInstallUnsquashfs == "y" ]]; then
+		installArchLinuxWithUnsquashfs;
+	else
+		installArchLinuxWithPacstrap $filesystem;
+	fi
 
 arch-chroot /mnt << EOF
 echo "Entering chroot"
@@ -509,14 +521,20 @@ installArchLinuxWithUnsquashfs() {
 } 
 
 installArchLinuxWithPacstrap() {
-	# yes '' | pacstrap -i /mnt base linux
-	# genfstabNormal;
-	yes '' | pacstrap -i /mnt base zfs-linux
-	genfstabZfs;
+	filesystem="$1"
+	if [[ $filesystem == "zfs" ]]; then
+		yes '' | pacstrap -i /mnt base zfs-linux
+		genfstabZfs;
+	elif [[ $filesystem == "ext4" ]]; then
+		yes '' | pacstrap -i /mnt base linux
+		genfstabNormal;
+	fi
 	arch-chroot /mnt << EOF
 #!/usr/bin/bash
 
-initZFSrequirements;
+if [[ $filesystem == "zfs" ]]; then
+	initZFSrequirements;
+fi
 ln -s /usr/share/zoneinfo/Asia/Baku /etc/localtime;
 hwclock --systohc;
 sed  -i 's/\#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen;
