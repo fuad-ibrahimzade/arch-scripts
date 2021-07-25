@@ -10,6 +10,7 @@ main() {
 	# temporary git clone ssl problem fix
 	# git config --global http.sslVerify false
 	# git config http.sslVerify false # for one repository
+	iwctl --passphrase "passphrase" station wlan0 connect-hidden "ssid"
 
 	read -p "Output Device (default: /dev/sda):" Output_Device
 	Output_Device=${Output_Device:-/dev/sda}
@@ -28,7 +29,8 @@ main() {
 	# recoverPartitionTableFromMemory $Output_Device;
 	initZFSrequirements;
 	# AREA section OLD5
-	createAndMountPartitions $Output_Device;
+	# createAndMountPartitions $Output_Device;
+	createAndMountPartitionsZFS $Output_Device;
 	# installArchLinuxWithUnsquashfs;
 	installArchLinuxWithPacstrap;
 
@@ -274,28 +276,44 @@ createAndMountPartitions() {
 	# isopart=$(echo $Output_Device)1;
 	# swappart=$(echo $Output_Device)2;
 
-	# # (echo g; echo n; echo p; echo 1; echo ""; echo +512M; echo t; echo 1; echo n; echo p; echo 2; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device); # before without isopart
-	# #(echo g; echo n; echo p; echo 1; echo ""; echo +512M; echo t; echo 1; echo n; echo p; echo 2; echo ""; echo +512M; echo t; echo 2; echo 38; echo n; echo p; echo 3; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
-	# efipart=$(echo $Output_Device)3;
-	# #extbootpart=$(echo $Output_Device)2;
-	# rootpart=$(echo $Output_Device)4;
-	# # after ls -l /dev/disk/by-label	found ARCH_202011 (before was user -n EFI) on mount of /dev/sr0 at /run/archiso/bootmnt/arch/boot/syslinux/archiso_sys-linux.cfg
-	# mkfs.fat -F32 -n ARCH_202011 "$efipart";
-	# #mksfs.ext4 "$extbootpart";
-	# mkfs.ext4 -L root "$rootpart";
-	# mount "$rootpart" /mnt
-	# mkdir -p /mnt/boot
-	# #mkdir -p /mnt/efi
-	# #mount "$efipart" /mnt/efi
-	# mount "$efipart" /mnt/boot
-	# #mount "$extbootpart" /mnt/boot
-	# #get file name from disk and partitions
+	(echo g; echo n; echo p; echo 1; echo ""; echo +512M; echo t; echo 1; echo n; echo p; echo 2; echo ""; echo +2048M; echo w; echo q) | fdisk $(echo $Output_Device); # before without isopart
+	#(echo g; echo n; echo p; echo 1; echo ""; echo +512M; echo t; echo 1; echo n; echo p; echo 2; echo ""; echo +512M; echo t; echo 2; echo 38; echo n; echo p; echo 3; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
+	efipart=$(echo $Output_Device)1;
+	#extbootpart=$(echo $Output_Device)2;
+	rootpart=$(echo $Output_Device)2;
+	# after ls -l /dev/disk/by-label	found ARCH_202011 (before was user -n EFI) on mount of /dev/sr0 at /run/archiso/bootmnt/arch/boot/syslinux/archiso_sys-linux.cfg
+	mkfs.fat -F32 -n ARCH_202104 "$efipart";
+	#mksfs.ext4 "$extbootpart";
+	mkfs.ext4 -L root "$rootpart";
+	mount "$rootpart" /mnt
+	mkdir -p /mnt/boot
+	#mkdir -p /mnt/efi
+	#mount "$efipart" /mnt/efi
+	mount "$efipart" /mnt/boot
+	#mount "$extbootpart" /mnt/boot
+	#get file name from disk and partitions
 	# mkfs.fat -F32 -n ISO "$isopart";
 	# mkdir -p /mnt/iso
 	# mount "$isopart" /mnt/iso
 	# mkswap "$swappart"
 	# swapon "$swappart"
-	#endregion
+	# endregion
+
+} 
+
+createAndMountPartitionsZFS() {
+	Output_Device="$1"
+	ISO_URL="http://mirrors.evowise.com/archlinux/iso/2021.01.01/archlinux-2021.01.01-x86_64.iso"
+	ISO_MB=$( curl -sI $ISO_URL | grep -i Content-Length | grep -o '[0-9]\+' )
+	# ISO_MB=$( curl -sI $ISO_URL | grep -i Content-Length | awk '{print $2}' | awk '{print $1/1024/1024 + 1}' )
+	ISO_MB=$((ISO_MB/1024/1024 + 10 ))
+    #boot arhiso
+	#create gpt table
+	#create boot swap root partitions
+	sfdisk --delete "$Output_Device";
+	#wipefs --all "$Output_Device";
+	#dd if=/dev/zero of="$Output_Device" bs=512 count=1
+	partprobe;
 
 
 	parted --script $(echo $Output_Device) \
@@ -345,8 +363,7 @@ createAndMountPartitions() {
 	# 1) zedenv, zectl dataset structure, create boot environment for legacy /home dataset
 	# 2) pacman -U /var/cache/pacman/pkg/zfs-linux-*.pkg.tar.xz after zectl pacman hook or zectl-systemd-boot configure
 	#endregion
-
-} 
+}
 
 writeArchIsoToSeperatePartition() {
 	# test
