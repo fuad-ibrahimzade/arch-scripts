@@ -27,12 +27,13 @@ main() {
 
 	filesystem="ext4"
 	PS3="Choose root file system: "
-	options=(zfs ext4)
+	options=(btrfs zfs ext4)
 	select menu in "${options[@]}";
 	do
 		filesystem="$menu"
 		break;
 	done
+
 	offlineInstallUnsquashfs="n"
 	PS3="Choose root file system: "
 	options=(y n)
@@ -41,6 +42,7 @@ main() {
 		offlineInstallUnsquashfs="$menu"
 		break;
 	done
+	
 	bootsystem="systemd"
 	PS3="Choose boot system system: "
 	options=(systemd grub)
@@ -58,6 +60,8 @@ main() {
 		createAndMountPartitionsZFS $Output_Device;
 	elif [[ $filesystem == "ext4" ]]; then
 		createAndMountPartitions $Output_Device;
+	elif [[ $filesystem == "btrfs" ]]; then
+		createAndMountPartitionsBTRFS $Output_Device;
 	fi
 	# AREA section OLD5
 	if [[ $offlineInstallUnsquashfs == "y" ]]; then
@@ -91,6 +95,12 @@ if [[ $filesystem == "zfs" ]]; then
 	search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
 	replace="HOOKS=(base udev autodetect modconf keyboard keymap consolefont block zfs filesystems)"
 	sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
+elif [[ $filesystem == "btrfs" ]]; then
+	sed -i 's/MODULES=()/MODULES=(btrfs)/g' /etc/mkinitcpio.conf;
+	search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
+	#replace="HOOKS=(base udev block automount modconf filesystems keyboard fsck)"
+	replace="HOOKS=(base udev block autodetect modconf filesystems keyboard fsck)"
+	sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
 fi
 
 if [[ $offlineInstallUnsquashfs == "y" ]]; then
@@ -102,7 +112,7 @@ fi
 if [[ $bootsystem == "systemd" ]]; then
 	installUEFISystemdBoot;
 elif [[ $bootsystem == "grub" ]]; then
-	installUEFIGrub $offlineInstallUnsquashfs;
+	installUEFIGrub $offlineInstallUnsquashfs $filesystem;
 fi
 
 #writeArchIsoToSeperatePartition;
@@ -128,8 +138,9 @@ fi
 # cp -av .config/. "/mnt/home/$user_name/.config"
 # createArchISO $user_name $user_password;
 
-if [[ $filesystem == "ext4" ]]; then
+if [[ $filesystem == "ext4" ] || [ $filesystem == "btrfs" ]]; then
 	umount /mnt/boot
+	umount /mnt/home
 	umount /mnt -l
 	umount -l -R /mnt
 	umount -l -R /mnt
@@ -285,6 +296,7 @@ EOF
 
 installUEFIGrub() {
 	offlineInstallUnsquashfs="$1"
+	filesystem="$2"
 	pacman --noconfirm -S grub efibootmgr &&
 	#yes | pacman -S grub efibootmgr os-prober intel-ucode amd-ucode
 
@@ -294,15 +306,23 @@ installUEFIGrub() {
 		mkinitcpio -p linux && # when pacstrap used
 	fi
 
+
+	if [[ $filesystem == "zfs" ]]; then
+		ZPOOL_VDEV_NAME_PATH=1 grub-install --target=x86_64-efi --efi-directory=/boot &&
+		#grub-install --target=x86_64-efi --efi-directory=/efi --boot-directory=/boot
+		ZPOOL_VDEV_NAME_PATH=1 grub-mkconfig -o /boot/grub/grub.cfg &&
+
+		search="linux\\t/vmlinuz-linux root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
+		replace="linux\\t/vmlinuz-linux zfs=bootfs root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
+		sed -i "s|\$search|\$replace|g" /boot/grub/grub.cfg;
+	else
+		grub-install --target=x86_64-efi --efi-directory=/boot
+		grub-mkconfig -o /boot/grub/grub.cfg;
+	fi
+
 	# AREA section OLD3
 
-	ZPOOL_VDEV_NAME_PATH=1 grub-install --target=x86_64-efi --efi-directory=/boot &&
-	#grub-install --target=x86_64-efi --efi-directory=/efi --boot-directory=/boot
-	ZPOOL_VDEV_NAME_PATH=1 grub-mkconfig -o /boot/grub/grub.cfg &&
 
-	search="linux\\t/vmlinuz-linux root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
-	replace="linux\\t/vmlinuz-linux zfs=bootfs root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
-	sed -i "s|\$search|\$replace|g" /boot/grub/grub.cfg;
 }
 
 
@@ -351,6 +371,34 @@ createAndMountPartitions() {
 	# mkswap "$swappart"
 	# swapon "$swappart"
 	# endregion
+
+} 
+
+createAndMountPartitionsBTRFS() {
+	Output_Device="$1"
+
+	sfdisk --delete "$Output_Device";
+	(echo o; echo n; echo p; echo 1; echo ""; echo +512M; echo n; echo p; echo 2; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
+	partprobe;
+	efipart=$(echo $Output_Device)1;
+	rootpart=$(echo $Output_Device)2;
+	mkfs.fat -F32 -n EFI "$efipart";
+	mkfs.btrfs -f -m single -L arch "$rootpart";
+	mount -o compress=lzo "$rootpart" /mnt;
+	cd /mnt;
+	btrfs su cr @;
+	#btrfs su cr @boot;
+	btrfs su cr @home;
+	cd /;
+	umount /mnt;
+	mount -o noauto,compress=lzo,subvol=@ "$rootpart" /mnt;
+	cd /mnt;
+	mkdir -p {boot,home};
+	#mount -o noauto,compress=lzo,subvol=@boot "$rootpart" boot;
+	#mkdir boot/EFI;
+	#mount "$efipart" /mnt/boot/EFI;
+	mount "$efipart" /mnt/boot;
+	mount -o noauto,compress=lzo,subvol=@home "$rootpart" home;
 
 } 
 
@@ -548,6 +596,12 @@ installArchLinuxWithPacstrap() {
 		yes '' | pacstrap -i /mnt base zfs-linux
 		genfstabZfs;
 	elif [[ $filesystem == "ext4" ]]; then
+		yes '' | pacstrap -i /mnt base linux
+		genfstabNormal;
+	elif [[ $filesystem == "btrfs" ]]; then
+		#pacstrap -i /mnt base base-devel linux linux-firmware efibootmgr grub amd-ucode intel-ucode os-prober snapper vim nano lynx iwd;
+		yes '' | pacstrap -i /mnt base base-devel btrfs-progs linux linux-firmware 
+		yes | pacstrap -i /mnt efibootmgr grub amd-ucode intel-ucode os-prober snapper vim nano lynx iwd;
 		yes '' | pacstrap -i /mnt base linux
 		genfstabNormal;
 	fi
