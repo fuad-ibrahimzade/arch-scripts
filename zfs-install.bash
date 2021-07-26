@@ -58,7 +58,7 @@ main() {
 		done
 
 		offlineInstallUnsquashfs="n"
-		PS3="Choose root file system: "
+		PS3="Offline Unsquashfs install: "
 		options=(y n)
 		select menu in "${options[@]}";
 		do
