@@ -208,30 +208,46 @@ initZFSrequirements2() {
 	curl -L https://git.io/JsfVS | xargs -i{} pacman-key --lsign-key {}
 	curl -L https://git.io/Jsfw2 > /etc/pacman.d/mirrorlist-archzfs
 
-	tee -a /etc/pacman.conf <<- 'EOF'
-
-	#[archzfs-testing]
-	#Include = /etc/pacman.d/mirrorlist-archzfs
-
-	[archzfs]
-	Include = /etc/pacman.d/mirrorlist-archzfs
-	EOF
-	pacman -Sy
-
-	INST_LINVAR=$(sed 's|.*linux|linux|' /proc/cmdline | sed 's|.img||g' | awk '{ print $1 }')
-	INST_LINVER=$(pacman -Si zfs-${INST_LINVAR} | grep 'Depends On' | sed "s|.*${INST_LINVAR}=||" | awk '{ print $1 }')
-
-	if [ ${INST_LINVER} = \
-	$(pacman -Si ${INST_LINVAR} | grep Version | awk '{ print $3 }') ]; then
-		pacman -S --noconfirm --needed ${INST_LINVAR}
+	if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
+		mount /home
+		echo "initZFSrequirements inside chroot started!"
 	else
-		pacman -U --noconfirm --needed \
-		https://archive.archlinux.org/packages/l/${INST_LINVAR}/${INST_LINVAR}-${INST_LINVER}-x86_64.pkg.tar.zst
+		mount -o remount,size=2G /run/archiso/cowspace
 	fi
+	
+	declare file="/etc/pacman.conf"
+	declare regex="zfs"
 
-	pacman -Sy zfs-${INST_LINVAR}
-	sed -i 's/#IgnorePkg/IgnorePkg/' /etc/pacman.conf
-	sed -i "/^IgnorePkg/ s/$/ ${INST_LINVAR} ${INST_LINVAR}-headers zfs-${INST_LINVAR} zfs-utils/" /etc/pacman.conf
+	declare file_content=$( cat "${file}" )
+	if [[ " $file_content " =~ $regex ]] # please note the space before and after the file content
+		then
+			echo "archzfs found in pacman.conf"
+		else
+			tee -a /etc/pacman.conf <<- 'EOF'
+
+			#[archzfs-testing]
+			#Include = /etc/pacman.d/mirrorlist-archzfs
+
+			[archzfs]
+			Include = /etc/pacman.d/mirrorlist-archzfs
+			EOF
+			pacman -Sy
+
+			INST_LINVAR=$(sed 's|.*linux|linux|' /proc/cmdline | sed 's|.img||g' | awk '{ print $1 }')
+			INST_LINVER=$(pacman -Si zfs-${INST_LINVAR} | grep 'Depends On' | sed "s|.*${INST_LINVAR}=||" | awk '{ print $1 }')
+
+			if [ ${INST_LINVER} = \
+			$(pacman -Si ${INST_LINVAR} | grep Version | awk '{ print $3 }') ]; then
+				pacman -S --noconfirm --needed ${INST_LINVAR}
+			else
+				pacman -U --noconfirm --needed \
+				https://archive.archlinux.org/packages/l/${INST_LINVAR}/${INST_LINVAR}-${INST_LINVER}-x86_64.pkg.tar.zst
+			fi
+
+			pacman -Sy zfs-${INST_LINVAR}
+			sed -i 's/#IgnorePkg/IgnorePkg/' /etc/pacman.conf
+			sed -i "/^IgnorePkg/ s/$/ ${INST_LINVAR} ${INST_LINVAR}-headers zfs-${INST_LINVAR} zfs-utils/" /etc/pacman.conf
+	fi
 
 	modprobe zfs
 	# INST_LINVAR=$(sed 's|.*linux|linux|' /proc/cmdline | sed 's|.img||g' | awk '{ print $1 }')
