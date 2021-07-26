@@ -94,7 +94,8 @@ main() {
 
 	# recoverPartitionTableFromMemory $Output_Device;
 	if [[ $filesystem == "zfs" ]]; then
-		initZFSrequirements;
+		# initZFSrequirements;
+		initZFSrequirements2;
 		createAndMountPartitionsZFS $Output_Device;
 	elif [[ $filesystem == "ext4" ]]; then
 		createAndMountPartitions $Output_Device;
@@ -198,6 +199,44 @@ genfstabZfs() {
 
 	echo "/dev/zvol/zroot/encr/swap none swap discard 0 0" >> /mnt/etc/fstab
 	echo "zroot/encr/data/home /home zfs rw,xattr,posixacl 0 0" >> /mnt/etc/fstab
+}
+
+initZFSrequirements2() {
+	# https://openzfs.github.io/openzfs-docs/Getting%20Started/Arch%20Linux/1-zfs-linux.html?highlight=zfs%20linux#
+	pacman -S --needed --noconfirm curl
+	curl -L https://archzfs.com/archzfs.gpg |  pacman-key -a -
+	curl -L https://git.io/JsfVS | xargs -i{} pacman-key --lsign-key {}
+	curl -L https://git.io/Jsfw2 > /etc/pacman.d/mirrorlist-archzfs
+
+	tee -a /etc/pacman.conf <<- 'EOF'
+
+	#[archzfs-testing]
+	#Include = /etc/pacman.d/mirrorlist-archzfs
+
+	[archzfs]
+	Include = /etc/pacman.d/mirrorlist-archzfs
+	EOF
+	pacman -Sy
+
+	INST_LINVAR=$(sed 's|.*linux|linux|' /proc/cmdline | sed 's|.img||g' | awk '{ print $1 }')
+	INST_LINVER=$(pacman -Si zfs-${INST_LINVAR} | grep 'Depends On' | sed "s|.*${INST_LINVAR}=||" | awk '{ print $1 }')
+
+	if [ ${INST_LINVER} = \
+	$(pacman -Si ${INST_LINVAR} | grep Version | awk '{ print $3 }') ]; then
+		pacman -S --noconfirm --needed ${INST_LINVAR}
+	else
+		pacman -U --noconfirm --needed \
+		https://archive.archlinux.org/packages/l/${INST_LINVAR}/${INST_LINVAR}-${INST_LINVER}-x86_64.pkg.tar.zst
+	fi
+
+	pacman -Sy zfs-${INST_LINVAR}
+	sed -i 's/#IgnorePkg/IgnorePkg/' /etc/pacman.conf
+	sed -i "/^IgnorePkg/ s/$/ ${INST_LINVAR} ${INST_LINVAR}-headers zfs-${INST_LINVAR} zfs-utils/" /etc/pacman.conf
+
+	modprobe zfs
+	# INST_LINVAR=$(sed 's|.*linux|linux|' /proc/cmdline | sed 's|.img||g' | awk '{ print $1 }')
+	# pacman -Sy --needed --noconfirm ${INST_LINVAR} ${INST_LINVAR}-headers zfs-${INST_LINVAR} zfs-utils
+
 }
 
 initZFSrequirements() {
@@ -649,7 +688,8 @@ installArchLinuxWithPacstrap() {
 #!/usr/bin/bash
 
 if [[ $filesystem == "zfs" ]]; then
-	initZFSrequirements;
+	# initZFSrequirements;
+	initZFSrequirements2;
 fi
 ln -s /usr/share/zoneinfo/Asia/Baku /etc/localtime;
 hwclock --systohc;
@@ -2033,6 +2073,7 @@ export -f createArchISO
 export -f initZFSBootTimeUnlockService
 export -f configureZectlSystemdBoot
 export -f initZFSrequirements
+export -f initZFSrequirements2
 export -f installUEFISystemdBoot
 export -f installUEFIGrub
 
