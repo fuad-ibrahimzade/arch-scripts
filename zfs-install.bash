@@ -94,8 +94,8 @@ main() {
 
 	# recoverPartitionTableFromMemory $Output_Device;
 	if [[ $filesystem == "zfs" ]]; then
-		# initZFSrequirements;
-		initZFSrequirements2;
+		initZFSrequirements;
+		# initZFSrequirements2;
 		createAndMountPartitionsZFS $Output_Device;
 	elif [[ $filesystem == "ext4" ]]; then
 		createAndMountPartitions $Output_Device;
@@ -200,6 +200,14 @@ genfstabZfs() {
 
 	echo "/dev/zvol/zroot/encr/swap none swap discard 0 0" >> /mnt/etc/fstab
 	echo "zroot/encr/data/home /home zfs rw,xattr,posixacl 0 0" >> /mnt/etc/fstab
+}
+
+installLtsKernelZFS() {
+	initZFSrequirements;
+	# pacman -S --noconfirm --needed kexec-tools
+	# kexec -l /boot/vmlinuz-linux-lts --initrd=/boot/initramfs-linux-lts.img --reuse-cmdline
+	# kexec -e
+	# systemctl kexec
 }
 
 initZFSrequirements2() {
@@ -705,8 +713,8 @@ installArchLinuxWithPacstrap() {
 	#!/usr/bin/bash
 
 	if [[ $filesystem == "zfs" ]]; then
-		# initZFSrequirements;
-		initZFSrequirements2;
+		initZFSrequirements;
+		# initZFSrequirements2;
 	fi
 	ln -s /usr/share/zoneinfo/Asia/Baku /etc/localtime;
 	hwclock --systohc;
