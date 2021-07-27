@@ -94,8 +94,8 @@ main() {
 
 	# recoverPartitionTableFromMemory $Output_Device;
 	if [[ $filesystem == "zfs" ]]; then
-		initZFSrequirements;
-		# initZFSrequirements2;
+		# initZFSrequirements;
+		initZFSrequirements2;
 		createAndMountPartitionsZFS $Output_Device;
 	elif [[ $filesystem == "ext4" ]]; then
 		createAndMountPartitions $Output_Device;
@@ -242,20 +242,20 @@ initZFSrequirements2() {
 			EOF
 			pacman -Sy
 
-			INST_LINVAR=$(sed 's|.*linux|linux|' /proc/cmdline | sed 's|.img||g' | awk '{ print $1 }')
-			INST_LINVER=$(pacman -Si zfs-${INST_LINVAR} | grep 'Depends On' | sed "s|.*${INST_LINVAR}=||" | awk '{ print $1 }')
+			# INST_LINVAR=$(sed 's|.*linux|linux|' /proc/cmdline | sed 's|.img||g' | awk '{ print $1 }')
+			# INST_LINVER=$(pacman -Si zfs-${INST_LINVAR} | grep 'Depends On' | sed "s|.*${INST_LINVAR}=||" | awk '{ print $1 }')
 
-			if [ ${INST_LINVER} = \
-			$(pacman -Si ${INST_LINVAR} | grep Version | awk '{ print $3 }') ]; then
-				pacman -S --noconfirm --needed ${INST_LINVAR}
-			else
-				pacman -U --noconfirm --needed \
-				https://archive.archlinux.org/packages/l/${INST_LINVAR}/${INST_LINVAR}-${INST_LINVER}-x86_64.pkg.tar.zst
-			fi
+			# if [ ${INST_LINVER} = \
+			# $(pacman -Si ${INST_LINVAR} | grep Version | awk '{ print $3 }') ]; then
+			# 	pacman -S --noconfirm --needed ${INST_LINVAR}
+			# else
+			# 	pacman -U --noconfirm --needed \
+			# 	https://archive.archlinux.org/packages/l/${INST_LINVAR}/${INST_LINVAR}-${INST_LINVER}-x86_64.pkg.tar.zst
+			# fi
 
-			pacman -Sy zfs-${INST_LINVAR}
-			sed -i 's/#IgnorePkg/IgnorePkg/' /etc/pacman.conf
-			sed -i "/^IgnorePkg/ s/$/ ${INST_LINVAR} ${INST_LINVAR}-headers zfs-${INST_LINVAR} zfs-utils/" /etc/pacman.conf
+			# pacman -Sy zfs-${INST_LINVAR}
+			# sed -i 's/#IgnorePkg/IgnorePkg/' /etc/pacman.conf
+			# sed -i "/^IgnorePkg/ s/$/ ${INST_LINVAR} ${INST_LINVAR}-headers zfs-${INST_LINVAR} zfs-utils/" /etc/pacman.conf
 	fi
 
 	modprobe zfs
@@ -713,8 +713,8 @@ installArchLinuxWithPacstrap() {
 	#!/usr/bin/bash
 
 	if [[ $filesystem == "zfs" ]]; then
-		initZFSrequirements;
-		# initZFSrequirements2;
+		# initZFSrequirements;
+		initZFSrequirements2;
 	fi
 	ln -s /usr/share/zoneinfo/Asia/Baku /etc/localtime;
 	hwclock --systohc;
