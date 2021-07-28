@@ -956,6 +956,7 @@ installTools() {
 	installAURpackageTrizen $user_name $user_password p7zip-gui
 	installAURpackageTrizen $user_name $user_password fbcat-git
 	installAURpackageTrizen $user_name $user_password bauh;
+	# installAURpackageTrizen $user_name $user_password app-outlet-bin;
 	installAURpackageTrizen $user_name $user_password lite-xl
 	# git clone https://github.com/rxi/lite-plugins	# original lite plugins
 	git clone https://github.com/franko/lite-plugins # lite-xl plugins
