@@ -1183,6 +1183,7 @@ installi3Seperate() {
 	# picom vs xcompmgr
 	installAURpackageTrizen $user_name $user_password quickswitch-i3
 	installAURpackageTrizen $user_name $user_password wmfocus;
+	installAURpackageTrizen $user_name $user_password ulauncher
 
 	pacman --noconfirm -S dmenu
 	installGitHubMakepackage "morc_menu" "https://github.com/Boruch-Baum/morc_menu"
