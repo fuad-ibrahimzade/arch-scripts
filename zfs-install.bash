@@ -12,6 +12,13 @@ main() {
 	# git config http.sslVerify false # for one repository
 	iwctl --passphrase "passphrase" station wlan0 connect-hidden "ssid"
 
+	read -p "Create Only ArchZfsISO (default: n, [select y or n]):" onlyCreateArchZfsISO
+	onlyCreateArchZfsISO=${onlyCreateArchZfsISO:-n}
+	if [[ $onlyCreateArchZfsISO == "n" ]]; then
+		createArchZfsISO;
+		exit
+	fi
+
 	default_Output_Device="/dev/sda"
 	default_root_password="root"
 	default_user_name="user"
