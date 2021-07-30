@@ -10,81 +10,185 @@ main() {
 	# temporary git clone ssl problem fix
 	# git config --global http.sslVerify false
 	# git config http.sslVerify false # for one repository
+	iwctl --passphrase "passphrase" station wlan0 connect-hidden "ssid"
 
-	read -p "Output Device (default: /dev/sda):" Output_Device
-	Output_Device=${Output_Device:-/dev/sda}
-	echo $Output_Device
-	read -p "Root Password (default: root):" root_password;
-	root_password=${root_password:-root}
-	echo $root_password
-	read -p "User Name (default: user):" user_name;
-	user_name=${user_name:-user}
-	echo $user_name
-	read -p "User Password (default: user):" user_password;
-	user_password=${user_password:-user}
-	echo $user_password
+	default_Output_Device="/dev/sda"
+	default_root_password="root"
+	default_user_name="user"
+	default_user_password="user"
+	default_filesystem="btrfs"
+	default_offlineInstallUnsquashfs="n"
+	default_bootsystem="grub"
+	default_install_tools="n"
+
+	read -p "Accept Defaults default: y, [select y or n](Output Device: $default_Output_Device, root_password: $default_root_password, user_name: $default_user_name, user_password: $default_user_password, filesystem: $default_filesystem, offlineInstallUnsquashfs: $default_offlineInstallUnsquashfs, bootsystem: $default_bootsystem, install_tools: $default_install_tools):" defaults_accepted
+	defaults_accepted=${defaults_accepted:-y}
+	echo $defaults_accepted
+
+	Output_Device="$default_Output_Device"
+	root_password="$default_root_password"
+	user_name="$default_user_name"
+	user_password="$default_user_password"
+	filesystem="$default_filesystem"
+	offlineInstallUnsquashfs="$default_offlineInstallUnsquashfs"
+	bootsystem="$default_bootsystem"
+	install_tools="$default_install_tools"
+
+	if [[ $defaults_accepted == "n" ]]; then
+		read -p "Output Device (default: /dev/sda):" Output_Device
+		Output_Device=${Output_Device:-/dev/sda}
+		echo $Output_Device
+		read -p "Root Password (default: root):" root_password;
+		root_password=${root_password:-root}
+		echo $root_password
+		read -p "User Name (default: user):" user_name;
+		user_name=${user_name:-user}
+		echo $user_name
+		read -p "User Password (default: user):" user_password;
+		user_password=${user_password:-user}
+		echo $user_password
+
+		filesystem="ext4"
+		PS3="Choose root file system: "
+		options=(btrfs zfs ext4)
+		select menu in "${options[@]}";
+		do
+			filesystem="$menu"
+			break;
+		done
+
+		offlineInstallUnsquashfs="n"
+		PS3="Offline Unsquashfs install: "
+		options=(y n)
+		select menu in "${options[@]}";
+		do
+			offlineInstallUnsquashfs="$menu"
+			break;
+		done
+		
+		if [[ $filesystem == "btrfs" ]]; then
+			bootsystem="grub"
+		else
+			PS3="Choose boot system system: "
+			options=(systemd grub)
+			select menu in "${options[@]}";
+			do
+				bootsystem="$menu"
+				break;
+			done
+		fi
+		
+		
+		install_tools="n"
+		PS3="Choose to install tools or not: "
+		options=(y n)
+		select menu in "${options[@]}";
+		do
+			install_tools="$menu"
+			break;
+		done
+	fi
+
 
 	pacman -Syy
+
 	# recoverPartitionTableFromMemory $Output_Device;
-	initZFSrequirements;
+	if [[ $filesystem == "zfs" ]]; then
+		# initZFSrequirements;
+		initZFSrequirements2;
+		createAndMountPartitionsZFS $Output_Device;
+	elif [[ $filesystem == "ext4" ]]; then
+		createAndMountPartitions $Output_Device;
+	elif [[ $filesystem == "btrfs" ]]; then
+		createAndMountPartitionsBTRFS $Output_Device;
+	fi
 	# AREA section OLD5
-	createAndMountPartitions $Output_Device;
-	# installArchLinuxWithUnsquashfs;
-	installArchLinuxWithPacstrap;
+	if [[ $offlineInstallUnsquashfs == "y" ]]; then
+		installArchLinuxWithUnsquashfs;
+	else
+		installArchLinuxWithPacstrap $filesystem;
+	fi
 
-arch-chroot /mnt << EOF
-echo "Entering chroot"
-EOF
-arch-chroot /mnt << EOF
-pacman -Sy
+	arch-chroot /mnt <<- 'EOF'
+	echo "Entering chroot"
+	EOF
 
-initPacmanEntropy;
+	arch-chroot /mnt <<- 'EOF'
+	pacman -Sy
 
-# AREA section OLD2
+	initPacmanEntropy;
 
-pacman --noconfirm --needed -S sudo
-search="# %wheel ALL=(ALL) ALL"
-replace=" %wheel ALL=(ALL) ALL"
-sed -i "s|\$search|\$replace|g" /etc/sudoers;
-configureUsers $root_password $user_name $user_password;
+	# AREA section OLD2
 
-installTools $user_name $user_password && # fix without subsequent && script exists after installDesktopEnvironment
+	pacman --noconfirm --needed -S sudo
+	search="# %wheel ALL=(ALL) ALL"
+	replace=" %wheel ALL=(ALL) ALL"
+	sed -i "s|\$search|\$replace|g" /etc/sudoers;
+	configureUsers $root_password $user_name $user_password;
 
-# AREA section OLD5
+	if [[ $install_tools == "y" ]]; then
+		installTools $user_name $user_password && # fix without subsequent && script exists after installDesktopEnvironment
+	fi
 
-initZFSBootTimeUnlockService;
-search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
-replace="HOOKS=(base udev autodetect modconf keyboard keymap consolefont block zfs filesystems)"
-sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
-mkinitcpio -p linux
+	# AREA section OLD5
 
-installUEFISystemdBoot;
-#installUEFIGrub;
+	if [[ $filesystem == "zfs" ]]; then
+		initZFSBootTimeUnlockService;
+		search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
+		replace="HOOKS=(base udev autodetect modconf keyboard keymap consolefont block zfs filesystems)"
+		sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
+	elif [[ $filesystem == "btrfs" ]]; then
+		sed -i 's/MODULES=()/MODULES=(btrfs)/g' /etc/mkinitcpio.conf;
+		search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
+		#replace="HOOKS=(base udev block automount modconf filesystems keyboard fsck)"
+		replace="HOOKS=(base udev block autodetect modconf filesystems keyboard fsck)"
+		sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
+	fi
 
-#writeArchIsoToSeperatePartition;
+	if [[ $offlineInstallUnsquashfs == "y" ]]; then
+		mkinitcpio -g /boot/initramfs-linux.img
+	else
+		mkinitcpio -p linux
+	fi
 
-# AREA section OLD4
+	if [[ $bootsystem == "systemd" ]]; then
+		installUEFISystemdBoot;
+	elif [[ $bootsystem == "grub" ]]; then
+		installUEFIGrub $offlineInstallUnsquashfs $filesystem;
+	fi
 
-copyWallpapers;
+	#writeArchIsoToSeperatePartition;
 
-configureZectlSystemdBoot $user_name $user_password;;
+	# AREA section OLD4
 
-umount -l /home
+	copyWallpapers;
 
-exit
-EOF
+	if [[ $filesystem == "zfs" ]]; then
+		configureZectlSystemdBoot $user_name $user_password;;
+		umount -l /home
+	fi
 
-cp /etc/zfs/zpool.cache /mnt/etc/zfs
-umount /mnt/boot
-zpool export zroot
-# cp -av .config/. "/mnt/home/$user_name/.config"
-# createArchISO $user_name $user_password;
+	exit
+	EOF
 
-#umount /mnt/boot
-#umount /mnt -l
-#umount -l -R /mnt
-#umount -l -R /mnt
-#reboot
+	if [[ $filesystem == "zfs" ]]; then
+		cp /etc/zfs/zpool.cache /mnt/etc/zfs
+		umount /mnt/boot
+		zpool export zroot
+	fi
+
+	# cp -av .config/. "/mnt/home/$user_name/.config"
+	# createArchISO $user_name $user_password;
+
+	if [[ $filesystem == "ext4" || $filesystem == "btrfs" ]]; then
+		umount /mnt/boot
+		umount /mnt/home
+		umount /mnt -l
+		umount -l -R /mnt
+		umount -l -R /mnt
+	fi
+
+	#reboot
 }
 
 genfstabNormal() {
@@ -96,6 +200,68 @@ genfstabZfs() {
 
 	echo "/dev/zvol/zroot/encr/swap none swap discard 0 0" >> /mnt/etc/fstab
 	echo "zroot/encr/data/home /home zfs rw,xattr,posixacl 0 0" >> /mnt/etc/fstab
+}
+
+installLtsKernelZFS() {
+	initZFSrequirements;
+	# pacman -S --noconfirm --needed kexec-tools
+	# kexec -l /boot/vmlinuz-linux-lts --initrd=/boot/initramfs-linux-lts.img --reuse-cmdline
+	# kexec -e
+	# systemctl kexec
+}
+
+initZFSrequirements2() {
+	# https://openzfs.github.io/openzfs-docs/Getting%20Started/Arch%20Linux/1-zfs-linux.html?highlight=zfs%20linux#
+	pacman -S --needed --noconfirm curl
+	curl -L https://archzfs.com/archzfs.gpg |  pacman-key -a -
+	curl -L https://git.io/JsfVS | xargs -i{} pacman-key --lsign-key {}
+	curl -L https://git.io/Jsfw2 > /etc/pacman.d/mirrorlist-archzfs
+
+	if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
+		mount /home
+		echo "initZFSrequirements inside chroot started!"
+	else
+		mount -o remount,size=2G /run/archiso/cowspace
+	fi
+	
+	declare file="/etc/pacman.conf"
+	declare regex="zfs"
+
+	declare file_content=$( cat "${file}" )
+	if [[ " $file_content " =~ $regex ]] # please note the space before and after the file content
+		then
+			echo "archzfs found in pacman.conf"
+		else
+			tee -a /etc/pacman.conf <<- 'EOF'
+
+			#[archzfs-testing]
+			#Include = /etc/pacman.d/mirrorlist-archzfs
+
+			[archzfs]
+			Include = /etc/pacman.d/mirrorlist-archzfs
+			EOF
+			pacman -Sy
+
+			# INST_LINVAR=$(sed 's|.*linux|linux|' /proc/cmdline | sed 's|.img||g' | awk '{ print $1 }')
+			# INST_LINVER=$(pacman -Si zfs-${INST_LINVAR} | grep 'Depends On' | sed "s|.*${INST_LINVAR}=||" | awk '{ print $1 }')
+
+			# if [ ${INST_LINVER} = \
+			# $(pacman -Si ${INST_LINVAR} | grep Version | awk '{ print $3 }') ]; then
+			# 	pacman -S --noconfirm --needed ${INST_LINVAR}
+			# else
+			# 	pacman -U --noconfirm --needed \
+			# 	https://archive.archlinux.org/packages/l/${INST_LINVAR}/${INST_LINVAR}-${INST_LINVER}-x86_64.pkg.tar.zst
+			# fi
+
+			# pacman -Sy zfs-${INST_LINVAR}
+			# sed -i 's/#IgnorePkg/IgnorePkg/' /etc/pacman.conf
+			# sed -i "/^IgnorePkg/ s/$/ ${INST_LINVAR} ${INST_LINVAR}-headers zfs-${INST_LINVAR} zfs-utils/" /etc/pacman.conf
+	fi
+
+	modprobe zfs
+	# INST_LINVAR=$(sed 's|.*linux|linux|' /proc/cmdline | sed 's|.img||g' | awk '{ print $1 }')
+	# pacman -Sy --needed --noconfirm ${INST_LINVAR} ${INST_LINVAR}-headers zfs-${INST_LINVAR} zfs-utils
+
 }
 
 initZFSrequirements() {
@@ -110,12 +276,12 @@ initZFSrequirements() {
 			then
 				echo "archzfs found in pacman.conf"
 			else
-				cat > temp << EOF
+				cat > temp <<- 'EOF'
 
-[archzfs]
-Server = http://archzfs.com/\$repo/x86_64
-SigLevel = Optional TrustAll
-EOF
+				[archzfs]
+				Server = http://archzfs.com/\$repo/x86_64
+				SigLevel = Optional TrustAll
+				EOF
 				cat temp >> /etc/pacman.conf
 				# echo user | sudo -S cat temp | sudo tee -a /etc/pacman.conf
 				rm temp
@@ -129,22 +295,22 @@ EOF
 }
 
 initZFSBootTimeUnlockService() {
-	cat > temp << EOF
-[Unit]
-Description=Load encryption keys
-DefaultDependencies=no
-After=zfs-import.target
-Before=zfs-mount.service
+	cat > temp <<- 'EOF'
+	[Unit]
+	Description=Load encryption keys
+	DefaultDependencies=no
+	After=zfs-import.target
+	Before=zfs-mount.service
 
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStart=/usr/bin/zfs load-key -a
-StandardInput=tty-force
+	[Service]
+	Type=oneshot
+	RemainAfterExit=yes
+	ExecStart=/usr/bin/zfs load-key -a
+	StandardInput=tty-force
 
-[Install]
-WantedBy=zfs-mount.service
-EOF
+	[Install]
+	WantedBy=zfs-mount.service
+	EOF
 	cat temp >> /etc/systemd/system/zfs-load-key.service
 	rm temp
 
@@ -185,14 +351,14 @@ configureZectlSystemdBoot() {
 	# cp /efi/initramfs-linux-fallback.img /efi/env/org.zectl-default
 	cp /efi/vmlinuz-linux /efi/env/org.zectl-default
 	
-	cat > temp << EOF
-title           Arch Linux
-linux           /env/org.zectl-default/vmlinuz-linux
-initrd          /env/org.zectl-default/initramfs-linux.img
-options         zfs=bootfs rw
-EOF
-# initrd          /env/org.zectl-default/intel-ucode.img
-# options         zfs=zpool/ROOT/default rw
+	cat > temp <<- 'EOF'
+	title           Arch Linux
+	linux           /env/org.zectl-default/vmlinuz-linux
+	initrd          /env/org.zectl-default/initramfs-linux.img
+	options         zfs=bootfs rw
+	EOF
+	# initrd          /env/org.zectl-default/intel-ucode.img
+	# options         zfs=zpool/ROOT/default rw
 	sudo cat temp | sudo tee -a /efi/loader/entries/org.zectl-default.conf
 	rm temp
 
@@ -207,47 +373,60 @@ EOF
 
 installUEFISystemdBoot() {
 	bootctl --path=/boot install
-	cat > temp << EOF
-default arch
-timeout 4
-editor 0
-EOF
+	cat > temp <<- 'EOF'
+	default arch
+	timeout 4
+	editor 0
+	EOF
 	cat temp >> /boot/loader/loader.conf
 	rm temp
-	cat > temp << EOF
-title Arch Linux
-linux /vmlinuz-linux
-initrd /initramfs-linux.img
-options zfs=bootfs rw
-EOF
+	cat > temp <<- 'EOF'
+	title Arch Linux
+	linux /vmlinuz-linux
+	initrd /initramfs-linux.img
+	options zfs=bootfs rw
+	EOF
 	cat temp >> /boot/loader/entries/arch.conf
 	rm temp
-	cat > temp << EOF
-title Arch Linux Fallback
-linux /vmlinuz-linux
-initrd /initramfs-linux-fallback.img
-options zfs=bootfs rw
-EOF
+	cat > temp <<- 'EOF'
+	title Arch Linux Fallback
+	linux /vmlinuz-linux
+	initrd /initramfs-linux-fallback.img
+	options zfs=bootfs rw
+	EOF
 	cat temp >> /boot/loader/entries/arch-fallback.conf
 	rm temp
 }
 
 installUEFIGrub() {
-	pacman --noconfirm -S grub efibootmgr &&
+	offlineInstallUnsquashfs="$1"
+	filesystem="$2"
+	pacman --noconfirm -S grub efibootmgr
 	#yes | pacman -S grub efibootmgr os-prober intel-ucode amd-ucode
 
-	mkinitcpio -p linux && # when pacstrap used
-	# mkinitcpio -g /boot/initramfs-linux.img && # when unsquashfs used
+	if [[ $offlineInstallUnsquashfs == "y" ]]; then
+		mkinitcpio -g /boot/initramfs-linux.img # when unsquashfs used
+	else
+		mkinitcpio -p linux # when pacstrap used
+	fi
+
+
+	if [[ $filesystem == "zfs" ]]; then
+		ZPOOL_VDEV_NAME_PATH=1 grub-install --target=x86_64-efi --efi-directory=/boot
+		#grub-install --target=x86_64-efi --efi-directory=/efi --boot-directory=/boot
+		ZPOOL_VDEV_NAME_PATH=1 grub-mkconfig -o /boot/grub/grub.cfg
+
+		search="linux\\t/vmlinuz-linux root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
+		replace="linux\\t/vmlinuz-linux zfs=bootfs root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
+		sed -i "s|\$search|\$replace|g" /boot/grub/grub.cfg;
+	else
+		grub-install --target=x86_64-efi --efi-directory=/boot
+		grub-mkconfig -o /boot/grub/grub.cfg;
+	fi
 
 	# AREA section OLD3
 
-	ZPOOL_VDEV_NAME_PATH=1 grub-install --target=x86_64-efi --efi-directory=/boot &&
-	#grub-install --target=x86_64-efi --efi-directory=/efi --boot-directory=/boot
-	ZPOOL_VDEV_NAME_PATH=1 grub-mkconfig -o /boot/grub/grub.cfg &&
 
-	search="linux\\t/vmlinuz-linux root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
-	replace="linux\\t/vmlinuz-linux zfs=bootfs root=ZFS=/encr/ROOT/default rw  loglevel=3 quiet"
-	sed -i "s|\$search|\$replace|g" /boot/grub/grub.cfg;
 }
 
 
@@ -274,28 +453,72 @@ createAndMountPartitions() {
 	# isopart=$(echo $Output_Device)1;
 	# swappart=$(echo $Output_Device)2;
 
-	# # (echo g; echo n; echo p; echo 1; echo ""; echo +512M; echo t; echo 1; echo n; echo p; echo 2; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device); # before without isopart
-	# #(echo g; echo n; echo p; echo 1; echo ""; echo +512M; echo t; echo 1; echo n; echo p; echo 2; echo ""; echo +512M; echo t; echo 2; echo 38; echo n; echo p; echo 3; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
-	# efipart=$(echo $Output_Device)3;
-	# #extbootpart=$(echo $Output_Device)2;
-	# rootpart=$(echo $Output_Device)4;
-	# # after ls -l /dev/disk/by-label	found ARCH_202011 (before was user -n EFI) on mount of /dev/sr0 at /run/archiso/bootmnt/arch/boot/syslinux/archiso_sys-linux.cfg
-	# mkfs.fat -F32 -n ARCH_202011 "$efipart";
-	# #mksfs.ext4 "$extbootpart";
-	# mkfs.ext4 -L root "$rootpart";
-	# mount "$rootpart" /mnt
-	# mkdir -p /mnt/boot
-	# #mkdir -p /mnt/efi
-	# #mount "$efipart" /mnt/efi
-	# mount "$efipart" /mnt/boot
-	# #mount "$extbootpart" /mnt/boot
-	# #get file name from disk and partitions
+	(echo g; echo n; echo p; echo 1; echo ""; echo +512M; echo t; echo 1; echo n; echo p; echo 2; echo ""; echo +2048M; echo w; echo q) | fdisk $(echo $Output_Device); # before without isopart
+	#(echo g; echo n; echo p; echo 1; echo ""; echo +512M; echo t; echo 1; echo n; echo p; echo 2; echo ""; echo +512M; echo t; echo 2; echo 38; echo n; echo p; echo 3; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
+	efipart=$(echo $Output_Device)1;
+	#extbootpart=$(echo $Output_Device)2;
+	rootpart=$(echo $Output_Device)2;
+	# after ls -l /dev/disk/by-label	found ARCH_202011 (before was user -n EFI) on mount of /dev/sr0 at /run/archiso/bootmnt/arch/boot/syslinux/archiso_sys-linux.cfg
+	mkfs.fat -F32 -n ARCH_202104 "$efipart";
+	#mksfs.ext4 "$extbootpart";
+	mkfs.ext4 -L root "$rootpart";
+	mount "$rootpart" /mnt
+	mkdir -p /mnt/boot
+	#mkdir -p /mnt/efi
+	#mount "$efipart" /mnt/efi
+	mount "$efipart" /mnt/boot
+	#mount "$extbootpart" /mnt/boot
+	#get file name from disk and partitions
 	# mkfs.fat -F32 -n ISO "$isopart";
 	# mkdir -p /mnt/iso
 	# mount "$isopart" /mnt/iso
 	# mkswap "$swappart"
 	# swapon "$swappart"
-	#endregion
+	# endregion
+
+} 
+
+createAndMountPartitionsBTRFS() {
+	Output_Device="$1"
+
+	sfdisk --delete "$Output_Device";
+	(echo o; echo n; echo p; echo 1; echo ""; echo +512M; echo n; echo p; echo 2; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
+	partprobe;
+	efipart=$(echo $Output_Device)1;
+	rootpart=$(echo $Output_Device)2;
+	mkfs.fat -F32 -n EFI "$efipart";
+	mkfs.btrfs -f -m single -L arch "$rootpart";
+	mount -o compress=lzo "$rootpart" /mnt;
+	cd /mnt;
+	btrfs su cr @;
+	#btrfs su cr @boot;
+	btrfs su cr @home;
+	cd /;
+	umount /mnt;
+	mount -o noauto,compress=lzo,subvol=@ "$rootpart" /mnt;
+	cd /mnt;
+	mkdir -p {boot,home};
+	#mount -o noauto,compress=lzo,subvol=@boot "$rootpart" boot;
+	#mkdir boot/EFI;
+	#mount "$efipart" /mnt/boot/EFI;
+	mount "$efipart" /mnt/boot;
+	mount -o noauto,compress=lzo,subvol=@home "$rootpart" home;
+
+} 
+
+createAndMountPartitionsZFS() {
+	Output_Device="$1"
+	ISO_URL="http://mirrors.evowise.com/archlinux/iso/2021.01.01/archlinux-2021.01.01-x86_64.iso"
+	ISO_MB=$( curl -sI $ISO_URL | grep -i Content-Length | grep -o '[0-9]\+' )
+	# ISO_MB=$( curl -sI $ISO_URL | grep -i Content-Length | awk '{print $2}' | awk '{print $1/1024/1024 + 1}' )
+	ISO_MB=$((ISO_MB/1024/1024 + 10 ))
+    #boot arhiso
+	#create gpt table
+	#create boot swap root partitions
+	sfdisk --delete "$Output_Device";
+	#wipefs --all "$Output_Device";
+	#dd if=/dev/zero of="$Output_Device" bs=512 count=1
+	partprobe;
 
 
 	parted --script $(echo $Output_Device) \
@@ -345,8 +568,37 @@ createAndMountPartitions() {
 	# 1) zedenv, zectl dataset structure, create boot environment for legacy /home dataset
 	# 2) pacman -U /var/cache/pacman/pkg/zfs-linux-*.pkg.tar.xz after zectl pacman hook or zectl-systemd-boot configure
 	#endregion
+}
 
-} 
+createArchZfsISO() {
+	mount -o remount,size=2G /run/archiso/cowspace
+	pacman -Syyu
+	pacman -S --noconfirm archiso wget curl
+	cp -pr /usr/share/archiso/configs/releng archlive/
+	wget https://archzfs.com/archzfs.gpg
+	pacman-key -a archzfs.gpg
+	pacman-key --lsign-key DDF7DB817396A49B2A2723F7403BD972F75D9D76
+	pacman -Syu
+
+
+	tee -a archlive/releng/pacman.conf <<- 'EOF'
+	[archzfs]
+	Server = https://archzfs.com/$repo/$arch
+	SigLevel = Optional Trust All
+	EOF
+	tee -a archlive/releng/packages.x86_64 <<- 'EOF'
+	linux-headers
+	archzfs-linux-lts
+	EOF
+
+	zfs_version=$(pacman -Si zfs-linux-lts | grep Version | awk '{print $3}')
+	zfs_version_date=$(pacman -Si zfs-linux-lts | grep Date | awk '{$1=$2=$3="";print $0}')
+	read Year Month Day <<< "$(echo $zfs_version_date | date '+%Y %m %d' -f -)"
+	sed -i "s/Include = \/etc\/pacman\.d\/mirrorlist/Server=https\:\/\/archive\.archlinux\.org\/repos\/$Year\/$Month\/$Day\/\$repo\/os/\$arch/g" /etc/pacman.conf
+
+	bash archlive/releng/build.sh -v -o out/archzfs.iso
+	curl --progress-bar -T archlive/releng/out/archzfs.iso https://transfer.sh/archzfs.iso | tee /dev/null
+}
 
 writeArchIsoToSeperatePartition() {
 	# test
@@ -355,20 +607,20 @@ writeArchIsoToSeperatePartition() {
 	# dd if=/dev/sdaX of=/dev/sdbY bs=64K conv=noerror,sync
 	# dd if=/archlinux-2021.01.01-x86_64.iso of=/sda1 bs=1M conv=noerror,sync
 
-	cat > temp << EOF
-menuentry "Archc Linux OS Live ISO" --class arch {
-	set root='(hd0,1)'
-	set isofile="/archlinux-2021.01.01-x86_64.iso"
-	set dri="free"
-	search --no-floppy -f --set=root \$isofile
-	probe -u \$root --set=abc
-	set pqr="/dev/disk/by-uuid/\$abc"
-	loopback loop (hd0,1)\$isofile
-	linux  (loop)/arch/boot/x86_64/vmlinuz-linux img_dev=\$pqr img_loop=\$isofile driver=\$dri quiet splash vt.global_cursor_default=0 loglevel=2 rd.systemd.show_status=false rd.udev.log-priority=3 sysrq_always_enabled=1 cow_spacesize=2G
-	initrd  (loop)/arch/boot/intel-ucode.img (loop)/arch/boot/amd-ucode.img (loop)/arch/boot/x86_64/initramfs-linux.img
-}
+	cat > temp <<- 'EOF'
+	menuentry "Archc Linux OS Live ISO" --class arch {
+		set root='(hd0,1)'
+		set isofile="/archlinux-2021.01.01-x86_64.iso"
+		set dri="free"
+		search --no-floppy -f --set=root \$isofile
+		probe -u \$root --set=abc
+		set pqr="/dev/disk/by-uuid/\$abc"
+		loopback loop (hd0,1)\$isofile
+		linux  (loop)/arch/boot/x86_64/vmlinuz-linux img_dev=\$pqr img_loop=\$isofile driver=\$dri quiet splash vt.global_cursor_default=0 loglevel=2 rd.systemd.show_status=false rd.udev.log-priority=3 sysrq_always_enabled=1 cow_spacesize=2G
+		initrd  (loop)/arch/boot/intel-ucode.img (loop)/arch/boot/amd-ucode.img (loop)/arch/boot/x86_64/initramfs-linux.img
+	}
 
-EOF
+	EOF
 
 	# these 2 below are first lines in 40_custom file
 	# #!/bin/sh
@@ -432,11 +684,11 @@ createArchISO() {
 	sudo mv archiso-files/customrepo/x86_64 /archiso-files/customrepo/x86_64
 	# repo-add archiso-files/customrepo/customrepo.db.tar.gz archiso-files/customrepo/x86_64/*.pkg.tar*
 	localIP=$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')
-	cat > temp << EOF
-[custom]
-SigLevel = Optional TrustAll
-Server = file:///archiso-files/customrepo/x86_64
-EOF
+	cat > temp <<- 'EOF'
+	[custom]
+	SigLevel = Optional TrustAll
+	Server = file:///archiso-files/customrepo/x86_64
+	EOF
 	cat temp >> archlive/pacman.conf
 	mkdir -p ./{out,work}
 	mkarchiso -v -w ./work -o ./out archlive
@@ -473,29 +725,42 @@ installArchLinuxWithUnsquashfs() {
 } 
 
 installArchLinuxWithPacstrap() {
-	# yes '' | pacstrap -i /mnt base linux
-	# genfstabNormal;
-	yes '' | pacstrap -i /mnt base zfs-linux
-	genfstabZfs;
-	arch-chroot /mnt << EOF
-#!/usr/bin/bash
+	filesystem="$1"
+	if [[ $filesystem == "zfs" ]]; then
+		yes '' | pacstrap -i /mnt base zfs-linux
+		genfstabZfs;
+	elif [[ $filesystem == "ext4" ]]; then
+		yes '' | pacstrap -i /mnt base linux
+		genfstabNormal;
+	elif [[ $filesystem == "btrfs" ]]; then
+		#pacstrap -i /mnt base base-devel linux linux-firmware efibootmgr grub amd-ucode intel-ucode os-prober snapper vim nano lynx iwd;
+		yes '' | pacstrap -i /mnt base base-devel btrfs-progs linux linux-firmware 
+		yes | pacstrap -i /mnt efibootmgr grub amd-ucode intel-ucode os-prober snapper vim nano lynx iwd;
+		yes '' | pacstrap -i /mnt base linux
+		genfstabNormal;
+	fi
+	arch-chroot /mnt <<- 'EOF'
+	#!/usr/bin/bash
 
-initZFSrequirements;
-ln -s /usr/share/zoneinfo/Asia/Baku /etc/localtime;
-hwclock --systohc;
-sed  -i 's/\#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen;
-locale-gen;
-echo "LANG=en_US.UTF-8" >> /etc/locale.conf;
-#yes | pacman -S networkmanager;
-pacman -S --noconfirm connman
+	if [[ $filesystem == "zfs" ]]; then
+		# initZFSrequirements;
+		initZFSrequirements2;
+	fi
+	ln -s /usr/share/zoneinfo/Asia/Baku /etc/localtime;
+	hwclock --systohc;
+	sed  -i 's/\#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen;
+	locale-gen;
+	echo "LANG=en_US.UTF-8" >> /etc/locale.conf;
+	#yes | pacman -S networkmanager;
+	pacman -S --noconfirm connman
 
-echo "localhost" >> /etc/hostname;# Replace your-hostname with your value;
-echo "127.0.0.1 localhost" >> /etc/hosts;
-echo "::1 localhost" >> /etc/hosts;
+	echo "localhost" >> /etc/hostname;# Replace your-hostname with your value;
+	echo "127.0.0.1 localhost" >> /etc/hosts;
+	echo "::1 localhost" >> /etc/hosts;
 
-#systemctl enable NetworkManager.service;
-systemctl enable connman.service;
-EOF
+	#systemctl enable NetworkManager.service;
+	systemctl enable connman.service;
+	EOF
 
 }
 
@@ -543,21 +808,21 @@ installTools() {
 	echo "export EDITOR=vim" >> $HOME/.bashrc
 	echo "export VISUAL=vim" >> $HOME/.bashrc
 
-	cat > temp << EOF
-bind -r '\C-s'
-stty -ixon
-EOF
+	cat > temp <<- 'EOF'
+	bind -r '\C-s'
+	stty -ixon
+	EOF
 	cat temp >> $HOME/.bashrc
 	cat temp >> "/home/$user_name/.bashrc"
 	rm temp
-	cat > temp << EOF
-inoremap <C-s> <esc>:w<cr>                 " save files
-nnoremap <C-s> :w<cr>
-inoremap <C-d> <esc>:wq!<cr>               " save and exit
-nnoremap <C-d> :wq!<cr>
-inoremap <C-q> <esc>:qa!<cr>               " quit discarding changes
-nnoremap <C-q> :qa!<cr>
-EOF
+	cat > temp <<- 'EOF'
+	inoremap <C-s> <esc>:w<cr>                 " save files
+	nnoremap <C-s> :w<cr>
+	inoremap <C-d> <esc>:wq!<cr>               " save and exit
+	nnoremap <C-d> :wq!<cr>
+	inoremap <C-q> <esc>:qa!<cr>               " quit discarding changes
+	nnoremap <C-q> :qa!<cr>
+	EOF
 	cat temp >> $HOME/.vimrc
 	cat temp >> "/home/$user_name/.vimrc"
 	rm temp
@@ -721,6 +986,7 @@ EOF
 	installAURpackageTrizen $user_name $user_password p7zip-gui
 	installAURpackageTrizen $user_name $user_password fbcat-git
 	installAURpackageTrizen $user_name $user_password bauh;
+	# installAURpackageTrizen $user_name $user_password app-outlet-bin;
 	installAURpackageTrizen $user_name $user_password lite-xl
 	# git clone https://github.com/rxi/lite-plugins	# original lite plugins
 	git clone https://github.com/franko/lite-plugins # lite-xl plugins
@@ -771,17 +1037,17 @@ installCacheCleanTools() {
 	# pacman -R --noconfirm $(pacman -Qtdq)
 	# du -sh /var/cache
 
-	cat > /etc/systemd/system/paccache.timer << EOF
-[Unit]
-Description=Clean-up old pacman pkg cache
+	cat > /etc/systemd/system/paccache.timer <<- 'EOF'
+	[Unit]
+	Description=Clean-up old pacman pkg cache
 
-[Timer]
-OnCalendar=daily
-Persistent=true
+	[Timer]
+	OnCalendar=daily
+	Persistent=true
 
-[Install]
-WantedBy=multi-user.target
-EOF
+	[Install]
+	WantedBy=multi-user.target
+	EOF
 	systemctl enable paccache.timer
 	
 	search="#SystemMaxUse="
@@ -917,6 +1183,7 @@ installi3Seperate() {
 	# picom vs xcompmgr
 	installAURpackageTrizen $user_name $user_password quickswitch-i3
 	installAURpackageTrizen $user_name $user_password wmfocus;
+	installAURpackageTrizen $user_name $user_password ulauncher
 
 	pacman --noconfirm -S dmenu
 	installGitHubMakepackage "morc_menu" "https://github.com/Boruch-Baum/morc_menu"
@@ -946,11 +1213,11 @@ installi3Seperate() {
 # 	search="loginctl terminate-session \${XDG_SESSION_ID-}"
 # 	replace="pkill X"
 # 	sed -i "s|\$search|\$replace|g" /usr/bin/rofi-power-menu
-# 	cat > temp << EOF
-# #!/bin/bash
-# pkill rofi
-# i3lock-fancy
-# EOF
+# 	cat > temp <<- 'EOF'
+# 	#!/bin/bash
+# 	pkill rofi
+# 	i3lock-fancy
+# 	EOF
 # 	cat temp >> "/usr/bin/i3fancy-locker.sh"
 # 	rm temp
 # 	search="loginctl lock-session \${XDG_SESSION_ID-}"
@@ -976,14 +1243,14 @@ installi3Seperate() {
 	# mkdir -p "/home/$user_name/.config/lxqt"
 	# echo "window_manager=i3" >> "/home/$user_name/.config/lxqt/session.conf"
 	# echo "TERMINAL=urxvt" >> "/home/$user_name/.config/lxqt/session.conf"
-	cat > "/home/$user_name/.config/autostart/i3related.desktop" << EOF
-[Desktop Entry]
-Exec=feh --bg-fill /usr/share/backgrounds/archlinux/1403423502665.png && xcompmgr -o 0.7 &
-OnlyShowIn=LXQt
-Name=i3related
-Type=Application
-Version=1.0
-EOF
+	cat > "/home/$user_name/.config/autostart/i3related.desktop" <<- 'EOF'
+	[Desktop Entry]
+	Exec=feh --bg-fill /usr/share/backgrounds/archlinux/1403423502665.png && xcompmgr -o 0.7 &
+	OnlyShowIn=LXQt
+	Name=i3related
+	Type=Application
+	Version=1.0
+	EOF
 	pacman -S --noconfirm hsetroot
 	echo "exec --no-startup-id hsetroot -solid '#000000'" >> "/home/$user_name/.config/i3/config";
 
@@ -1009,17 +1276,17 @@ installZentile() {
 	# chmod a+x zentile_linux_amd64
 	# ./zentile_linux_amd64
 
-	cat > /etc/systemd/system/openbox-tiling.service << EOF
-[Unit]
-Description=Openbox tiling script
-[Service]
-Type=forking
-ExecStart=/usr/bin/zentile_linux_amd64
-KillMode=proces
-TimeoutSec=infinity
-[Install]
-WantedBy=multi-user.target 
-EOF
+	cat > /etc/systemd/system/openbox-tiling.service <<- 'EOF'
+	[Unit]
+	Description=Openbox tiling script
+	[Service]
+	Type=forking
+	ExecStart=/usr/bin/zentile_linux_amd64
+	KillMode=proces
+	TimeoutSec=infinity
+	[Install]
+	WantedBy=multi-user.target 
+	EOF
 	sudo chmod 755 /usr/bin/zentile_linux_amd64
 	#chmod u+x /usr/bin/temp-script.sh
 	chmod a+x /usr/bin/zentile_linux_amd64
@@ -1265,14 +1532,14 @@ installFISH(){
 	usermod --shell /usr/bin/fish user
 	fish_update_completions
 	# head -n -2 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD lines
-	cat > temp << EOF
-set -g -x fish_greeting ''
-### "vim" as manpager
-set -x MANPAGER '/bin/bash -c "vim -MRn -c \"set buftype=nofile showtabline=0 ft=man ts=8 nomod nolist norelativenumber nonu noma\" -c \"normal L\" -c \"nmap q :qa<CR>\"</dev/tty <(col -b)"'
+	cat > temp <<- 'EOF'
+	set -g -x fish_greeting ''
+	### "vim" as manpager
+	set -x MANPAGER '/bin/bash -c "vim -MRn -c \"set buftype=nofile showtabline=0 ft=man ts=8 nomod nolist norelativenumber nonu noma\" -c \"normal L\" -c \"nmap q :qa<CR>\"</dev/tty <(col -b)"'
 
-### "nvim" as manpager
-# set -x MANPAGER "nvim -c 'set ft=man' -"
-EOF
+	### "nvim" as manpager
+	# set -x MANPAGER "nvim -c 'set ft=man' -"
+	EOF
 	mkdir -p "/home/$user_name/.config/fish/"
 	cat temp >> "/home/$user_name/.config/fish/config.fish"
 	rm temp
@@ -1330,7 +1597,7 @@ installZSH() {
 
 
 
-	# 	cat > temp << EOF
+	# 	cat > temp <<- 'EOF'
 	# plugins=(
 	# 	zsh-autosuggestions 
 	# 	zsh-syntax-highlighting
@@ -1661,70 +1928,70 @@ initCronScriptAtBootForWallpaper() {
 
 initScriptAtBoot2() {
 
-	cat > /usr/bin/temp-script.sh << EOF
-#!/usr/bin/bash
-# sleep 60 # one min
-sleep 6
-installAURpackage() {
-	#usermod --append --groups wheel nobody
-	usermod -aG wheel nobody
+	cat > /usr/bin/temp-script.sh <<- 'EOF'
+	#!/usr/bin/bash
+	# sleep 60 # one min
+	sleep 6
+	installAURpackage() {
+		#usermod --append --groups wheel nobody
+		usermod -aG wheel nobody
 
-	nobody_password=\$( cat /etc/shadow | grep nobody | sed 's/[^a-zA-Z0-9]//g' | sed 's/[nobody]//g' )
-	nobody_password=\${nobody_password:-18628}
+		nobody_password=\$( cat /etc/shadow | grep nobody | sed 's/[^a-zA-Z0-9]//g' | sed 's/[nobody]//g' )
+		nobody_password=\${nobody_password:-18628}
 
-	packageName="\$1"
-	echo "Packaga name is \${packageName}"
-	cd /tmp
-	sudo -u nobody git clone "https://aur.archlinux.org/\${packageName}.git"
+		packageName="\$1"
+		echo "Packaga name is \${packageName}"
+		cd /tmp
+		sudo -u nobody git clone "https://aur.archlinux.org/\${packageName}.git"
 
-	chgrp nobody "/tmp/\$packageName"
-	chmod g+ws "/tmp/\$packageName"
-	setfacl -m u::rwx,g::rwx "/tmp/\$packageName"
-	setfacl -d --set u::rwx,g::rwx,o::- "/tmp/\$packageName"
+		chgrp nobody "/tmp/\$packageName"
+		chmod g+ws "/tmp/\$packageName"
+		setfacl -m u::rwx,g::rwx "/tmp/\$packageName"
+		setfacl -d --set u::rwx,g::rwx,o::- "/tmp/\$packageName"
 
-	cd "/tmp/\$packageName"
+		cd "/tmp/\$packageName"
 
-	#echo "nobody:\${nobody_password}" | chpasswd
-	#yes | sudo -S -u nobody makepkg -scri
-	yes | sudo -S -u nobody makepkg -sd
-	build_file=\$( ls | grep ".tar." )
-	#pacman -U *.tar.xz
-	yes | pacman -U "\$build_file"
-	cd ..
-	rm -rf "/tmp/\${packageName}"
+		#echo "nobody:\${nobody_password}" | chpasswd
+		#yes | sudo -S -u nobody makepkg -scri
+		yes | sudo -S -u nobody makepkg -sd
+		build_file=\$( ls | grep ".tar." )
+		#pacman -U *.tar.xz
+		yes | pacman -U "\$build_file"
+		cd ..
+		rm -rf "/tmp/\${packageName}"
 
-	gpasswd -d nobody wheel
-}
-#installAURpackage "ly-git";
-#installAURpackage "sway-git";
-#installAURpackage "waybar-git";
-yes | pacman -Runs sway waybar;
-python -m pikaur --noconfirm -S ly-git sway-git waybar-git;
-#echo "user" | sudo -u user yay --noconfirm --sudoflags "-S" -S ly-git sway-git waybar-git; #working
-systemctl enable ly.service;
+		gpasswd -d nobody wheel
+	}
+	#installAURpackage "ly-git";
+	#installAURpackage "sway-git";
+	#installAURpackage "waybar-git";
+	yes | pacman -Runs sway waybar;
+	python -m pikaur --noconfirm -S ly-git sway-git waybar-git;
+	#echo "user" | sudo -u user yay --noconfirm --sudoflags "-S" -S ly-git sway-git waybar-git; #working
+	systemctl enable ly.service;
 
-# systemctl stop temp-script.service
-# systemctl disable temp-script.service
-# rm /etc/systemd/system/temp-script.service
-# rm /etc/systemd/system/temp-script.service # and symlinks that might be related
-# rm /usr/lib/systemd/system/temp-script.service 
-# rm /usr/lib/systemd/system/temp-script.service # and symlinks that might be related
-# systemctl daemon-reload
-# systemctl reset-failed
-# rm /usr/bin/temp-script.sh
-reboot
-EOF
-	cat > /etc/systemd/system/temp-script.service << EOF
-[Unit]
-Description=My temp script
-[Service]
-Type=forking
-ExecStart=/bin/bash /usr/bin/temp-script.sh
-KillMode=proces
-TimeoutSec=infinity
-[Install]
-WantedBy=multi-user.target 
-EOF
+	# systemctl stop temp-script.service
+	# systemctl disable temp-script.service
+	# rm /etc/systemd/system/temp-script.service
+	# rm /etc/systemd/system/temp-script.service # and symlinks that might be related
+	# rm /usr/lib/systemd/system/temp-script.service 
+	# rm /usr/lib/systemd/system/temp-script.service # and symlinks that might be related
+	# systemctl daemon-reload
+	# systemctl reset-failed
+	# rm /usr/bin/temp-script.sh
+	reboot
+	EOF
+	cat > /etc/systemd/system/temp-script.service <<- 'EOF'
+	[Unit]
+	Description=My temp script
+	[Service]
+	Type=forking
+	ExecStart=/bin/bash /usr/bin/temp-script.sh
+	KillMode=proces
+	TimeoutSec=infinity
+	[Install]
+	WantedBy=multi-user.target 
+	EOF
 	sudo chmod 755 /usr/bin/temp-script.sh
 	#chmod u+x /usr/bin/temp-script.sh
 	sudo systemctl enable temp-script.service
@@ -1733,40 +2000,40 @@ EOF
 initScriptAtBoot() {
 	user_name="$1"
 	user_password="$2"
-	cat > /usr/bin/temp-script.sh << EOF
-#!/usr/bin/bash
-sleep 60 # one min
-echo "$user_password" | sudo -S -u "$user_name" /bin/bash -c '
-		python -m pikaur --noconfirm -S ly-git;
-		systemctl enable ly.service
-		#mkdir -p ${HOME}/Downloads/build && cd $_
-		# mkdir -p /home/"$user_name"/Downloads/build && cd $_
-		python -m pikaur --noconfirm -S sway-git waybar-git
-		
-		# systemctl stop temp-script.service
-		# systemctl disable temp-script.service
-		# rm /etc/systemd/system/temp-script.service
-		# rm /etc/systemd/system/temp-script.service # and symlinks that might be related
-		# rm /usr/lib/systemd/system/temp-script.service 
-		# rm /usr/lib/systemd/system/temp-script.service # and symlinks that might be related
-		systemctl daemon-reload
-		systemctl reset-failed
-		# rm /usr/bin/temp-script.sh
-		touch /tmp/bootrun_happened
-		#rm ${HOME}/Downloads/build
-		# rm -rf /home/"$user_name"/Downloads/build
-	'
-EOF
-	cat > /etc/systemd/system/temp-script.service << EOF
-[Unit]
-Description=My temp script
-[Service]
-Type=forking
-ExecStart=/bin/bash /usr/bin/temp-script.sh
-KillMode=proces
-[Install]
-WantedBy=multi-user.target 
-EOF
+	cat > /usr/bin/temp-script.sh <<- 'EOF'
+	#!/usr/bin/bash
+	sleep 60 # one min
+	echo "$user_password" | sudo -S -u "$user_name" /bin/bash -c '
+			python -m pikaur --noconfirm -S ly-git;
+			systemctl enable ly.service
+			#mkdir -p ${HOME}/Downloads/build && cd $_
+			# mkdir -p /home/"$user_name"/Downloads/build && cd $_
+			python -m pikaur --noconfirm -S sway-git waybar-git
+			
+			# systemctl stop temp-script.service
+			# systemctl disable temp-script.service
+			# rm /etc/systemd/system/temp-script.service
+			# rm /etc/systemd/system/temp-script.service # and symlinks that might be related
+			# rm /usr/lib/systemd/system/temp-script.service 
+			# rm /usr/lib/systemd/system/temp-script.service # and symlinks that might be related
+			systemctl daemon-reload
+			systemctl reset-failed
+			# rm /usr/bin/temp-script.sh
+			touch /tmp/bootrun_happened
+			#rm ${HOME}/Downloads/build
+			# rm -rf /home/"$user_name"/Downloads/build
+		'
+	EOF
+	cat > /etc/systemd/system/temp-script.service <<- 'EOF'
+	[Unit]
+	Description=My temp script
+	[Service]
+	Type=forking
+	ExecStart=/bin/bash /usr/bin/temp-script.sh
+	KillMode=proces
+	[Install]
+	WantedBy=multi-user.target 
+	EOF
 	sudo chmod 755 /usr/bin/temp-script.sh
 	#chmod u+x /usr/bin/temp-script.sh
 	sudo systemctl enable temp-script.service
@@ -1790,13 +2057,13 @@ recoverPartitionTableFromMemory() {
 	# sgdisk -b [part_table] [SOURCE]
 	# sgdisk -l [part_table] -Gg [DESTINATION]
 	# sfdisk --delete "$Output_Device";
-	cat > repart.sh << "EOF"
-#!/bin/bash
-echo "unit: sectors" 
-for i in /sys/block/$1/$1?/; do
-    printf '/dev/%s : start=%d, size=%d, type=XX\n' "$(basename $i)" "$(<$i/start)" "$(<$i/size)"
-done
-EOF
+	cat > repart.sh <<- 'EOF'
+	#!/bin/bash
+	echo "unit: sectors" 
+	for i in /sys/block/$1/$1?/; do
+		printf '/dev/%s : start=%d, size=%d, type=XX\n' "$(basename $i)" "$(<$i/start)" "$(<$i/size)"
+	done
+	EOF
 	bash repart.sh >> temp
 
 	sudo dmesg | grep "$Output_Device"
@@ -1863,6 +2130,7 @@ export -f createArchISO
 export -f initZFSBootTimeUnlockService
 export -f configureZectlSystemdBoot
 export -f initZFSrequirements
+export -f initZFSrequirements2
 export -f installUEFISystemdBoot
 export -f installUEFIGrub
 
