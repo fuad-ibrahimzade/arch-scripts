@@ -16,7 +16,7 @@ main() {
 
 	read -p "Create Only ArchZfsISO (default: n, [select y or n]):" onlyCreateArchZfsISO
 	onlyCreateArchZfsISO=${onlyCreateArchZfsISO:-n}
-	if [[ $onlyCreateArchZfsISO == "n" ]]; then
+	if [[ $onlyCreateArchZfsISO == "y" ]]; then
 		createArchZfsISO;
 		exit
 	fi
