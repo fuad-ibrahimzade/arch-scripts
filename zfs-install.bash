@@ -11,6 +11,8 @@ main() {
 	# git config --global http.sslVerify false
 	# git config http.sslVerify false # for one repository
 	iwctl --passphrase "passphrase" station wlan0 connect-hidden "ssid"
+	
+	initPacmanMirrorList;
 
 	read -p "Create Only ArchZfsISO (default: n, [select y or n]):" onlyCreateArchZfsISO
 	onlyCreateArchZfsISO=${onlyCreateArchZfsISO:-n}
@@ -772,6 +774,11 @@ installArchLinuxWithPacstrap() {
 }
 
 # CHROOT functions
+
+initPacmanMirrorList() {
+	curl https://archlinux.org/mirrorlist/all/https/ > /etc/pacman.d/mirrorlist
+	sed '0,/\#Server/{s//Server/}' /etc/pacman.d/mirrorlist
+}
 
 initPacmanEntropy() {
 	pacman -S --noconfirm archlinux-keyring
@@ -2108,6 +2115,7 @@ copyWallpapers() {
 
 
 export -f initPacmanEntropy
+export -f initPacmanMirrorList
 export -f installTools
 export -f installCacheCleanTools
 export -f installBackupTools
