@@ -614,8 +614,9 @@ createArchZfsISO() {
 	pacman -Syyuu
 	initPacmanMirrorList;
 
-	bash archlive/releng/build.sh -v -o out/archzfs.iso
-	curl --progress-bar -T archlive/releng/out/archzfs.iso https://transfer.sh/archzfs.iso | tee /dev/null
+	mkrid -p archlive/out
+	bash archlive/build.sh -v -o archlive/out/archzfs.iso
+	curl --progress-bar -T archlive/out/archzfs.iso https://transfer.sh/archzfs.iso | tee /dev/null
 }
 
 writeArchIsoToSeperatePartition() {
