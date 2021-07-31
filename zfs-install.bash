@@ -590,12 +590,12 @@ createArchZfsISO() {
 	pacman -Syu
 
 
-	tee -a archlive/releng/pacman.conf <<- 'EOF'
+	tee -a archlive/pacman.conf <<- 'EOF'
 	[archzfs]
 	Server = https://archzfs.com/$repo/$arch
 	SigLevel = Optional Trust All
 	EOF
-	tee -a archlive/releng/packages.x86_64 <<- 'EOF'
+	tee -a archlive/packages.x86_64 <<- 'EOF'
 	linux-headers
 	archzfs-linux-lts
 	EOF
