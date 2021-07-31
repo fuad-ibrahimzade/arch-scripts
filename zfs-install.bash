@@ -587,6 +587,11 @@ createArchZfsISO() {
 	wget https://archzfs.com/archzfs.gpg
 	pacman-key -a archzfs.gpg
 	pacman-key --lsign-key DDF7DB817396A49B2A2723F7403BD972F75D9D76
+	tee -a /etc/pacman.conf <<- 'EOF'
+	[archzfs]
+	Server = https://archzfs.com/$repo/$arch
+	SigLevel = Optional Trust All
+	EOF
 	pacman -Syu
 
 
@@ -603,7 +608,11 @@ createArchZfsISO() {
 	zfs_version=$(pacman -Si zfs-linux-lts | grep Version | awk '{print $3}')
 	zfs_version_date=$(pacman -Si zfs-linux-lts | grep Date | awk '{$1=$2=$3="";print $0}')
 	read Year Month Day <<< "$(echo $zfs_version_date | date '+%Y %m %d' -f -)"
-	sed -i "s/Include = \/etc\/pacman\.d\/mirrorlist/Server=https\:\/\/archive\.archlinux\.org\/repos\/$Year\/$Month\/$Day\/\$repo\/os/\$arch/g" /etc/pacman.conf
+	# sed -i "s|Include = /etc/pacman\.d/mirrorlist|Server=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/$repo/os/$arch/g" /etc/pacman.conf
+
+	echo "Server=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/$repo/os/$arch/g" > /etc/pacman.d/mirrorlist
+	pacman -Syyuu
+	initPacmanMirrorList;
 
 	bash archlive/releng/build.sh -v -o out/archzfs.iso
 	curl --progress-bar -T archlive/releng/out/archzfs.iso https://transfer.sh/archzfs.iso | tee /dev/null
