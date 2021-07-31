@@ -581,7 +581,9 @@ createAndMountPartitionsZFS() {
 
 createArchZfsISO() {
 	mount -o remount,size=2G /run/archiso/cowspace
-	pacman -Syyu
+	# pacman -Syyu
+	initPacmanEntropy;
+	pacman -Syy
 	pacman -S --noconfirm archiso wget curl
 	mkdir archlive
 	cp -pr /usr/share/archiso/configs/releng archlive/
@@ -593,7 +595,8 @@ createArchZfsISO() {
 	Server = https://archzfs.com/$repo/$arch
 	SigLevel = Optional TrustAll
 	EOF
-	pacman -Syu
+	# pacman -Syu
+	pacman -Syy
 
 
 	tee -a archlive/releng/pacman.conf <<- 'EOF'
