@@ -590,7 +590,7 @@ createArchZfsISO() {
 	tee -a /etc/pacman.conf <<- 'EOF'
 	[archzfs]
 	Server = https://archzfs.com/$repo/$arch
-	SigLevel = Optional Trust All
+	SigLevel = Optional TrustAll
 	EOF
 	pacman -Syu
 
@@ -598,7 +598,7 @@ createArchZfsISO() {
 	tee -a archlive/pacman.conf <<- 'EOF'
 	[archzfs]
 	Server = https://archzfs.com/$repo/$arch
-	SigLevel = Optional Trust All
+	SigLevel = Optional TrustAll
 	EOF
 	tee -a archlive/packages.x86_64 <<- 'EOF'
 	linux-headers
