@@ -583,6 +583,7 @@ createArchZfsISO() {
 	mount -o remount,size=2G /run/archiso/cowspace
 	pacman -Syyu
 	pacman -S --noconfirm archiso wget curl
+	mkdir archlive
 	cp -pr /usr/share/archiso/configs/releng archlive/
 	wget https://archzfs.com/archzfs.gpg
 	pacman-key -a archzfs.gpg
@@ -595,12 +596,12 @@ createArchZfsISO() {
 	pacman -Syu
 
 
-	tee -a archlive/pacman.conf <<- 'EOF'
+	tee -a archlive/releng/pacman.conf <<- 'EOF'
 	[archzfs]
 	Server = https://archzfs.com/$repo/$arch
 	SigLevel = Optional TrustAll
 	EOF
-	tee -a archlive/packages.x86_64 <<- 'EOF'
+	tee -a archlive/releng/packages.x86_64 <<- 'EOF'
 	linux-headers
 	archzfs-linux-lts
 	EOF
@@ -608,15 +609,15 @@ createArchZfsISO() {
 	zfs_version=$(pacman -Si zfs-linux-lts | grep Version | awk '{print $3}')
 	zfs_version_date=$(pacman -Si zfs-linux-lts | grep Date | awk '{$1=$2=$3="";print $0}')
 	read Year Month Day <<< "$(echo $zfs_version_date | date '+%Y %m %d' -f -)"
-	# sed -i "s|Include = /etc/pacman\.d/mirrorlist|Server=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/$repo/os/$arch/g" /etc/pacman.conf
+	sed -i "s|Include = /etc/pacman\.d/mirrorlist|SigLevel = PackageRequired\nServer=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/$repo/os/$arch/g" archlive/releng/pacman.conf
 
-	echo "Server=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/$repo/os/$arch/g" > /etc/pacman.d/mirrorlist
-	pacman -Syyuu
-	initPacmanMirrorList;
+	# echo "Server=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/$repo/os/$arch/g" > /etc/pacman.d/mirrorlist
+	# pacman -Syyuu
+	# initPacmanMirrorList;
 
-	mkrid -p archlive/out
-	bash archlive/build.sh -v -o archlive/out/archzfs.iso
-	curl --progress-bar -T archlive/out/archzfs.iso https://transfer.sh/archzfs.iso | tee /dev/null
+	mkrid -p archlive/releng/out
+	bash archlive/releng/build.sh -v -o archlive/releng/out/archzfs.iso
+	curl --progress-bar -T archlive/releng/out/archzfs.iso https://transfer.sh/archzfs.iso | tee /dev/null
 }
 
 writeArchIsoToSeperatePartition() {
