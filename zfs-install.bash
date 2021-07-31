@@ -609,13 +609,13 @@ createArchZfsISO() {
 	zfs_version=$(pacman -Si zfs-linux-lts | grep Version | awk '{print $3}')
 	zfs_version_date=$(pacman -Si zfs-linux-lts | grep Date | awk '{$1=$2=$3="";print $0}')
 	read Year Month Day <<< "$(echo $zfs_version_date | date '+%Y %m %d' -f -)"
-	sed -i "s|Include = /etc/pacman\.d/mirrorlist|SigLevel = PackageRequired\nServer=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/$repo/os/$arch/g" archlive/releng/pacman.conf
+	sed -i "s|Include = /etc/pacman\.d/mirrorlist|SigLevel = PackageRequired\nServer=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/$repo/os/$arch|g" archlive/releng/pacman.conf
 
 	# echo "Server=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/$repo/os/$arch/g" > /etc/pacman.d/mirrorlist
 	# pacman -Syyuu
 	# initPacmanMirrorList;
 
-	mkrid -p archlive/releng/out
+	mkdir -p archlive/releng/out
 	bash archlive/releng/build.sh -v -o archlive/releng/out/archzfs.iso
 	curl --progress-bar -T archlive/releng/out/archzfs.iso https://transfer.sh/archzfs.iso | tee /dev/null
 }
