@@ -170,10 +170,10 @@ main() {
 
 	# AREA section OLD4
 
-	copyWallpapers;
+	# copyWallpapers;
 
 	if [[ $filesystem == "zfs" ]]; then
-		configureZectlSystemdBoot $user_name $user_password;;
+		configureZectlSystemdBoot $user_name $user_password;
 		umount -l /home
 	fi
 
@@ -2121,6 +2121,7 @@ recoverPartitionTableFromMemory() {
 
 copyWallpapers() {
 	mkdir -p /usr/share/backgrounds/archlinux
+	pacman -S --needed --noconfirm git
 	git clone https://github.com/fuad-ibrahimzade/arch-scripts
 	cp -av arch-scripts/selected-arch-wallpapers/. /usr/share/backgrounds/archlinux
 	rm -rf arch-scripts
