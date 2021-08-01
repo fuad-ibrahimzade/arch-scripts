@@ -118,11 +118,11 @@ main() {
 		installArchLinuxWithPacstrap $filesystem;
 	fi
 
-	arch-chroot /mnt <<- 'EOF'
+	arch-chroot /mnt <<- EOF
 	echo "Entering chroot"
 	EOF
 
-	arch-chroot /mnt <<- 'EOF'
+	arch-chroot /mnt <<- EOF
 	pacman -Sy
 
 	initPacmanEntropy;
@@ -241,7 +241,7 @@ initZFSrequirements2() {
 		then
 			echo "archzfs found in pacman.conf"
 		else
-			tee -a /etc/pacman.conf <<- 'EOF'
+			tee -a /etc/pacman.conf <<- EOF
 
 			#[archzfs-testing]
 			#Include = /etc/pacman.d/mirrorlist-archzfs
@@ -285,7 +285,7 @@ initZFSrequirements() {
 			then
 				echo "archzfs found in pacman.conf"
 			else
-				cat > temp <<- 'EOF'
+				cat > temp <<- EOF
 
 				[archzfs]
 				Server = http://archzfs.com/\$repo/x86_64
@@ -304,7 +304,7 @@ initZFSrequirements() {
 }
 
 initZFSBootTimeUnlockService() {
-	cat > temp <<- 'EOF'
+	cat > temp <<- EOF
 	[Unit]
 	Description=Load encryption keys
 	DefaultDependencies=no
@@ -360,7 +360,7 @@ configureZectlSystemdBoot() {
 	# cp /efi/initramfs-linux-fallback.img /efi/env/org.zectl-default
 	cp /efi/vmlinuz-linux /efi/env/org.zectl-default
 	
-	cat > temp <<- 'EOF'
+	cat > temp <<- EOF
 	title           Arch Linux
 	linux           /env/org.zectl-default/vmlinuz-linux
 	initrd          /env/org.zectl-default/initramfs-linux.img
@@ -382,14 +382,14 @@ configureZectlSystemdBoot() {
 
 installUEFISystemdBoot() {
 	bootctl --path=/boot install
-	cat > temp <<- 'EOF'
+	cat > temp <<- EOF
 	default arch
 	timeout 4
 	editor 0
 	EOF
 	cat temp >> /boot/loader/loader.conf
 	rm temp
-	cat > temp <<- 'EOF'
+	cat > temp <<- EOF
 	title Arch Linux
 	linux /vmlinuz-linux
 	initrd /initramfs-linux.img
@@ -397,7 +397,7 @@ installUEFISystemdBoot() {
 	EOF
 	cat temp >> /boot/loader/entries/arch.conf
 	rm temp
-	cat > temp <<- 'EOF'
+	cat > temp <<- EOF
 	title Arch Linux Fallback
 	linux /vmlinuz-linux
 	initrd /initramfs-linux-fallback.img
@@ -590,7 +590,7 @@ createArchZfsISO() {
 	wget https://archzfs.com/archzfs.gpg
 	pacman-key -a archzfs.gpg
 	pacman-key --lsign-key DDF7DB817396A49B2A2723F7403BD972F75D9D76
-	tee -a /etc/pacman.conf <<- 'EOF'
+	tee -a /etc/pacman.conf <<- EOF
 	[archzfs]
 	Server = https://archzfs.com/$repo/$arch
 	SigLevel = Optional TrustAll
@@ -599,12 +599,12 @@ createArchZfsISO() {
 	pacman -Syy
 
 
-	tee -a archlive/releng/pacman.conf <<- 'EOF'
+	tee -a archlive/releng/pacman.conf <<- EOF
 	[archzfs]
 	Server = https://archzfs.com/$repo/$arch
 	SigLevel = Optional TrustAll
 	EOF
-	tee -a archlive/releng/packages.x86_64 <<- 'EOF'
+	tee -a archlive/releng/packages.x86_64 <<- EOF
 	linux-headers
 	archzfs-linux-lts
 	EOF
@@ -632,7 +632,7 @@ writeArchIsoToSeperatePartition() {
 	# dd if=/dev/sdaX of=/dev/sdbY bs=64K conv=noerror,sync
 	# dd if=/archlinux-2021.01.01-x86_64.iso of=/sda1 bs=1M conv=noerror,sync
 
-	cat > temp <<- 'EOF'
+	cat > temp <<- EOF
 	menuentry "Archc Linux OS Live ISO" --class arch {
 		set root='(hd0,1)'
 		set isofile="/archlinux-2021.01.01-x86_64.iso"
@@ -709,7 +709,7 @@ createArchISO() {
 	sudo mv archiso-files/customrepo/x86_64 /archiso-files/customrepo/x86_64
 	# repo-add archiso-files/customrepo/customrepo.db.tar.gz archiso-files/customrepo/x86_64/*.pkg.tar*
 	localIP=$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')
-	cat > temp <<- 'EOF'
+	cat > temp <<- EOF
 	[custom]
 	SigLevel = Optional TrustAll
 	Server = file:///archiso-files/customrepo/x86_64
@@ -764,7 +764,7 @@ installArchLinuxWithPacstrap() {
 		yes '' | pacstrap -i /mnt base linux
 		genfstabNormal;
 	fi
-	arch-chroot /mnt <<- 'EOF'
+	arch-chroot /mnt <<- EOF
 	#!/usr/bin/bash
 
 	if [[ $filesystem == "zfs" ]]; then
@@ -838,14 +838,14 @@ installTools() {
 	echo "export EDITOR=vim" >> $HOME/.bashrc
 	echo "export VISUAL=vim" >> $HOME/.bashrc
 
-	cat > temp <<- 'EOF'
+	cat > temp <<- EOF
 	bind -r '\C-s'
 	stty -ixon
 	EOF
 	cat temp >> $HOME/.bashrc
 	cat temp >> "/home/$user_name/.bashrc"
 	rm temp
-	cat > temp <<- 'EOF'
+	cat > temp <<- EOF
 	inoremap <C-s> <esc>:w<cr>                 " save files
 	nnoremap <C-s> :w<cr>
 	inoremap <C-d> <esc>:wq!<cr>               " save and exit
@@ -1067,7 +1067,7 @@ installCacheCleanTools() {
 	# pacman -R --noconfirm $(pacman -Qtdq)
 	# du -sh /var/cache
 
-	cat > /etc/systemd/system/paccache.timer <<- 'EOF'
+	cat > /etc/systemd/system/paccache.timer <<- EOF
 	[Unit]
 	Description=Clean-up old pacman pkg cache
 
@@ -1243,7 +1243,7 @@ installi3Seperate() {
 # 	search="loginctl terminate-session \${XDG_SESSION_ID-}"
 # 	replace="pkill X"
 # 	sed -i "s|\$search|\$replace|g" /usr/bin/rofi-power-menu
-# 	cat > temp <<- 'EOF'
+# 	cat > temp <<- EOF
 # 	#!/bin/bash
 # 	pkill rofi
 # 	i3lock-fancy
@@ -1273,7 +1273,7 @@ installi3Seperate() {
 	# mkdir -p "/home/$user_name/.config/lxqt"
 	# echo "window_manager=i3" >> "/home/$user_name/.config/lxqt/session.conf"
 	# echo "TERMINAL=urxvt" >> "/home/$user_name/.config/lxqt/session.conf"
-	cat > "/home/$user_name/.config/autostart/i3related.desktop" <<- 'EOF'
+	cat > "/home/$user_name/.config/autostart/i3related.desktop" <<- EOF
 	[Desktop Entry]
 	Exec=feh --bg-fill /usr/share/backgrounds/archlinux/1403423502665.png && xcompmgr -o 0.7 &
 	OnlyShowIn=LXQt
@@ -1306,7 +1306,7 @@ installZentile() {
 	# chmod a+x zentile_linux_amd64
 	# ./zentile_linux_amd64
 
-	cat > /etc/systemd/system/openbox-tiling.service <<- 'EOF'
+	cat > /etc/systemd/system/openbox-tiling.service <<- EOF
 	[Unit]
 	Description=Openbox tiling script
 	[Service]
@@ -1562,7 +1562,7 @@ installFISH(){
 	usermod --shell /usr/bin/fish user
 	fish_update_completions
 	# head -n -2 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD lines
-	cat > temp <<- 'EOF'
+	cat > temp <<- EOF
 	set -g -x fish_greeting ''
 	### "vim" as manpager
 	set -x MANPAGER '/bin/bash -c "vim -MRn -c \"set buftype=nofile showtabline=0 ft=man ts=8 nomod nolist norelativenumber nonu noma\" -c \"normal L\" -c \"nmap q :qa<CR>\"</dev/tty <(col -b)"'
@@ -1627,7 +1627,7 @@ installZSH() {
 
 
 
-	# 	cat > temp <<- 'EOF'
+	# 	cat > temp <<- EOF
 	# plugins=(
 	# 	zsh-autosuggestions 
 	# 	zsh-syntax-highlighting
@@ -1958,7 +1958,7 @@ initCronScriptAtBootForWallpaper() {
 
 initScriptAtBoot2() {
 
-	cat > /usr/bin/temp-script.sh <<- 'EOF'
+	cat > /usr/bin/temp-script.sh <<- EOF
 	#!/usr/bin/bash
 	# sleep 60 # one min
 	sleep 6
@@ -2011,7 +2011,7 @@ initScriptAtBoot2() {
 	# rm /usr/bin/temp-script.sh
 	reboot
 	EOF
-	cat > /etc/systemd/system/temp-script.service <<- 'EOF'
+	cat > /etc/systemd/system/temp-script.service <<- EOF
 	[Unit]
 	Description=My temp script
 	[Service]
@@ -2030,7 +2030,7 @@ initScriptAtBoot2() {
 initScriptAtBoot() {
 	user_name="$1"
 	user_password="$2"
-	cat > /usr/bin/temp-script.sh <<- 'EOF'
+	cat > /usr/bin/temp-script.sh <<- EOF
 	#!/usr/bin/bash
 	sleep 60 # one min
 	echo "$user_password" | sudo -S -u "$user_name" /bin/bash -c '
@@ -2054,7 +2054,7 @@ initScriptAtBoot() {
 			# rm -rf /home/"$user_name"/Downloads/build
 		'
 	EOF
-	cat > /etc/systemd/system/temp-script.service <<- 'EOF'
+	cat > /etc/systemd/system/temp-script.service <<- EOF
 	[Unit]
 	Description=My temp script
 	[Service]
@@ -2087,7 +2087,7 @@ recoverPartitionTableFromMemory() {
 	# sgdisk -b [part_table] [SOURCE]
 	# sgdisk -l [part_table] -Gg [DESTINATION]
 	# sfdisk --delete "$Output_Device";
-	cat > repart.sh <<- 'EOF'
+	cat > repart.sh <<- EOF
 	#!/bin/bash
 	echo "unit: sectors" 
 	for i in /sys/block/$1/$1?/; do
