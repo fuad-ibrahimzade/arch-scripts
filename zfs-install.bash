@@ -610,13 +610,13 @@ createArchZfsISO() {
 	EOF
 
 	zfs_version=$(pacman -Si zfs-linux-lts | grep Version | awk '{print $3}')
-	zfs_version_date=$(pacman -Si zfs-linux-lts | grep Date | awk '{$1=$2=$3="";print $0}')
+	zfs_version_date=$(pacman -Si zfs-linux-lts | grep Date | awk '{$1=$2=$3="";print $0}' | sed -i 's/+.*//g')
 	read Year Month Day <<< "$(echo $zfs_version_date | date '+%Y %m %d' -f -)"
 	# sed -i "s|\[core\]\\nInclude = /etc/pacman\.d/mirrorlist|SigLevel = PackageRequired\nServer=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/\$repo/os/\$arch|g" archlive/releng/pacman.conf
 	# sed -i "s|\[extra\]\\nInclude = /etc/pacman\.d/mirrorlist|SigLevel = PackageRequired\nServer=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/\$repo/os/\$arch|g" archlive/releng/pacman.conf
 	# sed -i "s|\[community\]\\nInclude = /etc/pacman\.d/mirrorlist|SigLevel = PackageRequired\nServer=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/\$repo/os/\$arch|g" archlive/releng/pacman.conf
 
-	echo "Server=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/\$repo/os/$arch" > archlive/releng/airootfs/etc/pacman.d/mirrorlist
+	echo "Server=https://archive.archlinux.org/repos/$Year/$Month/$Day/\$repo/os/\$arch" > archlive/releng/airootfs/etc/pacman.d/mirrorlist
 	# pacman -Syyuu
 	# initPacmanMirrorList;
 
