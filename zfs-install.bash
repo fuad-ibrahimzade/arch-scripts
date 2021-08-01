@@ -25,9 +25,9 @@ main() {
 	default_root_password="root"
 	default_user_name="user"
 	default_user_password="user"
-	default_filesystem="btrfs"
+	default_filesystem="zfs"
 	default_offlineInstallUnsquashfs="n"
-	default_bootsystem="grub"
+	default_bootsystem="systemd"
 	default_install_tools="n"
 
 	read -p "Accept Defaults default: y, [select y or n](Output Device: $default_Output_Device, root_password: $default_root_password, user_name: $default_user_name, user_password: $default_user_password, filesystem: $default_filesystem, offlineInstallUnsquashfs: $default_offlineInstallUnsquashfs, bootsystem: $default_bootsystem, install_tools: $default_install_tools):" defaults_accepted
