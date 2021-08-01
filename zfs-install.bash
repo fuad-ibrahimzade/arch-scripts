@@ -616,7 +616,7 @@ createArchZfsISO() {
 	# sed -i "s|\[extra\]\\nInclude = /etc/pacman\.d/mirrorlist|SigLevel = PackageRequired\nServer=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/\$repo/os/\$arch|g" archlive/releng/pacman.conf
 	# sed -i "s|\[community\]\\nInclude = /etc/pacman\.d/mirrorlist|SigLevel = PackageRequired\nServer=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/\$repo/os/\$arch|g" archlive/releng/pacman.conf
 
-	echo "Server=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/\$repo/os/$arch" > archlive/airootfs/etc/pacman.d/mirrorlist
+	echo "Server=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/\$repo/os/$arch" > archlive/releng/airootfs/etc/pacman.d/mirrorlist
 	# pacman -Syyuu
 	# initPacmanMirrorList;
 
