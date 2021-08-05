@@ -12,7 +12,8 @@ main() {
 	# git config http.sslVerify false # for one repository
 	if [ ! -f .env ]
 	then
-		export "$(cat .env | xargs)"
+		# export "$(cat .env | xargs)"
+		set -o allexport; source .env; set +o allexport
 	fi
 
 	passphrase=${passphrase:-mypassphrase}
