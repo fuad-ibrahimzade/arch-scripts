@@ -259,7 +259,11 @@ installWithRescueSystem() {
 	if [[ $offlineInstallUnsquashfs == "y" ]]; then
 		installArchLinuxWithUnsquashfs;
 	else
-		installArchLinuxWithPacstrap $filesystem;
+		if [[ $is_second_install == "y" ]]; then
+			installArchLinuxWithPacstrap $filesystem;
+		else
+			installArchLinuxWithPacstrap "ext4";
+		fi
 	fi
 
 
