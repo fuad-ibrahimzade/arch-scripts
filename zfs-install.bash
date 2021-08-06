@@ -106,6 +106,13 @@ main() {
 		done
 	fi
 
+	read -p "Do install with rescue system (default: n, [select y or n]):" doInstallWithRescueSystem
+	doInstallWithRescueSystem=${doInstallWithRescueSystem:-n}
+	if [[ $doInstallWithRescueSystem == "y" ]]; then
+		installWithRescueSystem $default_Output_Device $default_root_password $default_user_name $default_user_password $default_filesystem $default_offlineInstallUnsquashfs $default_bootsystem $default_install_tools;
+		exit
+	fi
+
 
 	pacman -Syy
 
@@ -204,6 +211,128 @@ main() {
 		umount -l -R /mnt
 		umount -l -R /mnt
 	fi
+
+	#reboot
+}
+
+installWithRescueSystem() {
+
+	default_Output_Device="$1"
+	default_root_password="$2"
+	default_user_name="$3"
+	default_user_password="$4"
+	default_filesystem="$5"
+	default_offlineInstallUnsquashfs="$6"
+	default_bootsystem="$7"
+	default_install_tools="$8"
+	is_second_install=${9:-n}
+
+	read -p "Accept Defaults default: y, [select y or n](Output Device: $default_Output_Device, root_password: $default_root_password, user_name: $default_user_name, user_password: $default_user_password, filesystem: $default_filesystem, offlineInstallUnsquashfs: $default_offlineInstallUnsquashfs, bootsystem: $default_bootsystem, install_tools: $default_install_tools):" defaults_accepted
+	defaults_accepted=${defaults_accepted:-y}
+	echo $defaults_accepted
+
+	Output_Device="$default_Output_Device"
+	root_password="$default_root_password"
+	user_name="$default_user_name"
+	user_password="$default_user_password"
+	filesystem="$default_filesystem"
+	offlineInstallUnsquashfs="$default_offlineInstallUnsquashfs"
+	bootsystem="$default_bootsystem"
+	install_tools="$default_install_tools"
+
+	pacman -Syy
+
+	if [[ $is_second_install == "y" ]]; then
+		if [[ $filesystem == "zfs" ]]; then
+			# initZFSrequirements;
+			initZFSrequirements2;
+			createAndMountPartitionsZFS $Output_Device $is_second_install;
+		elif [[ $filesystem == "ext4" ]]; then
+			createAndMountPartitions $Output_Device;
+		elif [[ $filesystem == "btrfs" ]]; then
+			createAndMountPartitionsBTRFS $Output_Device;
+		fi
+		# AREA section OLD5
+		if [[ $offlineInstallUnsquashfs == "y" ]]; then
+			installArchLinuxWithUnsquashfs;
+		else
+			installArchLinuxWithPacstrap $filesystem;
+		fi
+	else
+		createAndMountPartitions $Output_Device;
+	fi
+
+
+	arch-chroot /mnt <<- EOF
+	echo "Entering chroot"
+	EOF
+
+	arch-chroot /mnt <<- EOF
+	pacman -Sy
+
+	initPacmanEntropy;
+
+	# AREA section OLD2
+
+	pacman --noconfirm --needed -S sudo
+	search="# %wheel ALL=(ALL) ALL"
+	replace=" %wheel ALL=(ALL) ALL"
+	sed -i "s|\$search|\$replace|g" /etc/sudoers;
+	configureUsers $root_password $user_name $user_password;
+
+	if [[ $install_tools == "y" ]]; then
+		installTools $user_name $user_password && # fix without subsequent && script exists after installDesktopEnvironment
+	fi
+
+	if [[ $filesystem == "zfs" ]]; then
+		initZFSBootTimeUnlockService;
+		search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
+		replace="HOOKS=(base udev autodetect modconf keyboard keymap consolefont block zfs filesystems)"
+		sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
+	elif [[ $filesystem == "btrfs" ]]; then
+		sed -i 's/MODULES=()/MODULES=(btrfs)/g' /etc/mkinitcpio.conf;
+		search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
+		#replace="HOOKS=(base udev block automount modconf filesystems keyboard fsck)"
+		replace="HOOKS=(base udev block autodetect modconf filesystems keyboard fsck)"
+		sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
+	fi
+
+	if [[ $offlineInstallUnsquashfs == "y" ]]; then
+		mkinitcpio -g /boot/initramfs-linux.img
+	else
+		mkinitcpio -p linux
+	fi
+
+	if [[ $bootsystem == "systemd" ]]; then
+		installUEFISystemdBoot;
+	elif [[ $bootsystem == "grub" ]]; then
+		installUEFIGrub $offlineInstallUnsquashfs $filesystem;
+	fi
+
+	if [[ $filesystem == "zfs" ]]; then
+		configureZectlSystemdBoot $user_name $user_password;
+		umount -l /home
+	fi
+
+	exit
+	EOF
+
+	if [[ $filesystem == "zfs" ]]; then
+		cp /etc/zfs/zpool.cache /mnt/etc/zfs
+		umount /mnt/boot
+		zpool export zroot
+	fi
+
+	if [[ $filesystem == "ext4" || $filesystem == "btrfs" ]]; then
+		umount /mnt/boot
+		umount /mnt/home
+		umount /mnt -l
+		umount -l -R /mnt
+		umount -l -R /mnt
+	fi
+
+	is_second_install="y";
+	installWithRescueSystem $default_Output_Device $default_root_password $default_user_name $default_user_password $default_filesystem $default_offlineInstallUnsquashfs $default_bootsystem $default_install_tools $is_second_install;
 
 	#reboot
 }
@@ -525,6 +654,45 @@ createAndMountPartitionsBTRFS() {
 
 createAndMountPartitionsZFS() {
 	Output_Device="$1"
+	is_second_install="$2"
+	if [[ $is_second_install == "y" ]]; then
+		partprobe
+		(echo n; echo p; echo ""; echo ""; echo +512M; echo t; echo "",echo 1; echo n; echo p; echo ""; echo ""; echo +20480M; echo w; echo q) | fdisk $(echo $Output_Device);
+		efipart=$(echo $Output_Device)3;
+		rootpart=$(echo $Output_Device)4;
+
+		zpool create -o ashift=12 \
+			-O acltype=posixacl \
+			-O compression=lz4 \
+			-O relatime=on \
+			-O xattr=sa \
+			zroot "$rootpart"
+
+		zfs create -o encryption=on -o keyformat=passphrase -o mountpoint=none zroot/encr
+		zfs create -o mountpoint=none zroot/encr/data
+		zfs create -o mountpoint=none zroot/encr/ROOT
+		zfs create -o mountpoint=/ zroot/encr/ROOT/default
+		zfs create -o mountpoint=legacy zroot/encr/data/home
+
+		zfs umount -a
+
+		zpool set bootfs=zroot/encr/ROOT/default zroot
+
+		zfs create -V 2G -b 2048 -o logbias=throughput -o sync=always -o primarycache=metadata -o com.sun:auto-snapshot=false zroot/encr/swap
+		mkswap -f "/dev/zvol/zroot/encr/swap"
+
+		zpool export zroot
+		zpool import -R /mnt -l zroot
+
+		zpool set cachefile=/etc/zfs/zpool.cache zroot
+		mkdir -p /mnt/etc/zfs
+		cp /etc/zfs/zpool.cache /mnt/etc/zfs/
+
+		mkdir /mnt/boot
+		mkfs.fat -F32 "$efipart"
+		mount "$efipart" /mnt/boot
+		return 0
+	fi
 	ISO_URL="http://mirrors.evowise.com/archlinux/iso/2021.01.01/archlinux-2021.01.01-x86_64.iso"
 	ISO_MB=$( curl -sI $ISO_URL | grep -i Content-Length | grep -o '[0-9]\+' )
 	# ISO_MB=$( curl -sI $ISO_URL | grep -i Content-Length | awk '{print $2}' | awk '{print $1/1024/1024 + 1}' )
