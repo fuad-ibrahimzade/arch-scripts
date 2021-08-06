@@ -252,14 +252,14 @@ installWithRescueSystem() {
 		elif [[ $filesystem == "btrfs" ]]; then
 			createAndMountPartitionsBTRFS $Output_Device;
 		fi
-		# AREA section OLD5
-		if [[ $offlineInstallUnsquashfs == "y" ]]; then
-			installArchLinuxWithUnsquashfs;
-		else
-			installArchLinuxWithPacstrap $filesystem;
-		fi
 	else
 		createAndMountPartitions $Output_Device;
+	fi
+
+	if [[ $offlineInstallUnsquashfs == "y" ]]; then
+		installArchLinuxWithUnsquashfs;
+	else
+		installArchLinuxWithPacstrap $filesystem;
 	fi
 
 
@@ -271,8 +271,6 @@ installWithRescueSystem() {
 	pacman -Sy
 
 	initPacmanEntropy;
-
-	# AREA section OLD2
 
 	pacman --noconfirm --needed -S sudo
 	search="# %wheel ALL=(ALL) ALL"
