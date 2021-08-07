@@ -52,58 +52,7 @@ main() {
 	install_tools="$default_install_tools"
 
 	if [[ $defaults_accepted == "n" ]]; then
-		read -p "Output Device (default: /dev/sda):" Output_Device
-		Output_Device=${Output_Device:-/dev/sda}
-		echo $Output_Device
-		read -p "Root Password (default: root):" root_password;
-		root_password=${root_password:-root}
-		echo $root_password
-		read -p "User Name (default: user):" user_name;
-		user_name=${user_name:-user}
-		echo $user_name
-		read -p "User Password (default: user):" user_password;
-		user_password=${user_password:-user}
-		echo $user_password
-
-		filesystem="ext4"
-		PS3="Choose root file system: "
-		options=(btrfs zfs ext4)
-		select menu in "${options[@]}";
-		do
-			filesystem="$menu"
-			break;
-		done
-
-		offlineInstallUnsquashfs="n"
-		PS3="Offline Unsquashfs install: "
-		options=(y n)
-		select menu in "${options[@]}";
-		do
-			offlineInstallUnsquashfs="$menu"
-			break;
-		done
-		
-		if [[ $filesystem == "btrfs" ]]; then
-			bootsystem="grub"
-		else
-			PS3="Choose boot system system: "
-			options=(systemd grub)
-			select menu in "${options[@]}";
-			do
-				bootsystem="$menu"
-				break;
-			done
-		fi
-		
-		
-		install_tools="n"
-		PS3="Choose to install tools or not: "
-		options=(y n)
-		select menu in "${options[@]}";
-		do
-			install_tools="$menu"
-			break;
-		done
+		IFS=":" Output_Device root_password user_name user_password filesystem offlineInstallUnsquashfs install_tools < <(initDefaultOptions) 
 	fi
 
 	read -p "Do install with rescue system (default: n, [select y or n]):" doInstallWithRescueSystem
@@ -240,6 +189,10 @@ installWithRescueSystem() {
 	bootsystem="$default_bootsystem"
 	install_tools="$default_install_tools"
 
+	if [[ $defaults_accepted == "n" ]]; then
+		IFS=":" Output_Device root_password user_name user_password filesystem offlineInstallUnsquashfs install_tools < <(initDefaultOptions) 
+	fi
+
 	pacman -Syy
 
 	if [[ $is_second_install == "y" ]]; then
@@ -337,6 +290,64 @@ installWithRescueSystem() {
 	installWithRescueSystem $default_Output_Device $default_root_password $default_user_name $default_user_password $default_filesystem $default_offlineInstallUnsquashfs $default_bootsystem $default_install_tools $is_second_install;
 
 	#reboot
+}
+
+initDefaultOptions() {
+	read -p "Output Device (default: /dev/sda):" Output_Device
+	Output_Device=${Output_Device:-/dev/sda}
+	echo $Output_Device
+	read -p "Root Password (default: root):" root_password;
+	root_password=${root_password:-root}
+	echo $root_password
+	read -p "User Name (default: user):" user_name;
+	user_name=${user_name:-user}
+	echo $user_name
+	read -p "User Password (default: user):" user_password;
+	user_password=${user_password:-user}
+	echo $user_password
+
+	filesystem="ext4"
+	PS3="Choose root file system: "
+	options=(btrfs zfs ext4)
+	select menu in "${options[@]}";
+	do
+		filesystem="$menu"
+		break;
+	done
+
+	offlineInstallUnsquashfs="n"
+	PS3="Offline Unsquashfs install: "
+	options=(y n)
+	select menu in "${options[@]}";
+	do
+		offlineInstallUnsquashfs="$menu"
+		break;
+	done
+	
+	if [[ $filesystem == "btrfs" ]]; then
+		bootsystem="grub"
+	else
+		PS3="Choose boot system system: "
+		options=(systemd grub)
+		select menu in "${options[@]}";
+		do
+			bootsystem="$menu"
+			break;
+		done
+	fi
+	
+	
+	install_tools="n"
+	PS3="Choose to install tools or not: "
+	options=(y n)
+	select menu in "${options[@]}";
+	do
+		install_tools="$menu"
+		break;
+	done
+
+	echo "$Output_Device:$root_password:$user_name:$user_password:$filesystem:$offlineInstallUnsquashfs:$install_tools"
+
 }
 
 genfstabNormal() {
@@ -2343,6 +2354,7 @@ export -f initZFSrequirements
 export -f initZFSrequirements2
 export -f installUEFISystemdBoot
 export -f installUEFIGrub
+export -f initDefaultOptions
 
 
 #chroot /mnt /bin/bash -c "installAURpackage ly-git""
