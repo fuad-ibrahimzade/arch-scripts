@@ -52,7 +52,10 @@ main() {
 	install_tools="$default_install_tools"
 
 	if [[ $defaults_accepted == "n" ]]; then
-		IFS=":" Output_Device root_password user_name user_password filesystem offlineInstallUnsquashfs install_tools < <(initDefaultOptions) 
+		# IFS=":" read Output_Device root_password user_name user_password filesystem offlineInstallUnsquashfs install_tools < <(initDefaultOptions) 
+
+		eval "$(initDefaultOptions)"
+
 	fi
 
 	read -p "Do install with rescue system (default: n, [select y or n]):" doInstallWithRescueSystem
@@ -190,7 +193,8 @@ installWithRescueSystem() {
 	install_tools="$default_install_tools"
 
 	if [[ $defaults_accepted == "n" ]]; then
-		IFS=":" Output_Device root_password user_name user_password filesystem offlineInstallUnsquashfs install_tools < <(initDefaultOptions) 
+		# IFS=":" Output_Device root_password user_name user_password filesystem offlineInstallUnsquashfs install_tools < <(initDefaultOptions)
+		eval "$(initDefaultOptions)"
 	fi
 
 	pacman -Syy
@@ -346,7 +350,8 @@ initDefaultOptions() {
 		break;
 	done
 
-	echo "$Output_Device:$root_password:$user_name:$user_password:$filesystem:$offlineInstallUnsquashfs:$install_tools"
+	# echo "$Output_Device:$root_password:$user_name:$user_password:$filesystem:$offlineInstallUnsquashfs:$install_tools"
+	echo "Output_Device='$Output_Device'; root_password='$root_password'; user_name='$user_name'; user_password='$user_password'; filesystem='$filesystem'; offlineInstallUnsquashfs='$offlineInstallUnsquashfs'; install_tools='$install_tools'"
 
 }
 
