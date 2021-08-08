@@ -645,7 +645,8 @@ createAndMountPartitions() {
 	#extbootpart=$(echo $Output_Device)2;
 	rootpart=$(echo $Output_Device)2;
 	# after ls -l /dev/disk/by-label	found ARCH_202011 (before was user -n EFI) on mount of /dev/sr0 at /run/archiso/bootmnt/arch/boot/syslinux/archiso_sys-linux.cfg
-	mkfs.fat -F32 -n ARCH_202104 "$efipart";
+	labelname=$(cat /run/archiso/bootmnt/arch/version | awk -F. '{print "ARCH_"$1""$2}')
+	mkfs.fat -F32 -n "$labelname" "$efipart";
 	#mksfs.ext4 "$extbootpart";
 	mkfs.ext4 -L root "$rootpart";
 	mount "$rootpart" /mnt
@@ -672,6 +673,7 @@ createAndMountPartitionsBTRFS() {
 	partprobe;
 	efipart=$(echo $Output_Device)1;
 	rootpart=$(echo $Output_Device)2;
+	labelname=$(cat /run/archiso/bootmnt/arch/version | awk -F. '{print "ARCH_"$1""$2}')
 	mkfs.fat -F32 -n EFI "$efipart";
 	mkfs.btrfs -f -m single -L arch "$rootpart";
 	mount -o compress=lzo "$rootpart" /mnt;
