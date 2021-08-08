@@ -355,7 +355,7 @@ initDefaultOptions() {
 
 	# echo "$Output_Device:$root_password:$user_name:$user_password:$filesystem:$offlineInstallUnsquashfs:$install_tools"
 	# echo "Output_Device=\"$Output_Device\"; root_password=\"$root_password\"; user_name=\"$user_name\"; user_password=\"$user_password\"; fil'esystem=\"$filesystem\"; offlineInstallUnsquashfs=\"$offlineInstallUnsquashfs\"; bootsystem=\"$bootsystem\"; install_tools=\"$install_tools\""
-	echo 'Output_Device='$Output_Device'; root_password='$root_password'; user_name='$user_name'; user_password='$user_password'; filesystem='$filesystem'; offlineInstallUnsquashfs='$offlineInstallUnsquashfs'; bootsystem='$bootsystem'; install_tools='$install_tools'
+	echo 'Output_Device='"$Output_Device"'; root_password='"$root_password"'; user_name='"$user_name"'; user_password='"$user_password"'; filesystem='"$filesystem"'; offlineInstallUnsquashfs='"$offlineInstallUnsquashfs"'; bootsystem='"$bootsystem"'; install_tools='"$install_tools"
 
 }
 
