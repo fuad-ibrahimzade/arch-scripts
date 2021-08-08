@@ -362,7 +362,8 @@ initDefaultOptions() {
 	install_tools=\'$install_tools\'
 
 	# echo "$Output_Device:$root_password:$user_name:$user_password:$filesystem:$offlineInstallUnsquashfs:$install_tools"
-	echo "Output_Device='$(echo $Output_Device)'; root_password='$(echo $root_password)'; user_name='$(echo $user_name)'; user_password='$(echo $user_password)'; filesystem='$(echo $filesystem)'; offlineInstallUnsquashfs='$(echo $offlineInstallUnsquashfs)'; bootsystem='$(echo $bootsystem)'; install_tools='$(echo $install_tools)'"
+	echo "Output_Device='$Output_Device'; root_password='$root_password'; user_name='$user_name'; user_password='$user_password'; filesystem='$filesystem'; offlineInstallUnsquashfs='$offlineInstallUnsquashfs'; bootsystem='$bootsystem'; install_tools='$install_tools'"
+	# echo "Output_Device='$(echo $Output_Device)'; root_password='$(echo $root_password)'; user_name='$(echo $user_name)'; user_password='$(echo $user_password)'; filesystem='$(echo $filesystem)'; offlineInstallUnsquashfs='$(echo $offlineInstallUnsquashfs)'; bootsystem='$(echo $bootsystem)'; install_tools='$(echo $install_tools)'"
 	# echo 'Output_Device='"$Output_Device"'; root_password='"$root_password"'; user_name='"$user_name"'; user_password='"$user_password"'; filesystem='"$filesystem"'; offlineInstallUnsquashfs='"$offlineInstallUnsquashfs"'; bootsystem='"$bootsystem"'; install_tools='"$install_tools"
 
 }
