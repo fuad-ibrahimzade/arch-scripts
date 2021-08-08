@@ -1008,7 +1008,7 @@ installArchLinuxWithPacstrap() {
 # CHROOT functions
 
 initPacmanMirrorList() {
-	curl https://archlinux.org/mirrorlist/all/https/ > /etc/pacman.d/mirrorlist;
+	curl "https://archlinux.org/mirrorlist/all/https/" > /etc/pacman.d/mirrorlist;
 	sed -i '0,/\#Server/{s//Server/}' /etc/pacman.d/mirrorlist
 }
 
