@@ -10,7 +10,7 @@ main() {
 	# temporary git clone ssl problem fix
 	# git config --global http.sslVerify false
 	# git config http.sslVerify false # for one repository
-	if [ ! -f .env ]
+	if [ -f .env ]
 	then
 		# export "$(cat .env | xargs)"
 		set -o allexport; source .env; set +o allexport
