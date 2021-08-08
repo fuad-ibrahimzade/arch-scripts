@@ -265,7 +265,7 @@ installWithRescueSystem() {
 	fi
 
 	if [[ $bootsystem == "systemd" ]]; then
-		installUEFISystemdBoot;
+		installUEFISystemdBoot $filesystem;
 	elif [[ $bootsystem == "grub" ]]; then
 		installUEFIGrub $offlineInstallUnsquashfs $filesystem;
 	fi
@@ -551,6 +551,7 @@ configureZectlSystemdBoot() {
 }
 
 installUEFISystemdBoot() {
+	filesystem="$1"
 	bootctl --path=/boot install
 	cat > temp <<- EOF
 	default arch
@@ -563,7 +564,6 @@ installUEFISystemdBoot() {
 	title Arch Linux
 	linux /vmlinuz-linux
 	initrd /initramfs-linux.img
-	options zfs=bootfs rw
 	EOF
 	cat temp >> /boot/loader/entries/arch.conf
 	rm temp
@@ -571,10 +571,17 @@ installUEFISystemdBoot() {
 	title Arch Linux Fallback
 	linux /vmlinuz-linux
 	initrd /initramfs-linux-fallback.img
-	options zfs=bootfs rw
 	EOF
 	cat temp >> /boot/loader/entries/arch-fallback.conf
 	rm temp
+	if [[ $filesystem == "zfs" ]]; then
+		tee -a /boot/loader/entries/arch.conf <<- EOF
+		options zfs=bootfs rw
+		EOF
+		tee -a /boot/loader/entries/arch-fallback.conf <<- EOF
+		options zfs=bootfs rw
+		EOF
+	fi
 }
 
 installUEFIGrub() {
