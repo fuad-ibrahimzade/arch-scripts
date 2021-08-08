@@ -54,14 +54,15 @@ main() {
 	if [[ $defaults_accepted == "n" ]]; then
 		# IFS=":" read Output_Device root_password user_name user_password filesystem offlineInstallUnsquashfs install_tools < <(initDefaultOptions) 
 
-		eval "$(initDefaultOptions)"
+		# eval "$(initDefaultOptions)"
+		initDefaultOptions;
 
 	fi
 
 	read -p "Do install with rescue system (default: n, [select y or n]):" doInstallWithRescueSystem
 	doInstallWithRescueSystem=${doInstallWithRescueSystem:-n}
 	if [[ $doInstallWithRescueSystem == "y" ]]; then
-		installWithRescueSystem $default_Output_Device $default_root_password $default_user_name $default_user_password $default_filesystem $default_offlineInstallUnsquashfs $default_bootsystem $default_install_tools;
+		installWithRescueSystem $Output_Device $root_password $user_name $user_password $filesystem $offlineInstallUnsquashfs $bootsystem $install_tools;
 		exit
 	fi
 
@@ -194,7 +195,8 @@ installWithRescueSystem() {
 
 	if [[ $defaults_accepted == "n" ]]; then
 		# IFS=":" Output_Device root_password user_name user_password filesystem offlineInstallUnsquashfs install_tools < <(initDefaultOptions)
-		eval "$(initDefaultOptions)"
+		# eval "$(initDefaultOptions)"
+		initDefaultOptions;
 	fi
 
 	pacman -Syy
@@ -352,17 +354,17 @@ initDefaultOptions() {
 
 	# Output_Device=$(sed 's:/:\\/:g'  <<<"$Output_Device")
 	# Output_Device=${Output_Device//\//\\\/}
-	Output_Device=\'$Output_Device\'
-	root_password=\'$root_password\'
-	user_name=\'$user_name\'
-	user_password=\'$user_password\'
-	filesystem=\'$filesystem\'
-	offlineInstallUnsquashfs=\'$offlineInstallUnsquashfs\'
-	bootsystem=\'$bootsystem\'
-	install_tools=\'$install_tools\'
+	# Output_Device=\'$Output_Device\'
+	# root_password=\'$root_password\'
+	# user_name=\'$user_name\'
+	# user_password=\'$user_password\'
+	# filesystem=\'$filesystem\'
+	# offlineInstallUnsquashfs=\'$offlineInstallUnsquashfs\'
+	# bootsystem=\'$bootsystem\'
+	# install_tools=\'$install_tools\'
 
 	# echo "$Output_Device:$root_password:$user_name:$user_password:$filesystem:$offlineInstallUnsquashfs:$install_tools"
-	echo "Output_Device='$Output_Device'; root_password='$root_password'; user_name='$user_name'; user_password='$user_password'; filesystem='$filesystem'; offlineInstallUnsquashfs='$offlineInstallUnsquashfs'; bootsystem='$bootsystem'; install_tools='$install_tools'"
+	# echo "Output_Device='$Output_Device'; root_password='$root_password'; user_name='$user_name'; user_password='$user_password'; filesystem='$filesystem'; offlineInstallUnsquashfs='$offlineInstallUnsquashfs'; bootsystem='$bootsystem'; install_tools='$install_tools'"
 	# echo "Output_Device='$(echo $Output_Device)'; root_password='$(echo $root_password)'; user_name='$(echo $user_name)'; user_password='$(echo $user_password)'; filesystem='$(echo $filesystem)'; offlineInstallUnsquashfs='$(echo $offlineInstallUnsquashfs)'; bootsystem='$(echo $bootsystem)'; install_tools='$(echo $install_tools)'"
 	# echo 'Output_Device='"$Output_Device"'; root_password='"$root_password"'; user_name='"$user_name"'; user_password='"$user_password"'; filesystem='"$filesystem"'; offlineInstallUnsquashfs='"$offlineInstallUnsquashfs"'; bootsystem='"$bootsystem"'; install_tools='"$install_tools"
 
