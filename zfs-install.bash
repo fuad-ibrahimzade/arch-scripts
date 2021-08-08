@@ -71,8 +71,8 @@ main() {
 
 	# recoverPartitionTableFromMemory $Output_Device;
 	if [[ $filesystem == "zfs" ]]; then
-		# initZFSrequirements;
-		initZFSrequirements2;
+		initZFSrequirements;
+		# initZFSrequirements2;
 		createAndMountPartitionsZFS $Output_Device;
 	elif [[ $filesystem == "ext4" ]]; then
 		createAndMountPartitions $Output_Device;
@@ -203,8 +203,8 @@ installWithRescueSystem() {
 
 	if [[ $is_second_install == "y" ]]; then
 		if [[ $filesystem == "zfs" ]]; then
-			# initZFSrequirements;
-			initZFSrequirements2;
+			initZFSrequirements;
+			# initZFSrequirements2;
 			createAndMountPartitionsZFS $Output_Device $is_second_install;
 		elif [[ $filesystem == "ext4" ]]; then
 			createAndMountPartitions $Output_Device;
@@ -977,8 +977,8 @@ installArchLinuxWithPacstrap() {
 	#!/usr/bin/bash
 
 	if [[ $filesystem == "zfs" ]]; then
-		# initZFSrequirements;
-		initZFSrequirements2;
+		initZFSrequirements;
+		# initZFSrequirements2;
 	fi
 	ln -s /usr/share/zoneinfo/Asia/Baku /etc/localtime;
 	hwclock --systohc;
