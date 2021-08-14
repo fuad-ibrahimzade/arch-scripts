@@ -980,14 +980,14 @@ installTools() {
 	systemctl enable --now cronie.service
 	echo "export EDITOR=vim" >> "/home/$user_name/.bashrc"
 	echo "export VISUAL=vim" >> "/home/$user_name/.bashrc"
-	echo "export EDITOR=vim" >> $HOME/.bashrc
-	echo "export VISUAL=vim" >> $HOME/.bashrc
+	echo "export EDITOR=vim" >> "$HOME/.bashrc"
+	echo "export VISUAL=vim" >> "$HOME/.bashrc"
 
 	cat > temp <<- EOF
 	bind -r '\C-s'
 	stty -ixon
 	EOF
-	cat temp >> $HOME/.bashrc
+	cat temp >> "$HOME/.bashrc"
 	cat temp >> "/home/$user_name/.bashrc"
 	rm temp
 	cat > temp <<- EOF
@@ -998,7 +998,7 @@ installTools() {
 	inoremap <C-q> <esc>:qa!<cr>               " quit discarding changes
 	nnoremap <C-q> :qa!<cr>
 	EOF
-	cat temp >> $HOME/.vimrc
+	cat temp >> "$HOME/.vimrc"
 	cat temp >> "/home/$user_name/.vimrc"
 	rm temp
 
@@ -1230,7 +1230,7 @@ installCacheCleanTools() {
 	sed -i "s|\\$search|\\$replace|g" /etc/systemd/journald.conf;
 	systemctl restart systemd-journald
 
-	rm -rf $HOME/.cache/*
+	rm -rf "$HOME/.cache/*"
 
 	# sudo pacman -Rsn $(pacman -Qdtq)
 	# sudo pacman -Rns --noconfirm $(pacman -Qdtq) # removes all unneeded packages, but leaves optional dependencies
@@ -1783,9 +1783,9 @@ installZSH() {
 
 	search="plugins=(git)"
 	replace="plugins=(git zsh-completions zsh-autosuggestions zsh-syntax-highlighting history-substring-search)"
-	sed -i "s|\$search|\$replace|g" $HOME/.zshrc
+	sed -i "s|\$search|\$replace|g" "$HOME/.zshrc"
 
-	echo "autoload -U compinit && compinit" >> $HOME/.zshrc
+	echo "autoload -U compinit && compinit" >> "$HOME/.zshrc"
 
 
 	echo "$user_name ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
