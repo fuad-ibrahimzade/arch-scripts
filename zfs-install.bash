@@ -49,6 +49,8 @@ main() {
 	offlineInstallUnsquashfs="$default_offlineInstallUnsquashfs"
 	bootsystem="$default_bootsystem"
 	install_tools="$default_install_tools"
+	efipart=""
+	rootpart=""
 
 	if [[ $defaults_accepted == "n" ]]; then
 		# IFS=":" read Output_Device root_password user_name user_password filesystem offlineInstallUnsquashfs install_tools < <(initDefaultOptions) 
@@ -579,6 +581,14 @@ installUEFISystemdBoot() {
 		EOF
 		tee -a /boot/loader/entries/arch-fallback.conf <<- EOF
 		options zfs=bootfs rw
+		EOF
+	elif [[ $filesystem == "ext4" ]]; then
+		partuid=$(blkid -s PARTUUID -o value "$efipart")
+		tee -a /boot/loader/entries/arch.conf <<- EOF
+		options root=PARTUUID=$partuid rw
+		EOF
+		tee -a /boot/loader/entries/arch-fallback.conf <<- EOF
+		options root=PARTUUID=$partuid rw
 		EOF
 	fi
 }
