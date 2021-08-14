@@ -648,7 +648,7 @@ createAndMountPartitions() {
 	# isopart=$(echo $Output_Device)1;
 	# swappart=$(echo $Output_Device)2;
 
-	(echo g; echo n; echo p; echo 1; echo ""; echo +512M; echo t; echo 1; echo n; echo p; echo 2; echo ""; echo +2048M; echo w; echo q) | fdisk $(echo $Output_Device); # before without isopart
+	(echo g; echo n; echo p; echo 1; echo ""; echo +512M; echo t; echo 1; echo n; echo p; echo 2; echo ""; echo +3072M; echo w; echo q) | fdisk $(echo $Output_Device); # before without isopart
 	#(echo g; echo n; echo p; echo 1; echo ""; echo +512M; echo t; echo 1; echo n; echo p; echo 2; echo ""; echo +512M; echo t; echo 2; echo 38; echo n; echo p; echo 3; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
 	efipart=$(echo $Output_Device)1;
 	#extbootpart=$(echo $Output_Device)2;
@@ -708,7 +708,7 @@ createAndMountPartitionsZFS() {
 	is_second_install="$2"
 	if [[ $is_second_install == "y" ]]; then
 		partprobe
-		(echo n; echo p; echo ""; echo ""; echo +512M; echo t; echo "",echo 1; echo n; echo p; echo ""; echo ""; echo +20480M; echo w; echo q) | fdisk $(echo $Output_Device);
+		(echo n; echo p; echo ""; echo ""; echo +512M; echo t; echo "";echo 1; echo n; echo p; echo ""; echo ""; echo +20480M; echo w; echo q) | fdisk $(echo $Output_Device);
 		efipart=$(echo $Output_Device)3;
 		rootpart=$(echo $Output_Device)4;
 
