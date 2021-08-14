@@ -71,13 +71,23 @@ main() {
 }
 
 install() {
+	Output_Device="$1"
+	root_password="$2"
+	user_name="$3"
+	user_password="$4"
+	filesystem="$5"
+	offlineInstallUnsquashfs="$6"
+	bootsystem="$7"
+	install_tools="$8"
+	has_rescue_system=${9:-n}
+
 	pacman -Syy
 
 	# recoverPartitionTableFromMemory $Output_Device;
 	if [[ $filesystem == "zfs" ]]; then
 		initZFSrequirements;
 		# initZFSrequirements2;
-		createAndMountPartitionsZFS "$Output_Device";
+		createAndMountPartitionsZFS "$Output_Device" "$has_rescue_system";
 	elif [[ $filesystem == "ext4" ]]; then
 		createAndMountPartitions "$Output_Device";
 	elif [[ $filesystem == "btrfs" ]]; then
@@ -180,15 +190,15 @@ installWithRescueSystem() {
 	default_offlineInstallUnsquashfs="$6"
 	default_bootsystem="$7"
 	default_install_tools="$8"
-	is_second_install=${9:-n}
 
+	has_rescue_system=${9:-n}
 	default_filesystem="ext4"
 	default_offlineInstallUnsquashfs="y"
 	default_bootsystem="systemd"
 
-	read -r -p "Accept Defaults default: y, [select y or n](Output Device: $default_Output_Device, root_password: $default_root_password, user_name: $default_user_name, user_password: $default_user_password, filesystem: $default_filesystem, offlineInstallUnsquashfs: $default_offlineInstallUnsquashfs, bootsystem: $default_bootsystem, install_tools: $default_install_tools):" defaults_accepted
-	defaults_accepted=${defaults_accepted:-y}
-	echo "$defaults_accepted"
+	# read -r -p "Accept Defaults default for rescue system: y, [select y or n](Output Device: $default_Output_Device, root_password: $default_root_password, user_name: $default_user_name, user_password: $default_user_password, filesystem: $default_filesystem, offlineInstallUnsquashfs: $default_offlineInstallUnsquashfs, bootsystem: $default_bootsystem, install_tools: $default_install_tools):" defaults_accepted
+	# defaults_accepted=${defaults_accepted:-y}
+	# echo "$defaults_accepted"
 
 	Output_Device="$default_Output_Device"
 	root_password="$default_root_password"
@@ -205,105 +215,15 @@ installWithRescueSystem() {
 		initDefaultOptions;
 	fi
 
-	pacman -Syy
+	install "$default_Output_Device" "$default_root_password" "$default_user_name" "$default_user_password" "$default_filesystem" "$default_offlineInstallUnsquashfs" "$default_bootsystem" "$default_install_tools" "$has_rescue_system";
 
-	if [[ $is_second_install == "y" ]]; then
-		if [[ $filesystem == "zfs" ]]; then
-			# initZFSrequirements;
-			initZFSrequirements2;
-			createAndMountPartitionsZFS "$Output_Device" "$is_second_install";
-		elif [[ $filesystem == "ext4" ]]; then
-			createAndMountPartitions "$Output_Device";
-		elif [[ $filesystem == "btrfs" ]]; then
-			createAndMountPartitionsBTRFS "$Output_Device";
-		fi
-	else
-		createAndMountPartitions "$Output_Device";
-	fi
-
-	if [[ $offlineInstallUnsquashfs == "y" ]]; then
-		installArchLinuxWithUnsquashfs;
-	else
-		if [[ $is_second_install == "y" ]]; then
-			installArchLinuxWithPacstrap "$filesystem";
-		else
-			installArchLinuxWithPacstrap "ext4";
-		fi
-	fi
-
-
-	arch-chroot /mnt <<- EOF
-	echo "Entering chroot"
-	EOF
-
-	arch-chroot /mnt <<- EOF
-	pacman -Sy
-
-	initPacmanEntropy;
-
-	pacman --noconfirm --needed -S sudo
-	search="# %wheel ALL=(ALL) ALL"
-	replace=" %wheel ALL=(ALL) ALL"
-	sed -i "s|\$search|\$replace|g" /etc/sudoers;
-	configureUsers $root_password $user_name $user_password;
-
-	if [[ $install_tools == "y" ]]; then
-		installTools $user_name $user_password && # fix without subsequent && script exists after installDesktopEnvironment
-	fi
-
-	if [[ $filesystem == "zfs" ]]; then
-		initZFSBootTimeUnlockService;
-		search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
-		replace="HOOKS=(base udev autodetect modconf keyboard keymap consolefont block zfs filesystems)"
-		sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
-	elif [[ $filesystem == "btrfs" ]]; then
-		sed -i 's/MODULES=()/MODULES=(btrfs)/g' /etc/mkinitcpio.conf;
-		search="HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)"
-		#replace="HOOKS=(base udev block automount modconf filesystems keyboard fsck)"
-		replace="HOOKS=(base udev block autodetect modconf filesystems keyboard fsck)"
-		sed -i "s|\$search|\$replace|g" /etc/mkinitcpio.conf;
-	fi
-
-	if [[ $offlineInstallUnsquashfs == "y" ]]; then
-		mkinitcpio -g /boot/initramfs-linux.img
-	else
-		mkinitcpio -p linux
-	fi
-
-	if [[ $bootsystem == "systemd" ]]; then
-		installUEFISystemdBoot $filesystem;
-	elif [[ $bootsystem == "grub" ]]; then
-		installUEFIGrub $offlineInstallUnsquashfs $filesystem;
-	fi
-
-	if [[ $filesystem == "zfs" ]]; then
-		configureZectlSystemdBoot $user_name $user_password;
-		umount -l /home
-	fi
-
-	exit
-	EOF
-
-	if [[ $filesystem == "zfs" ]]; then
-		cp /etc/zfs/zpool.cache /mnt/etc/zfs
-		umount /mnt/boot
-		zpool export zroot
-	fi
-
-	if [[ $filesystem == "ext4" || $filesystem == "btrfs" ]]; then
-		umount /mnt/boot
-		umount /mnt/home
-		umount /mnt -l
-		umount -l -R /mnt
-		umount -l -R /mnt
-	fi
-
-	is_second_install="y";
-
+	has_rescue_system="y";
 	default_filesystem="zfs"
 	default_offlineInstallUnsquashfs="n"
+	default_bootsystem="systemd"
 
-	installWithRescueSystem "$default_Output_Device" "$default_root_password" "$default_user_name" "$default_user_password" "$default_filesystem" "$default_offlineInstallUnsquashfs" "$default_bootsystem" "$default_install_tools" "$is_second_install";
+
+	install "$default_Output_Device" "$default_root_password" "$default_user_name" "$default_user_password" "$default_filesystem" "$default_offlineInstallUnsquashfs" "$default_bootsystem" "$default_install_tools" "$has_rescue_system";
 
 	#reboot
 }
@@ -728,49 +648,7 @@ createAndMountPartitionsBTRFS() {
 
 createAndMountPartitionsZFS() {
 	Output_Device="$1"
-	is_second_install="$2"
-	if [[ $is_second_install == "y" ]]; then
-		partprobe
-		starting_part_number=$(partx -g /dev/sda | wc -l)
-		efipart_num=$((starting_part_number + 1))
-		rootpart_num=$((starting_part_number + 2))
-		efipart="${Output_Device}${efipart_num}";
-		rootpart="${Output_Device}${rootpart_num}";
-
-		(echo n; echo p; echo ""; echo ""; echo +512M; echo t; echo "";echo 1; echo n; echo p; echo ""; echo ""; echo +20480M; echo w; echo q) | fdisk $(echo $Output_Device);
-
-		zpool create -o ashift=12 \
-			-O acltype=posixacl \
-			-O compression=lz4 \
-			-O relatime=on \
-			-O xattr=sa \
-			zroot "$rootpart"
-
-		zfs create -o encryption=on -o keyformat=passphrase -o mountpoint=none zroot/encr
-		zfs create -o mountpoint=none zroot/encr/data
-		zfs create -o mountpoint=none zroot/encr/ROOT
-		zfs create -o mountpoint=/ zroot/encr/ROOT/default
-		zfs create -o mountpoint=legacy zroot/encr/data/home
-
-		zfs umount -a
-
-		zpool set bootfs=zroot/encr/ROOT/default zroot
-
-		zfs create -V 2G -b 2048 -o logbias=throughput -o sync=always -o primarycache=metadata -o com.sun:auto-snapshot=false zroot/encr/swap
-		mkswap -f "/dev/zvol/zroot/encr/swap"
-
-		zpool export zroot
-		zpool import -R /mnt -l zroot
-
-		zpool set cachefile=/etc/zfs/zpool.cache zroot
-		mkdir -p /mnt/etc/zfs
-		cp /etc/zfs/zpool.cache /mnt/etc/zfs/
-
-		mkdir /mnt/boot
-		mkfs.fat -F32 "$efipart"
-		mount "$efipart" /mnt/boot
-		return 0
-	fi
+	has_rescue_system="$2"
 	ISO_URL="http://mirrors.evowise.com/archlinux/iso/2021.01.01/archlinux-2021.01.01-x86_64.iso"
 	ISO_MB=$( curl -sI $ISO_URL | grep -i Content-Length | grep -o '[0-9]\+' )
 	# ISO_MB=$( curl -sI $ISO_URL | grep -i Content-Length | awk '{print $2}' | awk '{print $1/1024/1024 + 1}' )
@@ -778,9 +656,12 @@ createAndMountPartitionsZFS() {
     #boot arhiso
 	#create gpt table
 	#create boot swap root partitions
-	sfdisk --delete "$Output_Device";
-	#wipefs --all "$Output_Device";
-	#dd if=/dev/zero of="$Output_Device" bs=512 count=1
+	if [[ $has_rescue_system != "y" ]]; then
+		sfdisk --delete "$Output_Device";
+		#wipefs --all "$Output_Device";
+		#dd if=/dev/zero of="$Output_Device" bs=512 count=1
+	fi
+
 	partprobe;
 
 	starting_part_number=$(partx -g /dev/sda | wc -l)
@@ -789,18 +670,22 @@ createAndMountPartitionsZFS() {
 	efipart="${Output_Device}${efipart_num}";
 	rootpart="${Output_Device}${rootpart_num}";
 
+	if [[ $has_rescue_system != "y" ]]; then
+		parted --script $(echo $Output_Device) \
+		mklabel gpt \
+		mkpart ESP fat32 1 513 \
+		set "$efipart_num" boot on \
+		name "$efipart_num" boot \
+		mkpart primary 513 100% \
+		name "$rootpart_num" rootfs \
+		quit
 
-	parted --script $(echo $Output_Device) \
-	  mklabel gpt \
-	  mkpart ESP fat32 1 513 \
-	  set "$efipart_num" boot on \
-	  name "$efipart_num" boot \
-	  mkpart primary 513 100% \
-	  name "$rootpart_num" rootfs \
-	  quit
+		# efipart=$(echo $Output_Device)1;
+		# rootpart=$(echo $Output_Device)2;
+	else
+		(echo n; echo p; echo ""; echo ""; echo +512M; echo t; echo "";echo 1; echo n; echo p; echo ""; echo ""; echo +20480M; echo w; echo q) | fdisk $(echo $Output_Device);
+	fi
 
-	# efipart=$(echo $Output_Device)1;
-	# rootpart=$(echo $Output_Device)2;
 
 	zpool create -o ashift=12 \
 		-O acltype=posixacl \
