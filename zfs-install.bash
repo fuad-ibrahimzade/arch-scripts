@@ -49,8 +49,6 @@ main() {
 	offlineInstallUnsquashfs="$default_offlineInstallUnsquashfs"
 	bootsystem="$default_bootsystem"
 	install_tools="$default_install_tools"
-	efipart=""
-	rootpart=""
 
 	if [[ $defaults_accepted == "n" ]]; then
 		# IFS=":" read Output_Device root_password user_name user_password filesystem offlineInstallUnsquashfs install_tools < <(initDefaultOptions) 
@@ -130,7 +128,7 @@ main() {
 	fi
 
 	if [[ $bootsystem == "systemd" ]]; then
-		installUEFISystemdBoot;
+		installUEFISystemdBoot $filesystem;
 	elif [[ $bootsystem == "grub" ]]; then
 		installUEFIGrub $offlineInstallUnsquashfs $filesystem;
 	fi
@@ -583,13 +581,13 @@ installUEFISystemdBoot() {
 		options zfs=bootfs rw
 		EOF
 	elif [[ $filesystem == "ext4" ]]; then
-		partuid=$(blkid -s PARTUUID -o value "$efipart")
-		partuid=$( findmnt /boot -o PARTUUID -n )
+		# partuuid=$(blkid -s PARTUUID -o value "$efipart")
+		partuuid=$( findmnt /boot -o PARTUUID -n )
 		tee -a /boot/loader/entries/arch.conf <<- EOF
-		options root=PARTUUID=$partuid rw
+		options root=PARTUUID=$partuuid rw
 		EOF
 		tee -a /boot/loader/entries/arch-fallback.conf <<- EOF
-		options root=PARTUUID=$partuid rw
+		options root=PARTUUID=$partuuid rw
 		EOF
 	fi
 	bootctl --path=/boot update
