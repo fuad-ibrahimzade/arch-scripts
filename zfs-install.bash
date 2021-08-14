@@ -179,6 +179,10 @@ installWithRescueSystem() {
 	default_install_tools="$8"
 	is_second_install=${9:-n}
 
+	default_filesystem="ext4"
+	default_offlineInstallUnsquashfs="y"
+	default_bootsystem="systemd"
+
 	read -p "Accept Defaults default: y, [select y or n](Output Device: $default_Output_Device, root_password: $default_root_password, user_name: $default_user_name, user_password: $default_user_password, filesystem: $default_filesystem, offlineInstallUnsquashfs: $default_offlineInstallUnsquashfs, bootsystem: $default_bootsystem, install_tools: $default_install_tools):" defaults_accepted
 	defaults_accepted=${defaults_accepted:-y}
 	echo $defaults_accepted
@@ -202,8 +206,8 @@ installWithRescueSystem() {
 
 	if [[ $is_second_install == "y" ]]; then
 		if [[ $filesystem == "zfs" ]]; then
-			initZFSrequirements;
-			# initZFSrequirements2;
+			# initZFSrequirements;
+			initZFSrequirements2;
 			createAndMountPartitionsZFS $Output_Device $is_second_install;
 		elif [[ $filesystem == "ext4" ]]; then
 			createAndMountPartitions $Output_Device;
@@ -292,6 +296,10 @@ installWithRescueSystem() {
 	fi
 
 	is_second_install="y";
+
+	default_filesystem="zfs"
+	default_offlineInstallUnsquashfs="n"
+
 	installWithRescueSystem $default_Output_Device $default_root_password $default_user_name $default_user_password $default_filesystem $default_offlineInstallUnsquashfs $default_bootsystem $default_install_tools $is_second_install;
 
 	#reboot
