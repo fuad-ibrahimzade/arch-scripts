@@ -639,6 +639,12 @@ createAndMountPartitions() {
 	#dd if=/dev/zero of="$Output_Device" bs=512 count=1
 	partprobe;
 
+	starting_part_number=$(partx -g /dev/sda | wc -l)
+	efipart_num=$((starting_part_number + 1))
+	rootpart_num=$((starting_part_number + 2))
+	efipart="${Output_Device}${efipart_num}";
+	rootpart="${Output_Device}${rootpart_num}";
+
 
 	#region old without zfs
 	# (echo g; echo n; echo p; echo 1; echo ""; echo +$(echo $ISO_MB)M; echo t; echo 0c; echo n; echo p; echo 2; echo ""; echo +1024M; echo t; echo 2; echo 19; echo n; echo p; echo 3; echo ""; echo +512M; echo t; echo 3; echo 1; echo n; echo p; echo 4; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
@@ -650,9 +656,9 @@ createAndMountPartitions() {
 
 	(echo g; echo n; echo p; echo 1; echo ""; echo +512M; echo t; echo 1; echo n; echo p; echo 2; echo ""; echo +3072M; echo w; echo q) | fdisk $(echo $Output_Device); # before without isopart
 	#(echo g; echo n; echo p; echo 1; echo ""; echo +512M; echo t; echo 1; echo n; echo p; echo 2; echo ""; echo +512M; echo t; echo 2; echo 38; echo n; echo p; echo 3; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
-	efipart=$(echo $Output_Device)1;
+	# efipart=$(echo $Output_Device)1;
 	#extbootpart=$(echo $Output_Device)2;
-	rootpart=$(echo $Output_Device)2;
+	# rootpart=$(echo $Output_Device)2;
 	# after ls -l /dev/disk/by-label	found ARCH_202011 (before was user -n EFI) on mount of /dev/sr0 at /run/archiso/bootmnt/arch/boot/syslinux/archiso_sys-linux.cfg
 	labelname=$(cat /run/archiso/bootmnt/arch/version | awk -F. '{print "ARCH_"$1""$2}')
 	mkfs.fat -F32 -n "$labelname" "$efipart";
@@ -680,8 +686,14 @@ createAndMountPartitionsBTRFS() {
 	sfdisk --delete "$Output_Device";
 	(echo o; echo n; echo p; echo 1; echo ""; echo +512M; echo n; echo p; echo 2; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
 	partprobe;
-	efipart=$(echo $Output_Device)1;
-	rootpart=$(echo $Output_Device)2;
+	starting_part_number=$(partx -g /dev/sda | wc -l)
+	efipart_num=$((starting_part_number + 1))
+	rootpart_num=$((starting_part_number + 2))
+	efipart="${Output_Device}${efipart_num}";
+	rootpart="${Output_Device}${rootpart_num}";
+
+	# efipart=$(echo $Output_Device)1;
+	# rootpart=$(echo $Output_Device)2;
 	labelname=$(cat /run/archiso/bootmnt/arch/version | awk -F. '{print "ARCH_"$1""$2}')
 	mkfs.fat -F32 -n EFI "$efipart";
 	mkfs.btrfs -f -m single -L arch "$rootpart";
@@ -708,9 +720,13 @@ createAndMountPartitionsZFS() {
 	is_second_install="$2"
 	if [[ $is_second_install == "y" ]]; then
 		partprobe
+		starting_part_number=$(partx -g /dev/sda | wc -l)
+		efipart_num=$((starting_part_number + 1))
+		rootpart_num=$((starting_part_number + 2))
+		efipart="${Output_Device}${efipart_num}";
+		rootpart="${Output_Device}${rootpart_num}";
+
 		(echo n; echo p; echo ""; echo ""; echo +512M; echo t; echo "";echo 1; echo n; echo p; echo ""; echo ""; echo +20480M; echo w; echo q) | fdisk $(echo $Output_Device);
-		efipart=$(echo $Output_Device)3;
-		rootpart=$(echo $Output_Device)4;
 
 		zpool create -o ashift=12 \
 			-O acltype=posixacl \
@@ -756,18 +772,24 @@ createAndMountPartitionsZFS() {
 	#dd if=/dev/zero of="$Output_Device" bs=512 count=1
 	partprobe;
 
+	starting_part_number=$(partx -g /dev/sda | wc -l)
+	efipart_num=$((starting_part_number + 1))
+	rootpart_num=$((starting_part_number + 2))
+	efipart="${Output_Device}${efipart_num}";
+	rootpart="${Output_Device}${rootpart_num}";
+
 
 	parted --script $(echo $Output_Device) \
 	  mklabel gpt \
 	  mkpart ESP fat32 1 513 \
-	  set 1 boot on \
-	  name 1 boot \
+	  set "$efipart_num" boot on \
+	  name "$efipart_num" boot \
 	  mkpart primary 513 100% \
-	  name 2 rootfs \
+	  name "$rootpart_num" rootfs \
 	  quit
 
-	efipart=$(echo $Output_Device)1;
-	rootpart=$(echo $Output_Device)2;
+	# efipart=$(echo $Output_Device)1;
+	# rootpart=$(echo $Output_Device)2;
 
 	zpool create -o ashift=12 \
 		-O acltype=posixacl \
