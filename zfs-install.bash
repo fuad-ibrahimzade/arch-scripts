@@ -629,14 +629,14 @@ createAndMountPartitionsBTRFS() {
 	mkfs.fat -F32 -n EFI "$efipart";
 	mkfs.btrfs -f -m single -L arch "$rootpart";
 	mount -o compress=lzo "$rootpart" /mnt;
-	cd /mnt;
+	cd /mnt || exit;
 	btrfs su cr @;
 	#btrfs su cr @boot;
 	btrfs su cr @home;
 	cd /;
 	umount /mnt;
 	mount -o noauto,compress=lzo,subvol=@ "$rootpart" /mnt;
-	cd /mnt;
+	cd /mnt || exit;
 	mkdir -p {boot,home};
 	#mount -o noauto,compress=lzo,subvol=@boot "$rootpart" boot;
 	#mkdir boot/EFI;
@@ -772,7 +772,7 @@ createArchZfsISO() {
 
 writeArchIsoToSeperatePartition() {
 	# test
-	cd /iso
+	cd /iso || exit
 	wget http://mirrors.evowise.com/archlinux/iso/2021.01.01/archlinux-2021.01.01-x86_64.iso
 	# dd if=/dev/sdaX of=/dev/sdbY bs=64K conv=noerror,sync
 	# dd if=/archlinux-2021.01.01-x86_64.iso of=/sda1 bs=1M conv=noerror,sync
@@ -1371,7 +1371,7 @@ installi3Seperate() {
 
 	pacman -S --noconfirm tint2
 	mkdir -p "/home/$user_name/.config/tint2"
-	cp /usr/share/tint2/horizontal-dark-opaque.tint2rc >> "/home/$user_name/.config/tint2/tint2rc";
+	cat /usr/share/tint2/horizontal-dark-opaque.tint2rc >> "/home/$user_name/.config/tint2/tint2rc";
 	echo "exec --no-startup-id tint2 /home/$user_name/.config/tint2/tint2rc" >> "/home/$user_name/.config/i3/config";
 	# echo "exec --no-startup-id tint2 --disable-wm-check /home/$user_name/.config/tint2/tint2rc" >> "/home/$user_name/.config/i3/config";
 	installAURpackageTrizen "$user_name" "$user_password" t2ec
@@ -1517,7 +1517,7 @@ installDEkwin() {
 installDEregolith() {
 	user_name="$1"
 	mkdir /tmp/regolithtmp
-	cd /tmp/regolithtmp
+	cd /tmp/regolithtmp || exit
 	wget https://github.com/gardotd426/regolith-de/releases/latest/download/regolith-arch.zip
 	pacman -S --noconfirm unzip
 	unzip regolith-arch
@@ -1755,7 +1755,7 @@ installZSH() {
 	sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 	mkdir ~/.local/share/fonts
-	cd  ~/.local/share/fonts
+	cd  ~/.local/share/fonts || exit
 	wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf
 	wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf
 	wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf
@@ -1904,7 +1904,7 @@ installGitHubMakepackage() {
 	packageName="$1"
 	githubUrl="$2"
 	echo "Packaga name is ${packageName}"
-	cd /tmp
+	cd /tmp || exit
 	sudo -u nobody git clone "${githubUrl}"
 
 	chgrp nobody "/tmp/$packageName"
@@ -1912,7 +1912,7 @@ installGitHubMakepackage() {
 	setfacl -m u::rwx,g::rwx "/tmp/$packageName"
 	setfacl -d --set u::rwx,g::rwx,o::- "/tmp/$packageName"
 
-	cd "/tmp/$packageName"
+	cd "/tmp/$packageName" || exit
 	nobody_password=$( cat /etc/shadow | grep nobody | sed 's/[^a-zA-Z0-9]//g' | sed 's/[nobody]//g' )
 	nobody_password=${nobody_password:-18628}
 
@@ -1939,7 +1939,7 @@ installAURpackage() {
 
 	packageName="$1"
 	echo "Packaga name is ${packageName}"
-	cd /tmp
+	cd /tmp || exit
 	sudo -u nobody git clone "https://aur.archlinux.org/${packageName}.git"
 
 	chgrp nobody "/tmp/$packageName"
@@ -1947,7 +1947,7 @@ installAURpackage() {
 	setfacl -m u::rwx,g::rwx "/tmp/$packageName"
 	setfacl -d --set u::rwx,g::rwx,o::- "/tmp/$packageName"
 
-	cd "/tmp/$packageName"
+	cd "/tmp/$packageName" || exit
 	nobody_password=$( cat /etc/shadow | grep nobody | sed 's/[^a-zA-Z0-9]//g' | sed 's/[nobody]//g' )
 	nobody_password=${nobody_password:-18628}
 
