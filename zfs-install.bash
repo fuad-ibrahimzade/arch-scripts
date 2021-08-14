@@ -21,7 +21,7 @@ main() {
 	
 	initPacmanMirrorList;
 
-	read -p "Create Only ArchZfsISO (default: n, [select y or n]):" onlyCreateArchZfsISO
+	read -r -p "Create Only ArchZfsISO (default: n, [select y or n]):" onlyCreateArchZfsISO
 	onlyCreateArchZfsISO=${onlyCreateArchZfsISO:-n}
 	if [[ $onlyCreateArchZfsISO == "y" ]]; then
 		createArchZfsISO;
@@ -37,7 +37,7 @@ main() {
 	default_bootsystem=${default_bootsystem:-systemd}
 	default_install_tools=${default_install_tools:-n}
 
-	read -p "Accept Defaults default: y, [select y or n](Output Device: $default_Output_Device, root_password: $default_root_password, user_name: $default_user_name, user_password: $default_user_password, filesystem: $default_filesystem, offlineInstallUnsquashfs: $default_offlineInstallUnsquashfs, bootsystem: $default_bootsystem, install_tools: $default_install_tools):" defaults_accepted
+	read -r -p "Accept Defaults default: y, [select y or n](Output Device: $default_Output_Device, root_password: $default_root_password, user_name: $default_user_name, user_password: $default_user_password, filesystem: $default_filesystem, offlineInstallUnsquashfs: $default_offlineInstallUnsquashfs, bootsystem: $default_bootsystem, install_tools: $default_install_tools):" defaults_accepted
 	defaults_accepted=${defaults_accepted:-y}
 	echo "$defaults_accepted"
 
@@ -51,14 +51,14 @@ main() {
 	install_tools="$default_install_tools"
 
 	if [[ $defaults_accepted == "n" ]]; then
-		# IFS=":" read Output_Device root_password user_name user_password filesystem offlineInstallUnsquashfs install_tools < <(initDefaultOptions) 
+		# IFS=":" read -r Output_Device root_password user_name user_password filesystem offlineInstallUnsquashfs install_tools < <(initDefaultOptions) 
 
 		# eval "$(initDefaultOptions)"
 		initDefaultOptions;
 
 	fi
 
-	read -p "Do install with rescue system (default: n, [select y or n]):" doInstallWithRescueSystem
+	read -r -p "Do install with rescue system (default: n, [select y or n]):" doInstallWithRescueSystem
 	doInstallWithRescueSystem=${doInstallWithRescueSystem:-n}
 	if [[ $doInstallWithRescueSystem == "y" ]]; then
 		installWithRescueSystem "$Output_Device" "$root_password" "$user_name" "$user_password" "$filesystem" "$offlineInstallUnsquashfs" "$bootsystem" "$install_tools";
@@ -77,17 +77,17 @@ install() {
 	if [[ $filesystem == "zfs" ]]; then
 		initZFSrequirements;
 		# initZFSrequirements2;
-		createAndMountPartitionsZFS $Output_Device;
+		createAndMountPartitionsZFS "$Output_Device";
 	elif [[ $filesystem == "ext4" ]]; then
-		createAndMountPartitions $Output_Device;
+		createAndMountPartitions "$Output_Device";
 	elif [[ $filesystem == "btrfs" ]]; then
-		createAndMountPartitionsBTRFS $Output_Device;
+		createAndMountPartitionsBTRFS "$Output_Device";
 	fi
 	# AREA section OLD5
 	if [[ $offlineInstallUnsquashfs == "y" ]]; then
 		installArchLinuxWithUnsquashfs;
 	else
-		installArchLinuxWithPacstrap $filesystem;
+		installArchLinuxWithPacstrap "$filesystem";
 	fi
 
 	arch-chroot /mnt <<- EOF
@@ -186,9 +186,9 @@ installWithRescueSystem() {
 	default_offlineInstallUnsquashfs="y"
 	default_bootsystem="systemd"
 
-	read -p "Accept Defaults default: y, [select y or n](Output Device: $default_Output_Device, root_password: $default_root_password, user_name: $default_user_name, user_password: $default_user_password, filesystem: $default_filesystem, offlineInstallUnsquashfs: $default_offlineInstallUnsquashfs, bootsystem: $default_bootsystem, install_tools: $default_install_tools):" defaults_accepted
+	read -r -p "Accept Defaults default: y, [select y or n](Output Device: $default_Output_Device, root_password: $default_root_password, user_name: $default_user_name, user_password: $default_user_password, filesystem: $default_filesystem, offlineInstallUnsquashfs: $default_offlineInstallUnsquashfs, bootsystem: $default_bootsystem, install_tools: $default_install_tools):" defaults_accepted
 	defaults_accepted=${defaults_accepted:-y}
-	echo $defaults_accepted
+	echo "$defaults_accepted"
 
 	Output_Device="$default_Output_Device"
 	root_password="$default_root_password"
@@ -211,21 +211,21 @@ installWithRescueSystem() {
 		if [[ $filesystem == "zfs" ]]; then
 			# initZFSrequirements;
 			initZFSrequirements2;
-			createAndMountPartitionsZFS $Output_Device $is_second_install;
+			createAndMountPartitionsZFS "$Output_Device" "$is_second_install";
 		elif [[ $filesystem == "ext4" ]]; then
-			createAndMountPartitions $Output_Device;
+			createAndMountPartitions "$Output_Device";
 		elif [[ $filesystem == "btrfs" ]]; then
-			createAndMountPartitionsBTRFS $Output_Device;
+			createAndMountPartitionsBTRFS "$Output_Device";
 		fi
 	else
-		createAndMountPartitions $Output_Device;
+		createAndMountPartitions "$Output_Device";
 	fi
 
 	if [[ $offlineInstallUnsquashfs == "y" ]]; then
 		installArchLinuxWithUnsquashfs;
 	else
 		if [[ $is_second_install == "y" ]]; then
-			installArchLinuxWithPacstrap $filesystem;
+			installArchLinuxWithPacstrap "$filesystem";
 		else
 			installArchLinuxWithPacstrap "ext4";
 		fi
@@ -303,22 +303,22 @@ installWithRescueSystem() {
 	default_filesystem="zfs"
 	default_offlineInstallUnsquashfs="n"
 
-	installWithRescueSystem $default_Output_Device $default_root_password $default_user_name $default_user_password $default_filesystem $default_offlineInstallUnsquashfs $default_bootsystem $default_install_tools $is_second_install;
+	installWithRescueSystem "$default_Output_Device" "$default_root_password" "$default_user_name" "$default_user_password" "$default_filesystem" "$default_offlineInstallUnsquashfs" "$default_bootsystem" "$default_install_tools" "$is_second_install";
 
 	#reboot
 }
 
 initDefaultOptions() {
-	read -p "Output Device (default: /dev/sda):" Output_Device
+	read -r -p "Output Device (default: /dev/sda):" Output_Device
 	Output_Device=${Output_Device:-/dev/sda}
 	echo "$Output_Device"
-	read -p "Root Password (default: root):" root_password;
+	read -r -p "Root Password (default: root):" root_password;
 	root_password=${root_password:-root}
 	echo "$root_password"
-	read -p "User Name (default: user):" user_name;
+	read -r -p "User Name (default: user):" user_name;
 	user_name=${user_name:-user}
 	echo "$user_name"
-	read -p "User Password (default: user):" user_password;
+	read -r -p "User Password (default: user):" user_password;
 	user_password=${user_password:-user}
 	echo "$user_password"
 
@@ -871,7 +871,7 @@ createArchZfsISO() {
 
 	zfs_version=$(pacman -Si zfs-linux-lts | grep Version | awk '{print $3}')
 	zfs_version_date=$(pacman -Si zfs-linux-lts | grep Date | awk '{$1=$2=$3="";print $0}' | sed -i 's/+.*//g')
-	read Year Month Day <<< "$(echo $zfs_version_date | date '+%Y %m %d' -f -)"
+	read -r Year Month Day <<< "$(echo $zfs_version_date | date '+%Y %m %d' -f -)"
 	# sed -i "s|\[core\]\\nInclude = /etc/pacman\.d/mirrorlist|SigLevel = PackageRequired\nServer=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/\$repo/os/\$arch|g" archlive/releng/pacman.conf
 	# sed -i "s|\[extra\]\\nInclude = /etc/pacman\.d/mirrorlist|SigLevel = PackageRequired\nServer=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/\$repo/os/\$arch|g" archlive/releng/pacman.conf
 	# sed -i "s|\[community\]\\nInclude = /etc/pacman\.d/mirrorlist|SigLevel = PackageRequired\nServer=https://archive\.archlinux\.org/repos/$Year/$Month/$Day/\$repo/os/\$arch|g" archlive/releng/pacman.conf
@@ -2391,6 +2391,7 @@ copyWallpapers() {
 }
 
 
+export -f install
 export -f initPacmanEntropy
 export -f initPacmanMirrorList
 export -f installTools
