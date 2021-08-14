@@ -582,7 +582,7 @@ installUEFISystemdBoot() {
 		EOF
 	elif [[ $filesystem == "ext4" ]]; then
 		# partuuid=$(blkid -s PARTUUID -o value "$efipart")
-		partuuid=$( findmnt /boot -o PARTUUID -n )
+		partuuid=$( findmnt / -o PARTUUID -n )
 		tee -a /boot/loader/entries/arch.conf <<- EOF
 		options root=PARTUUID=$partuuid rw
 		EOF
