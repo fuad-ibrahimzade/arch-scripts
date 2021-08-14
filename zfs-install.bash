@@ -591,6 +591,7 @@ installUEFISystemdBoot() {
 		options root=PARTUUID=$partuid rw
 		EOF
 	fi
+	bootctl --path=/boot update
 }
 
 installUEFIGrub() {
