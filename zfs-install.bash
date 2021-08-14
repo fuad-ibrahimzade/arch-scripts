@@ -39,7 +39,7 @@ main() {
 
 	read -p "Accept Defaults default: y, [select y or n](Output Device: $default_Output_Device, root_password: $default_root_password, user_name: $default_user_name, user_password: $default_user_password, filesystem: $default_filesystem, offlineInstallUnsquashfs: $default_offlineInstallUnsquashfs, bootsystem: $default_bootsystem, install_tools: $default_install_tools):" defaults_accepted
 	defaults_accepted=${defaults_accepted:-y}
-	echo $defaults_accepted
+	echo "$defaults_accepted"
 
 	Output_Device="$default_Output_Device"
 	root_password="$default_root_password"
@@ -61,11 +61,16 @@ main() {
 	read -p "Do install with rescue system (default: n, [select y or n]):" doInstallWithRescueSystem
 	doInstallWithRescueSystem=${doInstallWithRescueSystem:-n}
 	if [[ $doInstallWithRescueSystem == "y" ]]; then
-		installWithRescueSystem $Output_Device $root_password $user_name $user_password $filesystem $offlineInstallUnsquashfs $bootsystem $install_tools;
+		installWithRescueSystem "$Output_Device" "$root_password" "$user_name" "$user_password" "$filesystem" "$offlineInstallUnsquashfs" "$bootsystem" "$install_tools";
 		exit
 	fi
 
+	install "$Output_Device" "$root_password" "$user_name" "$user_password" "$filesystem" "$offlineInstallUnsquashfs" "$bootsystem" "$install_tools";
 
+	#reboot
+}
+
+install() {
 	pacman -Syy
 
 	# recoverPartitionTableFromMemory $Output_Device;
@@ -163,8 +168,6 @@ main() {
 		umount -l -R /mnt
 		umount -l -R /mnt
 	fi
-
-	#reboot
 }
 
 installWithRescueSystem() {
@@ -308,16 +311,16 @@ installWithRescueSystem() {
 initDefaultOptions() {
 	read -p "Output Device (default: /dev/sda):" Output_Device
 	Output_Device=${Output_Device:-/dev/sda}
-	echo $Output_Device
+	echo "$Output_Device"
 	read -p "Root Password (default: root):" root_password;
 	root_password=${root_password:-root}
-	echo $root_password
+	echo "$root_password"
 	read -p "User Name (default: user):" user_name;
 	user_name=${user_name:-user}
-	echo $user_name
+	echo "$user_name"
 	read -p "User Password (default: user):" user_password;
 	user_password=${user_password:-user}
-	echo $user_password
+	echo "$user_password"
 
 	filesystem="ext4"
 	PS3="Choose root file system: "
@@ -507,8 +510,8 @@ initZFSBootTimeUnlockService() {
 configureZectlSystemdBoot() {
 	user_name="$1"
 	user_password="$2"
-	installAURpackageTrizen $user_name $user_password zectl
-	installAURpackageTrizen $user_name $user_password zectl-pacman-hook
+	installAURpackageTrizen "$user_name" "$user_password" zectl
+	installAURpackageTrizen "$user_name" "$user_password" zectl-pacman-hook
 
 	echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 
@@ -1260,32 +1263,32 @@ installTools() {
 	installAURpackage trizen
 	# #region additional tools
 	pacman -S --noconfirm thefuck aria2 shellcheck python-pywal nmon atop nethogs net-tools powertop feedreader newsboat
-	installAURpackageTrizen $user_name $user_password netatop;
+	installAURpackageTrizen "$user_name" "$user_password" netatop;
 	pacman -S --noconfirm tk && python -m pip install --user speedread
 	pacman -S --noconfirm xsel
-	installAURpackageTrizen $user_name $user_password clipit
+	installAURpackageTrizen "$user_name" "$user_password" clipit
 	# # endregion
-	installCacheCleanTools  $user_name $user_password;
-	installBackupTools  $user_name $user_password;
-	installPackageScanners $user_name $user_password;
+	installCacheCleanTools  "$user_name" "$user_password";
+	installBackupTools  "$user_name" "$user_password";
+	installPackageScanners "$user_name" "$user_password";
 	
 	pacman -S --noconfirm p7zip
-	installAURpackageTrizen $user_name $user_password p7zip-gui
-	installAURpackageTrizen $user_name $user_password fbcat-git
-	installAURpackageTrizen $user_name $user_password bauh;
+	installAURpackageTrizen "$user_name" "$user_password" p7zip-gui
+	installAURpackageTrizen "$user_name" "$user_password" fbcat-git
+	installAURpackageTrizen "$user_name" "$user_password" bauh;
 	# installAURpackageTrizen $user_name $user_password app-outlet-bin;
-	installAURpackageTrizen $user_name $user_password lite-xl
+	installAURpackageTrizen "$user_name" "$user_password" lite-xl
 	# git clone https://github.com/rxi/lite-plugins	# original lite plugins
 	git clone https://github.com/franko/lite-plugins # lite-xl plugins
 	mkdir -p /usr/share/lite-xl/plugins
 	cp -av lite-plugins/plugins/. /usr/share/lite-xl/plugins
 	rm -rf lite-plugins
-	installAURpackageTrizen $user_name $user_password vscodium-bin
+	installAURpackageTrizen "$user_name" "$user_password" vscodium-bin
 	pacman --noconfirm -S neofetch
-	installAURpackageTrizen $user_name $user_password archey4
+	installAURpackageTrizen "$user_name" "$user_password" archey4
 	# pacman --noconfirm -S cylon #all in one tool for arch
 
-	installAURpackageTrizen $user_name $user_password slimjet
+	installAURpackageTrizen "$user_name" "$user_password" slimjet
 	#region old debtap slimjet install
 	# # wget https://www.slimjetbrowser.com/release/slimjet_amd64.tar.xz
 	# # tar -xvf slimjet_amd64.tar.xz
@@ -1295,13 +1298,13 @@ installTools() {
 	# debtap -U slimjet_amd64.deb
 	# rm -rf slimjet_amd64*
 	#endregion
-	installAURpackageTrizen $user_name $user_password freedownloadmanager
+	installAURpackageTrizen "$user_name" "$user_password" freedownloadmanager
 
-	installFISH $user_name $user_password;
+	installFISH "$user_name" "$user_password";
 	# installZSH $user_name $user_password;
 	installBlackArchRepositories;
 
-	installDesktopEnvironment $user_name $user_password;
+	installDesktopEnvironment "$user_name" "$user_password";
 	#initScriptAtBoot $user_name $user_password;
 	#initScriptAtBoot2;
 
@@ -1318,9 +1321,9 @@ installCacheCleanTools() {
 	# bleachbit -c system.*
 
 	# pacman --noconfirm -S qt5-tools qt5-charts python-pyqt5-chart && installAURpackage stacer
-	installAURpackageTrizen $user_name $user_password bleachbit-cli;
-	installAURpackageTrizen $user_name $user_password stacer;
-	installAURpackageTrizen $user_name $user_password wat-git # Show upgrades since recent -Syu
+	installAURpackageTrizen "$user_name" "$user_password" bleachbit-cli;
+	installAURpackageTrizen "$user_name" "$user_password" stacer;
+	installAURpackageTrizen "$user_name" "$user_password" wat-git # Show upgrades since recent -Syu
 	# pacman -R --noconfirm $(pacman -Qtdq)
 	# du -sh /var/cache
 
@@ -1364,7 +1367,7 @@ installPackageScanners() {
 	user_name="$1"
 	user_password="$2"
 	#PKGBUILD Security Analysis
-	installAURpackageTrizen $user_name $user_password aura
+	installAURpackageTrizen "$user_name" "$user_password" aura
 	aura -Pa
 	# aura -Ap aura | aura -P #for individual package
 	#check integrity of packages
@@ -1377,7 +1380,7 @@ installDesktopEnvironment() {
 	user_password="$2"
 
 	pacman --noconfirm -S archlinux-wallpaper
-	installi3Only $user_name $user_password;
+	installi3Only "$user_name" "$user_password";
 	# installLxqtTiling $user_name $user_password;
 	# installDEmaterialshell
 	# installDEkwin
@@ -1421,10 +1424,10 @@ installLxqtTiling() {
 	# replace="Current=sddm-gracilis-theme"
 	# sed -i "s|\\$search|\\$replace|g" /etc/sddm.conf;
 	# systemctl enable sddm.service
-	installAURpackageTrizen $user_name $user_password ly-git;
+	installAURpackageTrizen "$user_name" "$user_password" ly-git;
 	systemctl enable ly.service
 
-	installi3Seperate $user_name $user_password;
+	installi3Seperate "$user_name" "$user_password";
 	# installZentile;
 }
 
@@ -1434,13 +1437,13 @@ installi3Only() {
 	pacman --noconfirm --needed -S archlinux-wallpaper
 	pacman --noconfirm -Syu 
 	pacman --noconfirm -S xorg xorg-xinit krusader kitty
-	installAURpackageTrizen $user_name $user_password kitti3;
+	installAURpackageTrizen "$user_name" "$user_password" kitti3;
 	pacman --noconfirm --needed -S xdg-utils ttf-freefont ttf-dejavu
 	pacman -S --noconfirm cmst
 	systemctl enable connman.service
-	installAURpackageTrizen $user_name $user_password ly-git;
+	installAURpackageTrizen "$user_name" "$user_password" ly-git;
 	systemctl enable ly.service
-	installi3Seperate $user_name $user_password;
+	installi3Seperate "$user_name" "$user_password";
 }
 
 installi3Seperate() {
@@ -1468,15 +1471,15 @@ installi3Seperate() {
 	sed -i 's|bindsym $mod+d exec dmenu_run|bindsym $mod+d exec rofi -show drun -show-icons -modi drun|g' "/home/$user_name/.config/i3/config";
 	pacman --noconfirm --needed -S xcompmgr feh
 	# picom vs xcompmgr
-	installAURpackageTrizen $user_name $user_password quickswitch-i3
-	installAURpackageTrizen $user_name $user_password wmfocus;
-	installAURpackageTrizen $user_name $user_password ulauncher
+	installAURpackageTrizen "$user_name" "$user_password" quickswitch-i3
+	installAURpackageTrizen "$user_name" "$user_password" wmfocus;
+	installAURpackageTrizen "$user_name" "$user_password" ulauncher
 
 	pacman --noconfirm -S dmenu
 	installGitHubMakepackage "morc_menu" "https://github.com/Boruch-Baum/morc_menu"
 	echo "bindsym \$mod+z exec morc_menu" >> "/home/$user_name/.config/i3/config"
 
-	installAURpackageTrizen $user_name $user_password pmenu
+	installAURpackageTrizen "$user_name" "$user_password" pmenu
 
 	pacman --noconfirm -S jgmenu
 	echo "bindsym \$mod+Shift+z exec jgmenu_run" >> "/home/$user_name/.config/i3/config"
@@ -1486,11 +1489,11 @@ installi3Seperate() {
 	cp /usr/share/tint2/horizontal-dark-opaque.tint2rc >> "/home/$user_name/.config/tint2/tint2rc";
 	echo "exec --no-startup-id tint2 /home/$user_name/.config/tint2/tint2rc" >> "/home/$user_name/.config/i3/config";
 	# echo "exec --no-startup-id tint2 --disable-wm-check /home/$user_name/.config/tint2/tint2rc" >> "/home/$user_name/.config/i3/config";
-	installAURpackageTrizen $user_name $user_password t2ec
+	installAURpackageTrizen "$user_name" "$user_password" t2ec
 
 	# installAURpackageTrizen $user_name $user_password rofi-power-menu
 	git clone https://github.com/jluttine/rofi-power-menu
-	installAURpackageTrizen $user_name $user_password i3lock-fancy-git
+	installAURpackageTrizen "$user_name" "$user_password" i3lock-fancy-git
 	wget --no-check-certificate "https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts/main/i3-seperate-install-files/i3fancy-locker.sh"
 	wget --no-check-certificate "https://raw.githubusercontent.com/fuad-ibrahimzade/arch-scripts/main/i3-seperate-install-files/rofi-power-menu"
 	mv i3fancy-locker.sh rofi-power-menu -t /usr/bin
@@ -1557,7 +1560,7 @@ installi3Seperate() {
 
 installZentile() {
 	download_url=$( curl -s https://api.github.com/repos/blrsn/zentile/releases/latest | grep "browser_download_url.*zentile_linux_amd64" | cut -d : -f 2,3 | tr -d \" )
-	wget $download_url
+	wget "$download_url"
 	mv zentile_linux_amd64 /usr/bin/zentile_linux_amd64
 
 	# chmod a+x zentile_linux_amd64
@@ -1837,8 +1840,8 @@ installFISH(){
 	# /usr/bin/fish set -U fish_user_paths $fish_user_paths "/home/$user_name/.local/bin" # for adding path
 	# /usr/bin/fish echo $fish_user_paths | tr " " "\n" | nl # for gettint line number
 	# /usr/bin/fish set --erase --universal fish_user_paths[5] # for removing sppecific path
-	installAURpackageTrizen $user_name $user_password ttf-meslo-nerd-font-powerlevel10k
-	installAURpackageTrizen $user_name $user_password fisher
+	installAURpackageTrizen "$user_name" "$user_password" ttf-meslo-nerd-font-powerlevel10k
+	installAURpackageTrizen "$user_name" "$user_password" fisher
 	echo "$user_name ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 	sudo -u "$user_name" fisher install IlanCosman/tide
 	sudo -u "$user_name" fisher install jorgebucaran/gitio.fish
@@ -1859,7 +1862,7 @@ installZSH() {
 	user_password="$2"
 	pacman --noconfirm -S zsh zsh-completions
 	pacman --noconfirm --needed -S xorg-font-util fontconfig
-	installAURpackageTrizen $user_name $user_password ttf-meslo-nerd-font-powerlevel10k;
+	installAURpackageTrizen "$user_name" "$user_password" ttf-meslo-nerd-font-powerlevel10k;
 	# installAURpackageTrizen $user_name $user_password oh-my-zsh-git;
 
 	# chsh -s $(which zsh)
@@ -1874,14 +1877,14 @@ installZSH() {
 	wget https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf
 	fc-cache -f -v
 
-	git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/powerlevel10k
+	git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}"/themes/powerlevel10k
 	sed -i 's/robbyrussell/powerlevel10k\/powerlevel10k/g' ~/.zshrc
 
-	git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-	git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-	git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/plugins/zsh-completions
-	git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search
-
+	git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}"/plugins/zsh-autosuggestions
+	git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}"/plugins/zsh-syntax-highlighting
+	git clone https://github.com/zsh-users/zsh-completions "${ZSH_CUSTOM:=~/.oh-my-zsh/custom}"/plugins/zsh-completions
+	git clone https://github.com/zsh-users/zsh-history-substring-search "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search
+"
 
 
 	# 	cat > temp <<- EOF
