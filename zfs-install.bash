@@ -134,6 +134,8 @@ install() {
 	sed -i "s|\$search|\$replace|g" /etc/sudoers;
 	configureUsers $root_password $user_name $user_password;
 
+
+	initMkinitcpioPreset;
 	# mkinitcpio -P
 	# curl https://raw.githubusercontent.com/archlinux/mkinitcpio/master/mkinitcpio.conf | tr -d '\r' > /etc/mkinitcpio.conf
 
@@ -198,6 +200,26 @@ install() {
 		umount -l -R /mnt
 		umount -l -R /mnt
 	fi
+}
+
+initMkinitcpioPreset() {
+	mkdir -p "/etc/mkinitcpio.d"
+	tee /etc/mkinitcpio.d/linux.preset <<- EOF
+	# mkinitcpio preset file for the 'linux' package
+
+	ALL_config="/etc/mkinitcpio.conf"
+	ALL_kver="/boot/vmlinuz-linux"
+
+	PRESETS=('default' 'fallback')
+
+	#default_config="/etc/mkinitcpio.conf"
+	default_image="/boot/initramfs-linux.img"
+	#default_options=""
+
+	#fallback_config="/etc/mkinitcpio.conf"
+	fallback_image="/boot/initramfs-linux-fallback.img"
+	fallback_options="-S autodetect"
+	EOF
 }
 
 installWithRescueSystem() {
@@ -2324,6 +2346,7 @@ copyWallpapers() {
 
 
 export -f install
+export -f initMkinitcpioPreset
 export -f initPacmanEntropy
 export -f initPacmanMirrorList
 export -f installTools
