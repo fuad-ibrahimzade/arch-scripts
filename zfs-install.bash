@@ -22,7 +22,7 @@ main() {
 	initPacmanMirrorList;
 
 	if [[ -z "${TMUX}" ]]; then
-		echo "Installng from tmux!"
+		echo "Installng from tmux!";
 		pacman -S --noconfirm tmux
 		# tmux attach -t base || tmux new -s base
 		current_filename_withpath="$0"
@@ -35,7 +35,7 @@ main() {
 		# tmux new-session -d "source $tmux_filename ; rm $tmux_filename"
 		tmux new-session -d -s tempSession "$tmux_filename";
 		tmux attach-session -t tempSession
-		rm $tmux_filename"
+		rm "$tmux_filename"
 	fi
 
 	read -r -p "Create Only ArchZfsISO (default: n, [select y or n]):" onlyCreateArchZfsISO
