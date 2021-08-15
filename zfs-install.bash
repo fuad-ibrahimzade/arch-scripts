@@ -938,7 +938,7 @@ installArchLinuxWithUnsquashfs() {
 installArchLinuxWithPacstrap() {
 	filesystem="$1"
 	if [[ $filesystem == "zfs" ]]; then
-		yes '' | pacstrap -i /mnt base zfs-linux
+		yes '' | pacstrap -i /mnt base linux archzfs-linux
 		genfstabZfs;
 	elif [[ $filesystem == "ext4" ]]; then
 		yes '' | pacstrap -i /mnt base linux
