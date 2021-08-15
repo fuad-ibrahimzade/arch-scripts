@@ -391,6 +391,27 @@ initZFSrequirements2() {
 }
 
 initZFSrequirements() {
+	# 5.13.6.arch1.1-1
+	# http://archzfs.com/archive_archzfs/zfs-linux-2.1.0_5.13.6.arch1.1-1-x86_64.pkg.tar.zst
+	# http://archzfs.com/archive_archzfs/zfs-linux-2.1.0_5.13.6.arch1.1-1-x86_64.pkg.tar.zst.sig
+	# http://archzfs.com/archive_archzfs/zfs-linux-2.1.0_5.13.6.arch1.1-1.src.tar.gz
+	
+	# http://archzfs.com/archive_archzfs/zfs-utils-2.0.5-1-x86_64.pkg.tar.zst
+	# http://archzfs.com/archive_archzfs/zfs-utils-2.0.5-1-x86_64.pkg.tar.zst.sig
+	# http://archzfs.com/archive_archzfs/zfs-utils-2.0.5-1.src.tar.gz
+	# archzfsiso_version=$(uname -r)
+	# zfslinux_packagename="http://archzfs.com/archive_archzfs/zfs-linux-2.1.0_${archzfsiso_version}-x86_64.pkg.tar.zst"
+	# wget "$zfslinux_packagename"
+	# version_date=$(stat "$zfslinux_packagename" | grep Modify | awk -F : '{print $2}' | awk '{print $1}')
+	# read -r Year Month Day <<< "$(echo "$version_date" | awk '{print $1" "$2" "$3}')"
+	# echo "Server=https://archive.archlinux.org/repos/$Year/$Month/$Day/\$repo/os/\$arch" > archlive/releng/airootfs/etc/pacman.d/
+
+	# curl "https://archlinux.org/mirrorlist/all/https/" > /etc/pacman.d/mirrorlist;
+	# echo "Server=https://archive.archlinux.org/repos/2021/07/30/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
+	# pacman -Syy
+	# wget http://archzfs.com/archive_archzfs/zfs-linux-2.1.0_5.13.6.arch1.1-1-x86_64.pkg.tar.zst
+	# wget http://archzfs.com/archive_archzfs/zfs-utils-2.0.5-1-x86_64.pkg.tar.zst
+	
 	curl -s https://eoli3n.github.io/archzfs/init | bash
 	if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
 		mount /home
@@ -463,7 +484,7 @@ configureZectlSystemdBoot() {
 	#configuring zectl systemdboot plugin refactoring esp partition
 	zectl set bootloader=systemdboot
 	# efipart=$(eval $(lsblk -oMOUNTPOINT,PATH -P -M | grep 'MOUNTPOINT="/boot"'); echo $PATH | sed 's/[0-9]*$//')
-	efipart=$(eval $(lsblk -oMOUNTPOINT,PATH -P -M | grep 'MOUNTPOINT="/boot"'); echo $PATH )
+	efipart=$(eval "$(lsblk -oMOUNTPOINT,PATH -P -M | grep 'MOUNTPOINT="/boot"')"; echo "$PATH" )
 	efipartUUID=$( findmnt /boot -o UUID -n )
 	umount /boot
 	mkdir /efi
@@ -492,7 +513,7 @@ configureZectlSystemdBoot() {
 	echo "/efi/env/org.zectl-default   /boot     none    rw,defaults,errors=remount-ro,bind    0 0" >> /etc/fstab
 
 	current_boot_env=$(cat /proc/cmdline | awk -F\\ '{print $(NF-1)}' | sed 's/org.zectl-//g')
-	zectl activate $(zectl list | grep $current_boot_env | awk '{print $1}')
+	zectl activate "$(zectl list | grep "$current_boot_env" | awk '{print $1}')"
 
 	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
 }
