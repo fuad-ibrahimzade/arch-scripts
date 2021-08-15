@@ -135,7 +135,7 @@ install() {
 	configureUsers $root_password $user_name $user_password;
 
 	# mkinitcpio -P
-	curl https://raw.githubusercontent.com/archlinux/mkinitcpio/master/mkinitcpio.conf | tr -d '\r' > /etc/mkinitcpio.conf
+	# curl https://raw.githubusercontent.com/archlinux/mkinitcpio/master/mkinitcpio.conf | tr -d '\r' > /etc/mkinitcpio.conf
 
 	if [[ $install_tools == "y" ]]; then
 		installTools $user_name $user_password && # fix without subsequent && script exists after installDesktopEnvironment
