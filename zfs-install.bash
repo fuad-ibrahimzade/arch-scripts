@@ -32,7 +32,10 @@ main() {
 		# send to tmux
 		cp "$current_filename_withpath" "$tmux_filename"
 		# execute tmux
-		tmux new-session -d "source $tmux_filename ; rm $tmux_filename"
+		# tmux new-session -d "source $tmux_filename ; rm $tmux_filename"
+		tmux new-session -d -s tempSession "$tmux_filename";
+		tmux attach-session -t tempSession
+		rm $tmux_filename"
 	fi
 
 	read -r -p "Create Only ArchZfsISO (default: n, [select y or n]):" onlyCreateArchZfsISO
