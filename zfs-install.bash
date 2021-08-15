@@ -21,22 +21,22 @@ main() {
 	
 	initPacmanMirrorList;
 
-	if [[ -z "${TMUX}" ]]; then
-		echo "Installng from tmux!";
-		pacman -S --noconfirm tmux
-		# tmux attach -t base || tmux new -s base
-		current_filename_withpath="$0"
-		current_filename_withextension="$(basename "$0")"
-		current_filename="${current_filename_withextension%.*}"
-		tmux_filename="${current_filename}_tmux.sh"
-		# send to tmux
-		cp "$current_filename_withpath" "$tmux_filename"
-		# execute tmux
-		# tmux new-session -d "source $tmux_filename ; rm $tmux_filename"
-		tmux new-session -d -s tempSession "$tmux_filename";
-		tmux attach-session -t tempSession
-		rm "$tmux_filename"
-	fi
+	# if [[ -z "${TMUX}" ]]; then
+	# 	echo "Installng from tmux!";
+	# 	pacman -S --noconfirm tmux
+	# 	# tmux attach -t base || tmux new -s base
+	# 	current_filename_withpath="$0"
+	# 	current_filename_withextension="$(basename "$0")"
+	# 	current_filename="${current_filename_withextension%.*}"
+	# 	tmux_filename="${current_filename}_tmux.sh"
+	# 	# send to tmux
+	# 	cp "$current_filename_withpath" "$tmux_filename"
+	# 	# execute tmux
+	# 	# tmux new-session -d "source $tmux_filename ; rm $tmux_filename"
+	# 	tmux new-session -d -s tempSession "$tmux_filename";
+	# 	tmux attach-session -t tempSession
+	# 	rm "$tmux_filename"
+	# fi
 
 	read -r -p "Create Only ArchZfsISO (default: n, [select y or n]):" onlyCreateArchZfsISO
 	onlyCreateArchZfsISO=${onlyCreateArchZfsISO:-n}
