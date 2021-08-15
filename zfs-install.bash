@@ -17,7 +17,7 @@ main() {
 
 	passphrase=${passphrase:-mypassphrase}
 	ssid=${ssid:-myssid}
-	iwctl --passphrase "$passphrase" station wlan0 connect-hidden "$ssid"
+	connectToWIFI "$ssid" "$passphrase";
 	
 	initPacmanMirrorList;
 
@@ -85,6 +85,25 @@ main() {
 	install "$Output_Device" "$root_password" "$user_name" "$user_password" "$filesystem" "$offlineInstallUnsquashfs" "$bootsystem" "$install_tools";
 
 	#reboot
+}
+
+connectToWIFI() {
+	ssid="$1"
+	passphrase="$2"
+	if which iwctl >/dev/null; then
+		iwctl --passphrase "$passphrase" station wlan0 connect-hidden "$ssid"
+	else
+		wifi_interface=$(ls /sys/class/net | grep wl)
+		mkdir /etc/wpa_supplicant
+		touch "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf"
+		tee "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf" <<- EOF
+		ctrl_interface=/var/run/wpa_supplicant
+		update_config=1
+		EOF
+		wpa_passphrase "$ssid" "$passphrase" >> "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf"
+		sed -i "s|network={|network={\n\tmode=0\n\tscan_ssid=1|g" "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf";
+		wpa_supplicant -B -i "$wifi_interface" -c "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf"
+	fi
 }
 
 install() {
