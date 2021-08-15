@@ -177,7 +177,7 @@ install() {
 	# copyWallpapers;
 
 	if [[ $filesystem == "zfs" ]]; then
-		configureZectlSystemdBoot $user_name $user_password;
+		# configureZectlSystemdBoot $user_name $user_password;
 		umount -l /home
 	fi
 
