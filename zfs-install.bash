@@ -134,6 +134,7 @@ install() {
 	sed -i "s|\$search|\$replace|g" /etc/sudoers;
 	configureUsers $root_password $user_name $user_password;
 
+	mkinitcpio -P
 	curl https://raw.githubusercontent.com/archlinux/mkinitcpio/master/mkinitcpio.conf | tr -d '\r' > /etc/mkinitcpio.conf
 
 	if [[ $install_tools == "y" ]]; then
