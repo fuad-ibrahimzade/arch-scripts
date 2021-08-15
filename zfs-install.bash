@@ -25,11 +25,12 @@ main() {
 		echo "Installng from tmux!"
 		pacman -S --noconfirm tmux
 		# tmux attach -t base || tmux new -s base
-		current_filename_withextension="$(basename "$0")" || "$0"
+		current_filename_withpath="$0"
+		current_filename_withextension="$(basename "$0")"
 		current_filename="${current_filename_withextension%.*}"
 		tmux_filename="${current_filename}_tmux.sh"
 		# send to tmux
-		cp "$current_filename" "$tmux_filename"
+		cp "$current_filename_withpath" "$tmux_filename"
 		# execute tmux
 		tmux new-session -d "source $tmux_filename ; rm $tmux_filename"
 	fi
