@@ -405,10 +405,13 @@ initZFSrequirements() {
 	# version_date=$(stat "$zfslinux_packagename" | grep Modify | awk -F : '{print $2}' | awk '{print $1}')
 	# read -r Year Month Day <<< "$(echo "$version_date" | awk '{print $1" "$2" "$3}')"
 	# echo "Server=https://archive.archlinux.org/repos/$Year/$Month/$Day/\$repo/os/\$arch" > archlive/releng/airootfs/etc/pacman.d/
+	# zfs_utils_version=$(bsdtar -qxO -f "$zfslinux_packagename" .PKGINFO | grep -Po 'depend = zfs-utils=\K.*')
 
 	# curl "https://archlinux.org/mirrorlist/all/https/" > /etc/pacman.d/mirrorlist;
 	# echo "Server=https://archive.archlinux.org/repos/2021/07/30/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
+	# sudo pacman --needed -Sw $(pacman -Qqn)
 	# pacman -Syy
+
 	# wget http://archzfs.com/archive_archzfs/zfs-linux-2.1.0_5.13.6.arch1.1-1-x86_64.pkg.tar.zst
 	# wget http://archzfs.com/archive_archzfs/zfs-utils-2.0.5-1-x86_64.pkg.tar.zst
 	
