@@ -659,13 +659,15 @@ createAndMountPartitionsBTRFS() {
 	Output_Device="$1"
 
 	sfdisk --delete "$Output_Device";
-	(echo o; echo n; echo p; echo 1; echo ""; echo +512M; echo n; echo p; echo 2; echo ""; echo ""; echo w; echo q) | fdisk $(echo $Output_Device);
 	partprobe;
 	starting_part_number=$(partx -g /dev/sda | wc -l)
 	efipart_num=$((starting_part_number + 1))
 	rootpart_num=$((starting_part_number + 2))
 	efipart="${Output_Device}${efipart_num}";
 	rootpart="${Output_Device}${rootpart_num}";
+
+	(echo o; echo n; echo p; echo 1; echo ""; echo +512M; echo n; echo p; echo 2; echo ""; echo ""; echo w; echo q) | fdisk "$(echo "$Output_Device")";
+	partprobe;
 
 	# efipart=$(echo $Output_Device)1;
 	# rootpart=$(echo $Output_Device)2;
