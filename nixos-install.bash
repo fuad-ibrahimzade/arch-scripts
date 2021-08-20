@@ -43,6 +43,10 @@ install() {
 	root_password="$2"
 	user_name="$3"
 	user_password="$4"
+
+	nix-channel --add https://nixos.org/channels/nixos-21.05 nixos
+	nix-channel --add https://nixos.org/channels/nixos-unstable unstable
+	nix-channel --update
 	
 	nixos-generate-config  --root /mnt
 
@@ -66,11 +70,13 @@ initPartitionsAndMount() {
 
 	partprobe;
 
-	# starting_part_number=$(partx -g /dev/sda | wc -l)
-	# efipart_num=$((starting_part_number + 1))
-	# rootpart_num=$((starting_part_number + 2))
-	# efipart="${Output_Device}${efipart_num}";
-	# rootpart="${Output_Device}${rootpart_num}";
+	starting_part_number=$(partx -g /dev/sda | wc -l)
+	efipart_num=$((starting_part_number + 1))
+	swappart_num=$((starting_part_number + 2))
+	rootpart_num=$((starting_part_number + 3))
+	efipart="${Output_Device}${efipart_num}";
+	swappart="${Output_Device}${swappart_num}";
+	rootpart="${Output_Device}${rootpart_num}";
 
 	is_efi="n"
 	if [[ -d "/sys/firmware/efi/" && -n "$(ls -A /sys/firmware/efi/)" ]]; then
@@ -97,9 +103,12 @@ initPartitionsAndMount() {
 	SWAP=""
 	ZFS=""
 	if [[ $is_efi == "y" ]]; then
-		BOOT=$DISK-part1
-		SWAP=$DISK-part2
-		ZFS=$DISK-part3
+		# BOOT=$DISK-part1
+		# SWAP=$DISK-part2
+		# ZFS=$DISK-part3
+		BOOT=$efipart
+		SWAP=$swappart
+		ZFS=$rootpart
 	else
 		BOOT=$DISK-part2
 		SWAP=$DISK-part3
