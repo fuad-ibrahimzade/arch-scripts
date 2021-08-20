@@ -31,10 +31,12 @@ main() {
 		initDefaultOptions;
 	fi
 
-	initPartitionsAndMount "$Output_Device" "$root_partitionsize";
+	echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 
+	initPartitionsAndMount "$Output_Device" "$root_partitionsize";
 	install "$Output_Device" "$root_password" "$user_name" "$user_password";
 
+	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
 	#reboot
 }
 
@@ -65,10 +67,10 @@ initPartitionsAndMount() {
 	root_partitionsize="$2"
 
 	# sfdisk --delete "$Output_Device";
-	sgdisk --zap-all "$Output_Device"
-	wipefs --all "$Output_Device";
+	sudo sgdisk --zap-all "$Output_Device"
+	sudo wipefs --all "$Output_Device";
 
-	partprobe;
+	sudo partprobe;
 
 	starting_part_number=$(partx -g /dev/sda | wc -l)
 	efipart_num=$((starting_part_number + 1))
@@ -89,15 +91,15 @@ initPartitionsAndMount() {
 	DISK="/dev/disk/by-uuid/$SDA_UUID"
 
 	if [[ $is_efi == "y" ]]; then
-		sgdisk -n 0:0:+1GiB -t 0:EF00 -c 0:boot "$DISK"
+		sudo sgdisk -n 0:0:+1GiB -t 0:EF00 -c 0:boot "$DISK"
 	else
-		sgdisk -n 0:0:+1MiB -t 0:ef02 -c 0:grub "$DISK"
-		sgdisk -n 0:0:+1GiB -t 0:ea00 -c 0:boot "$DISK"
+		sudo sgdisk -n 0:0:+1MiB -t 0:ef02 -c 0:grub "$DISK"
+		sudo sgdisk -n 0:0:+1GiB -t 0:ea00 -c 0:boot "$DISK"
 	fi
 
-	sgdisk -n 0:0:+4GiB -t 0:8200 -c 0:swap "$DISK"
+	sudo sgdisk -n 0:0:+4GiB -t 0:8200 -c 0:swap "$DISK"
 	# sgdisk -n 0:0:0 -t 0:BF01 -c 0:ZFS "$DISK"
-	sgdisk -n 0:0:+"$root_partitionsize"GiB -t 0:BF01 -c 0:ZFS "$DISK"
+	sudo sgdisk -n 0:0:+"$root_partitionsize"GiB -t 0:BF01 -c 0:ZFS "$DISK"
 
 	BOOT=""
 	SWAP=""
@@ -115,11 +117,11 @@ initPartitionsAndMount() {
 		ZFS=$DISK-part4
 	fi
 
-	zpool create -o ashift=12 -o altroot="/mnt" -O mountpoint=none -O encryption=aes-256-gcm -O keyformat=passphrase rpool "$ZFS"
-	zfs create -o mountpoint=none rpool/root
-	zfs create -o mountpoint=legacy rpool/root/nixos
-	zfs create -o mountpoint=legacy -o com.sun:auto-snapshot=true rpool/home
-	zfs set compression=lz4 rpool/home
+	sudo zpool create -o ashift=12 -o altroot="/mnt" -O mountpoint=none -O encryption=aes-256-gcm -O keyformat=passphrase rpool "$ZFS"
+	sudo zfs create -o mountpoint=none rpool/root
+	sudo zfs create -o mountpoint=legacy rpool/root/nixos
+	sudo zfs create -o mountpoint=legacy -o com.sun:auto-snapshot=true rpool/home
+	sudo zfs set compression=lz4 rpool/home
 
 	mount -t zfs rpool/root/nixos /mnt
 	mkdir /mnt/home
