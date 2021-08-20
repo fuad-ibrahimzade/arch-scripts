@@ -33,6 +33,7 @@ main() {
 
 	echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 
+	initPackageManager;
 	initPartitionsAndMount "$Output_Device" "$root_partitionsize";
 	install "$Output_Device" "$root_password" "$user_name" "$user_password";
 
@@ -45,10 +46,6 @@ install() {
 	root_password="$2"
 	user_name="$3"
 	user_password="$4"
-
-	nix-channel --add https://nixos.org/channels/nixos-21.05 nixos
-	nix-channel --add https://nixos.org/channels/nixos-unstable unstable
-	nix-channel --update
 	
 	nixos-generate-config  --root /mnt
 
@@ -154,6 +151,12 @@ connectToWIFI() {
 	fi
 }
 
+initPackageManager() {
+	nix-channel --add https://nixos.org/channels/nixos-21.05 nixos
+	nix-channel --add https://nixos.org/channels/nixos-unstable unstable
+	nix-channel --update
+}
+
 initDefaultOptions() {
 	read -r -p "Output Device (default: /dev/sda):" Output_Device
 	Output_Device=${Output_Device:-/dev/sda}
@@ -171,6 +174,7 @@ initDefaultOptions() {
 
 export -f install
 export -f connectToWIFI
+export -f initPackageManager
 export -f initDefaultOptions
 export -f initPartitionsAndMount
 
