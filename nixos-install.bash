@@ -31,13 +31,30 @@ main() {
 		initDefaultOptions;
 	fi
 
-	echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+	echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 
 	initPackageManager;
 	initPartitionsAndMount "$Output_Device" "$root_partitionsize";
+	
+	# tee -a /etc/nixos/configuration.nix <<- EOF
+	# security.sudo.extraRules= [
+	# 	{  
+	# 		users = [ \"$USER\" ];
+	# 		commands = [
+	# 		{ command = "ALL" ;
+	# 			options= [ "NOPASSWD" ]; # "SETENV" # Adding the following could be a good idea
+	# 		}
+	# 		];
+	# 	}
+	# ];
+	# EOF
+	# sudo nixos-rebuild switch 
+	# sudo nix-collect-garbage -d
+
 	install "$Output_Device" "$root_password" "$user_name" "$user_password";
 
-	head -n -1 /etc/sudoers > temp.txt ; mv temp.txt /etc/sudoers # delete NOPASSWD line
+
+	head -n -1 /etc/sudoers > temp.txt ; sudo -u root mv temp.txt /etc/sudoers # delete NOPASSWD line
 	#reboot
 }
 
