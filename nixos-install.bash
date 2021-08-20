@@ -50,6 +50,22 @@ main() {
 	# EOF
 	# sudo nixos-rebuild switch 
 	# sudo nix-collect-garbage -d
+	# zGenerationsInDaysToBeDeleted=22
+	# nix-collect-garbage -d --delete-older-than ${zGenerationsInDaysToBeDeleted}
+	# sudo nix-store --optimise
+
+	# https://github.com/Fuuzetsu/nix-project-defaults/blob/master/nixos-config/configuration.nix
+	# https://github.com/a-schaefers/themelios
+	# https://github.com/bhougland18/nixos_config
+	# https://gist.github.com/byrongibson/1578914d03a5c0a01a13f9ec53ee0b0a
+
+	# https://cheat.readthedocs.io/en/latest/nixos/zfs_install.html
+
+	# http://toxicfrog.github.io/automounting-zfs-on-nixos/
+	# https://nixos.wiki/wiki/Cheatsheet
+	# https://www.reddit.com/r/archlinux/comments/b2jkrp/anyone_tried_nixos_what_are_your_thoughts/
+	# https://nixos.wiki/wiki/NixOS_on_ZFS
+	# https://nixos.wiki/wiki/User:2r/NixOS_on_ZFS
 
 	install "$Output_Device" "$root_password" "$user_name" "$user_password";
 
