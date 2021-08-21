@@ -312,8 +312,8 @@ in {
     #   wget
       vim
     #   mkpasswd
-      jdk11
-      openjfx11
+    #   jdk11
+    #   openjfx11
 
       #NIX tools2
       nixpkgs-lint
