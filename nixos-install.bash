@@ -114,6 +114,12 @@ refactorCustomNixConfiguration() {
 	sed -i "s|your_physicalinterface|$physical_interface|g" "nixoszfs.nix"
 	sed -i "s|your_wifiinterface|$wifi_interface|g" "nixoszfs.nix"
 
+	working_interface="$physical_interface";
+	if [[ -z $(working_interface) ]]; then
+		working_interface="$wifi_interface"
+	fi
+	sed -i "s|your_working_interface|$working_interface|g" "nixoszfs.nix"
+
 	return
 	tee -a "nixoszfs.nix" <<- EOF
 	systemd.services.doUserdata = {

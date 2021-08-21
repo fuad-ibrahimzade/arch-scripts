@@ -13,6 +13,7 @@ let
   # run `ip a` to find the values of these
   physical_interface = "your_physicalinterface";
   wifi_interface = "your_wifiinterface";
+  working_interface = "your_working_interface";
 in {
   imports = [ # Include the results of the hardware scan.
     ./hardware-configuration.nix
@@ -52,7 +53,7 @@ in {
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
-  networking.interfaces.wlp1s0.useDHCP = true;
+  networking.interfaces."${working_interface}".useDHCP = true;
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
