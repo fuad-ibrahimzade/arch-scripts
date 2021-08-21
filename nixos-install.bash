@@ -35,6 +35,8 @@ main() {
 
 	initPackageManager;
 	initVirtualBoxGuestAdditions;
+	installDownloadAndEditTools;
+
 	initPartitionsAndMount "$Output_Device" "$root_partitionsize";
 	
 	# tee -a /etc/nixos/configuration.nix <<- EOF
@@ -165,6 +167,51 @@ initPartitionsAndMount() {
 	mkswap -L swap "$SWAP"
 }
 
+installDownloadAndEditTools() {
+	packages=$(nix-env -qA --installed "*")
+	nix-env -iA nixos.linuxPackages.virtualboxGuestAdditions
+	nix-env -iA nixos.git
+	nix-env -iA nixos.curl
+	nix-env -iA nixos.wget
+	nix-env -iA nixos.vim
+	nix-env -iA nixos.rsync
+}
+
+
+initVirtualBoxGuestAdditions() {
+	nix-env -iA nixos.linuxPackages.virtualboxGuestAdditions
+	current_user="$USER"
+	current_group=$(id -g -n)
+	systemctl enable --now vboxservice.service
+	usermod -a -G vboxsf "$current_user"
+	
+	echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+	sudo chown -R "$current_user":"$current_group" /media/sf_Public/ #create shared Public folder inside virtualbox
+	sudo cp /usr/bin/VBoxClient-all sudo cp /usr/local/bin/VBoxClient-all #needed for sharing clipboard inside virtualbox
+	sudo chown -R "$current_user":"$current_group" /usr/local/bin/VBoxClient-all
+}
+
+initPackageManager() {
+	nix-channel --add https://nixos.org/channels/nixos-21.05 nixos
+	nix-channel --add https://nixos.org/channels/nixos-unstable unstable
+	nix-channel --update
+}
+
+initDefaultOptions() {
+	read -r -p "Output Device (default: /dev/sda):" Output_Device
+	Output_Device=${Output_Device:-/dev/sda}
+	echo "$Output_Device"
+	read -r -p "Root Password (default: root):" root_password;
+	root_password=${root_password:-root}
+	echo "$root_password"
+	read -r -p "User Name (default: user):" user_name;
+	user_name=${user_name:-user}
+	echo "$user_name"
+	read -r -p "User Password (default: user):" user_password;
+	user_password=${user_password:-user}
+	echo "$user_password"
+}
+
 connectToWIFI() {
 	ssid="$1"
 	passphrase="$2"
@@ -185,46 +232,13 @@ connectToWIFI() {
 	fi
 }
 
-initPackageManager() {
-	nix-channel --add https://nixos.org/channels/nixos-21.05 nixos
-	nix-channel --add https://nixos.org/channels/nixos-unstable unstable
-	nix-channel --update
-}
-
-initVirtualBoxGuestAdditions() {
-	nix-env -iA nixos.linuxPackages.virtualboxGuestAdditions
-	current_user="$USER"
-	current_group=$(id -g -n)
-	systemctl enable --now vboxservice.service
-	usermod -a -G vboxsf "$current_user"
-	
-	echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
-	sudo chown -R "$current_user":"$current_group" /media/sf_Public/ #create shared Public folder inside virtualbox
-	sudo cp /usr/bin/VBoxClient-all sudo cp /usr/local/bin/VBoxClient-all #needed for sharing clipboard inside virtualbox
-	sudo chown -R "$current_user":"$current_group" /usr/local/bin/VBoxClient-all
-}
-
-initDefaultOptions() {
-	read -r -p "Output Device (default: /dev/sda):" Output_Device
-	Output_Device=${Output_Device:-/dev/sda}
-	echo "$Output_Device"
-	read -r -p "Root Password (default: root):" root_password;
-	root_password=${root_password:-root}
-	echo "$root_password"
-	read -r -p "User Name (default: user):" user_name;
-	user_name=${user_name:-user}
-	echo "$user_name"
-	read -r -p "User Password (default: user):" user_password;
-	user_password=${user_password:-user}
-	echo "$user_password"
-}
-
-export -f install
 export -f connectToWIFI
+export -f initDefaultOptions
 export -f initPackageManager
 export -f initVirtualBoxGuestAdditions
-export -f initDefaultOptions
+export -f installDownloadAndEditTools
 export -f initPartitionsAndMount
+export -f install
 
 main "$@"; exit
 
