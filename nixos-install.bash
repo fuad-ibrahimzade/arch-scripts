@@ -164,6 +164,9 @@ initAndMountPartitions() {
 	# SDA_ID="$(ls /dev/disk/by-id/ | grep '^[ata]')"
 	SDA_UUID=$(blkid -s UUID -o value "$Output_Device")
 	DISK="/dev/disk/by-uuid/$SDA_UUID"
+	if [[ -z $(sudo lsblk -o PARTUUID /dev/sda | grep -v PARTUUID) ]]; then
+		DISK="$Output_Device"
+	fi
 
 	if [[ $is_efi == "y" ]]; then
 		sudo sgdisk -n 0:0:+1GiB -t 0:EF00 -c 0:boot "$DISK"
