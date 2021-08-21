@@ -97,6 +97,8 @@ in {
     (nerdfonts.override { fonts = [ "FiraCode" "FiraMono" ]; })
   ];
 
+  nixpkgs.config.joypixels.acceptLicense = true;
+
   nixpkgs.overlays = [
     (self: super: {
       kakoune = super.wrapKakoune self.kakoune-unwrapped {
