@@ -195,7 +195,7 @@ initAndMountPartitions() {
 
 	sudo partprobe;
 
-	remaining_free_disk_size=$(sudo parted /dev/sda unit GiB print free | grep Free Space | awk -F'Free Space' '{print $(NF-1)}' | awk '{print $NF}' | tail -n -1 | awk -F"GiB" 'print $1')
+	remaining_free_disk_size=$(sudo parted /dev/sda unit GiB print free | grep Free Space | awk -F"Free Space" '{print $(NF-1)}' | awk '{print $NF}' | tail -n -1 | awk -F"GiB" 'print $1')
 	if ((remaining_free_disk_size > (root_partitionsize + 1)));then
 		sudo sgdisk -n 0:0:+"$root_partitionsize"GiB -t 0:BF01 -c 0:ZFS "$DISK"
 	else
