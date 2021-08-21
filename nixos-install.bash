@@ -186,7 +186,8 @@ initAndMountPartitions() {
 
 	sudo partprobe;
 
-	disk_size=$(sudo fdisk -l | grep Disk | grep Output_Device | awk -F"GiB" '{print $1}' | awk -F: '{print $2}'| tr '\n' ' ' | sed -e 's/^[[:space:]]*//')
+	disk_size_float=$(sudo fdisk -l | grep Disk | grep Output_Device | awk -F"GiB" '{print $1}' | awk -F: '{print $2}'| tr '\n' ' ' | sed -e 's/^[[:space:]]*//')
+	disk_size=$(("${disk_size_float%.*}" + 1 ))
 	if [[ "$disk_size" -gt 16 ]]; then
 		sudo sgdisk -n 0:0:+4GiB -t 0:8200 -c 0:swap "$DISK"
 	else
@@ -195,7 +196,8 @@ initAndMountPartitions() {
 
 	sudo partprobe;
 
-	remaining_free_disk_size=$(sudo parted "$DISK" unit GiB print free | grep "Free Space" | awk -F"Free Space" '{print $(NF-1)}' | awk '{print $NF}' | tail -n -1 | awk -F"GiB" '{print $1}' | tr '\n' ' ' | sed -e 's/^[[:space:]]*//');
+	remaining_free_disk_size_float=$(sudo parted "$DISK" unit GiB print free | grep "Free Space" | awk -F"Free Space" '{print $(NF-1)}' | awk '{print $NF}' | tail -n -1 | awk -F"GiB" '{print $1}' | tr '\n' ' ' | sed -e 's/^[[:space:]]*//');
+	remaining_free_disk_size=$(("${remaining_free_disk_size_float%.*}" + 1 ))
 	if [[ "$remaining_free_disk_size" -gt "$root_partitionsize" ]]; then
 		sudo sgdisk -n 0:0:+"$root_partitionsize"GiB -t 0:BF01 -c 0:ZFS "$DISK"
 	else
