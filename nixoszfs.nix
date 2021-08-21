@@ -8,6 +8,11 @@ let
   unstableTarball = fetchTarball
     "https://github.com/NixOS/nixpkgs-channels/archive/nixos-unstable.tar.gz";
 
+  main_user = "your_username";
+  hostname = "your_hostname";
+  # run `ip a` to find the values of these
+  physical_interface = "your_physicalinterface";
+  wifi_interface = "your_wifiinterface";
 in {
   imports = [ # Include the results of the hardware scan.
     ./hardware-configuration.nix
@@ -16,16 +21,30 @@ in {
       builtins.fetchTarball
       "https://github.com/rycee/home-manager/archive/release-21.05.tar.gz"
     }/nixos"
-  ];
+  ] 
+    ++ (if builtins.pathExists ./cachix.nix then [ ./cachix.nix ] else []);
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  hardware.opengl.driSupport32Bit = true;
+  networking.networkmanager.enable = true;
+  programs.nm-applet.enable = true;
+  programs.ssh.extraConfig = ''
+    Host gh
+      HostName github.com
+      User git
+  '';
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="intel_backlight", MODE="0666", RUN+="${pkgs.coreutils}/bin/chmod a+w /sys/class/backlight/%k/brightness"
+  '';
   # Add ZFS support.
   boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.requestEncryptionCredentials = true;
+  boot.tmpOnTmpfs = true;
 
-  networking.hostId = "yourhostid";
+  networking.hostId = "your_hostid";
+  networking.hostName = "${hostname}"; # Define your hostname.
   # networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -52,17 +71,28 @@ in {
   nixpkgs.config = {
     packageOverrides = pkgs: {
       unstable = import unstableTarball { config = config.nixpkgs.config; };
+	  nur = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") { 
+		  inherit pkgs; 
+	  };
     };
     allowUnfree = true;
   };
 
-  fonts.fonts = with pkgs; [
+#   fonts.fonts = with pkgs; [
+#     fira-code
+#     fira
+#     cooper-hewitt
+#     ibm-plex
+#     fira-code-symbols
+#     powerline-fonts
+#   ];
+  fonts.fonts = with pkgs; [ 
+    cantarell-fonts
     fira-code
-    fira
-    cooper-hewitt
-    ibm-plex
     fira-code-symbols
-    powerline-fonts
+    dina-font
+    joypixels
+    (nerdfonts.override { fonts = [ "FiraCode" "FiraMono" ]; })
   ];
 
   nixpkgs.overlays = [
@@ -272,12 +302,12 @@ in {
       # region new
       # Commandline tools
       coreutils
-      gitAndTools.gitFull
+    #   gitAndTools.gitFull
       man
-      tree
-      wget
+    #   tree
+    #   wget
       vim
-      mkpasswd
+    #   mkpasswd
       jdk11
       openjfx11
 
@@ -311,7 +341,46 @@ in {
       chromium
       virtmanager
 
+	  #instanNix
+		htop gnupg screen tree file
+		fasd fzf direnv
+		wget curl w3m inetutils dnsutils nmap openssl mkpasswd
+		flameshot 
+		gitAndTools.git git-lfs
+		nix-prefetch-scripts nix-update nixpkgs-review cachix
+		nur.repos.instantos.instantnix
+		papirus-icon-theme arc-theme
+		#gnome3.nautilus gsettings-desktop-schemas gnome3.dconf-editor
+		(neovim.override {viAlias = true; vimAlias = true;})
+
     ];
+  };
+  environment.variables = { EDITOR = "nvim"; };
+  environment.shellAliases = { ll="ls -al --color=auto"; ff="sudo vi /etc/nixos/configuration.nix"; ss="sudo nixos-rebuild switch"; };
+  environment.homeBinInPath = true;
+  environment.etc."inputrc".text = ''
+    "\e[Z": menu-complete
+    "\e\e[C": forward-word
+    "\e\e[D": backward-word
+    "\e[A": history-search-backward
+    "\e[B": history-search-forward
+  '';
+  environment.etc."gitconfig".text = ''
+    [alias]
+    ci = commit
+    co = checkout
+    st = status
+    d = diff
+    lg = log
+    fa = fetch --all
+  '';
+  security.sudo = {
+   enable = true;
+   extraConfig = ''
+     Defaults    insults
+      Cmnd_Alias BOOTCMDS = /sbin/shutdown,/usr/sbin/pm-suspend,/sbin/reboot
+      ${main_user} ALL=(root)NOPASSWD:BOOTCMDS
+   '';
   };
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -355,16 +424,47 @@ in {
   services.printing.enable = true;
 
   # Enable sound.
-  # sound.enable = true;
+  sound.enable = true;
   hardware.pulseaudio.enable = true;
 
-  # Enable the X11 windowing system.
+#   # Enable the X11 windowing system.
   services.xserver.enable = true;
-  services.xserver.layout = "us";
-  # services.xserver.xkbOptions = "eurosign:e";
+#   services.xserver.layout = "us";
+#   # services.xserver.xkbOptions = "eurosign:e";
 
-  # Enable touchpad support.
-  services.xserver.libinput.enable = true;
+#   # Enable touchpad support.
+#   services.xserver.libinput.enable = true;
+  services.xserver = {
+    layout = "us";
+    xkbVariant = "intl";
+    libinput.enable = true;  # Enable touchpad support.
+    autorun = true;
+  };
+  programs.slock.enable = true;
+  services.clipmenu.enable = true;
+  services.xserver.exportConfiguration = true;
+  services.dconf.enable = true;
+  services.gvfs.enable = true;
+  services.xserver.displayManager = {
+    defaultSession = "none+instantwm";
+    #startx.enable = true;
+    gdm.enable = false;
+    sddm.enable = false;
+  };
+  services.xserver.desktopManager = {
+    gnome3.enable = false;
+    plasma5.enable = false;
+    xterm.enable = false;
+  };
+  services.xserver.windowManager = {
+    session = pkgs.lib.singleton {
+      name = "instantwm";
+      start = ''
+        startinstantos &
+        waitPID=$!
+      '';
+    };
+  };
 
   # region old
   # Enable Gnome desktop Environment
@@ -376,10 +476,10 @@ in {
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.mutableUsers = false;
-  users.users.qaqulya = {
+  users.users."${main_user}" = {
     isNormalUser = true;
     createHome = true;
-    home = "/home/qaqulya";
+    home = "/home/${main_user}";
     shell = pkgs.zsh;
     subUidRanges = [{
       startUid = 100000;
@@ -389,8 +489,8 @@ in {
       startGid = 100000;
       count = 65536;
     }];
-    extraGroups = [ "wheel" "video" "audio" "disk" "networkmanager" ];
-    hashedPassword = "yourHashedPassword";
+    extraGroups = [ "wheel" "video" "audio" "disk" "networkmanager" "wireshark" "dialout" "docker" ];
+    hashedPassword = "your_hashedpassword";
     uid = 1000;
   };
   users.users.root.hashedPassword = "!";
@@ -398,15 +498,21 @@ in {
   # VirtualBox
   nixpkgs.config.allowUnfree = true;
   virtualisation.virtualbox.host.enable = true;
-  users.extraGroups.vboxusers.members = [ "yourVirtualboxuser" ];
+  users.extraGroups.vboxusers.members = [ "your_virtualboxuser" ];
   virtualisation.virtualbox.host.enableExtensionPack = true;
+  virtualisation.virtualbox.guest.enable = true;  # instantOS is a guest of VirtualBox
 
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
 
-  nix.gc.automatic = true;
+#   nix.gc.automatic = true;
+  nix.autoOptimiseStore = true;
+  nix.gc = {
+    automatic = true;
+    options = "--delete-older-than 14d";
+  };
   nix.gc.dates = "20:15";
   system.autoUpgrade.enable = true;
   system.stateVersion = "21.05"; # Did you read the comment?

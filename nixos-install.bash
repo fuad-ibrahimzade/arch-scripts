@@ -99,9 +99,18 @@ refactorCustomNixConfiguration() {
 	user_password="$2"
 	hased_user_password=$(echo user_password | mkpasswd -s -m 512)
 	hostid=$(head -c 8 /etc/machine-id)
-	sed -i "s|yourhostid|$hostid|g" "nixoszfs.nix"
-	sed -i "s|yourVirtualboxuser|$user_name|g" "nixoszfs.nix"
-	sed -i "s|yourHashedPassword|$hased_user_password|g" "nixoszfs.nix"
+	sed -i "s|your_hostid|$hostid|g" "nixoszfs.nix"
+	sed -i "s|your_hostname|localhost|g" "nixoszfs.nix"
+	sed -i "s|your_username|$user_name|g" "nixoszfs.nix"
+	sed -i "s|your_virtualboxuser|$user_name|g" "nixoszfs.nix"
+	sed -i "s|your_hashedpassword|$hased_user_password|g" "nixoszfs.nix"
+
+	# # run `ip a` to find the values of these
+	physical_interface=$(ls /sys/class/net | grep enp)
+	wifi_interface=$(ls /sys/class/net | grep wl)
+
+	sed -i "s|your_physicalinterface|$physical_interface|g" "nixoszfs.nix"
+	sed -i "s|your_wifiinterface|$wifi_interface|g" "nixoszfs.nix"
 
 	tee -a "nixoszfs.nix" <<- EOF
 	systemd.services.doUserdata = {
