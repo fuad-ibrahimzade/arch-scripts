@@ -86,7 +86,7 @@ install() {
 	user_name="$3"
 	user_password="$4"
 	
-	nixos-generate-config  --root /mnt
+	sudo nixos-generate-config  --root /mnt
 	# cp "nixoszfs.nix" /mnt/etc/nixos/configuration.nix
 	# nixos-install
 
@@ -195,7 +195,7 @@ initAndMountPartitions() {
 	sudo zfs create -o mountpoint=legacy -o com.sun:auto-snapshot=true rpool/home
 	sudo zfs set compression=lz4 rpool/home
 
-	sudov mount -t zfs rpool/root/nixos /mnt
+	sudo mount -t zfs rpool/root/nixos /mnt
 	sudo mkdir /mnt/home
 	sudo mount -t zfs rpool/home /mnt/home
 
