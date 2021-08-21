@@ -12,7 +12,7 @@ main() {
 	connectToWIFI "$ssid" "$passphrase";
 
 	default_Output_Device=${default_Output_Device:-/dev/sda}
-	default_root_partitionsize=${default_root_partitionsize:-/dev/sda}
+	default_root_partitionsize=${default_root_partitionsize:-5}
 	default_root_password=${default_root_password:-root}
 	default_user_name=${default_user_name:-user}
 	default_user_password=${default_user_password:-user}
@@ -33,8 +33,8 @@ main() {
 
 	echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 
-	initPackageManager;
-	initVirtualBoxGuestAdditions;
+	# initPackageManager;
+	# initVirtualBoxGuestAdditions;
 	installDownloadAndEditTools;
 
 	initPartitionsAndMount "$Output_Device" "$root_partitionsize";
@@ -69,6 +69,8 @@ main() {
 	# https://www.reddit.com/r/archlinux/comments/b2jkrp/anyone_tried_nixos_what_are_your_thoughts/
 	# https://nixos.wiki/wiki/NixOS_on_ZFS
 	# https://nixos.wiki/wiki/User:2r/NixOS_on_ZFS
+	# virtualbox guest editions:
+	# https://gist.github.com/cleverca22/85f6d2cd680139f7c6c8b6c2844cb132
 
 	install "$Output_Device" "$root_password" "$user_name" "$user_password";
 
@@ -85,11 +87,39 @@ install() {
 	
 	nixos-generate-config  --root /mnt
 
-	hostid=$(head -c 8 /etc/machine-id)
 
 	# boot.supportedFilesystems = ["zfs"];
 	# boot.zfs.requestEncryptionCredentials = true;
 	# sed -i "s|$search|$replace|g" /mnt/etc/nixos/configuration.nix
+
+}
+
+refactorCustomNixConfiguration() {
+	user_name="$1"
+	user_password="$2"
+	hased_user_password=$(echo user_password | mkpasswd -s -m 512)
+	hostid=$(head -c 8 /etc/machine-id)
+	sed -i "s|yourhostid|$hostid|g" "nixoszfs.nix"
+	sed -i "s|yourVirtualboxuser|$user_name|g" "nixoszfs.nix"
+	sed -i "s|yourHashedPassword|$hased_user_password|g" "nixoszfs.nix"
+
+	tee -a "nixoszfs.nix" <<- EOF
+	systemd.services.doUserdata = {
+		script = ''
+			echo hello
+			flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+		'';
+		wantedBy = ['multi-user.target'];
+		serviceConfig = {
+			Type = "oneshot";
+			ExecStartPost=/bin/sh -c "touch /etc/nixos/do-userdata.nix"
+			RemainAfterExit = false;
+		};
+		unitConfig = {
+			ConditionPathExists = "!/etc/nixos/do-userdata.nix";
+		};
+	};
+	EOF
 
 }
 
@@ -169,11 +199,14 @@ initPartitionsAndMount() {
 
 installDownloadAndEditTools() {
 	packages=$(nix-env -qA --installed "*")
-	nix-env -iA nixos.git
-	nix-env -iA nixos.curl
-	nix-env -iA nixos.wget
-	nix-env -iA nixos.vim
-	nix-env -iA nixos.rsync
+	# packages=$(nix-env -qa --installed "*")
+	# nix-env -iA nixos.git
+	# nix-env -iA nixos.curl
+	# nix-env -iA nixos.wget
+	# nix-env -iA nixos.vim
+	# nix-env -iA nixos.rsync
+	echo 'with import <nixpkgs>{}; [ git curl wget vim rsyc ]' > /tmp/tmp.nix
+	nix-env -if /tmp/tmp.nix
 }
 
 
@@ -200,6 +233,9 @@ initDefaultOptions() {
 	read -r -p "Output Device (default: /dev/sda):" Output_Device
 	Output_Device=${Output_Device:-/dev/sda}
 	echo "$Output_Device"
+	read -r -p "Root partition size in GiB (default: 5Gib):" root_partitionsize;
+	root_partitionsize=${root_partitionsize:-5}
+	echo "$root_partitionsize"
 	read -r -p "Root Password (default: root):" root_password;
 	root_password=${root_password:-root}
 	echo "$root_password"
