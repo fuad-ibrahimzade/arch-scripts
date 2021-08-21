@@ -147,17 +147,18 @@ initAndMountPartitions() {
 	sudo partprobe;
 
 	starting_part_number=$(sudo partx -g /dev/sda | wc -l)
+	is_efi="n"
+	if [[ -d "/sys/firmware/efi/" && -n "$(ls -A /sys/firmware/efi/)" ]]; then
+		is_efi="y"
+	else
+		starting_part_number=$((starting_part_number + 1));
+	fi
 	efipart_num=$((starting_part_number + 1))
 	swappart_num=$((starting_part_number + 2))
 	rootpart_num=$((starting_part_number + 3))
 	efipart="${Output_Device}${efipart_num}";
 	swappart="${Output_Device}${swappart_num}";
 	rootpart="${Output_Device}${rootpart_num}";
-
-	is_efi="n"
-	if [[ -d "/sys/firmware/efi/" && -n "$(ls -A /sys/firmware/efi/)" ]]; then
-		is_efi="y"
-	fi
 
 	# partuuid=$(blkid -s PARTUUID -o value "$efipart")
 	# SDA_ID="$(ls /dev/disk/by-id/ | grep '^[ata]')"
@@ -175,21 +176,9 @@ initAndMountPartitions() {
 	# sgdisk -n 0:0:0 -t 0:BF01 -c 0:ZFS "$DISK"
 	sudo sgdisk -n 0:0:+"$root_partitionsize"GiB -t 0:BF01 -c 0:ZFS "$DISK"
 
-	BOOT=""
-	SWAP=""
-	ZFS=""
-	if [[ $is_efi == "y" ]]; then
-		# BOOT=$DISK-part1
-		# SWAP=$DISK-part2
-		# ZFS=$DISK-part3
-		BOOT=$efipart
-		SWAP=$swappart
-		ZFS=$rootpart
-	else
-		BOOT=$DISK-part2
-		SWAP=$DISK-part3
-		ZFS=$DISK-part4
-	fi
+	BOOT=$efipart
+	SWAP=$swappart
+	ZFS=$rootpart
 
 	sudo zpool create -o ashift=12 -o altroot="/mnt" -O mountpoint=none -O encryption=aes-256-gcm -O keyformat=passphrase rpool "$ZFS"
 	sudo zfs create -o mountpoint=none rpool/root
