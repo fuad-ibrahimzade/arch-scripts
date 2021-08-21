@@ -71,7 +71,7 @@ main() {
 	# https://nixos.wiki/wiki/User:2r/NixOS_on_ZFS
 	# virtualbox guest editions:
 	# https://gist.github.com/cleverca22/85f6d2cd680139f7c6c8b6c2844cb132
-
+	refactorCustomNixConfiguration "$user_name" "$user_password";
 	install "$Output_Device" "$root_password" "$user_name" "$user_password";
 
 
@@ -112,6 +112,7 @@ refactorCustomNixConfiguration() {
 	sed -i "s|your_physicalinterface|$physical_interface|g" "nixoszfs.nix"
 	sed -i "s|your_wifiinterface|$wifi_interface|g" "nixoszfs.nix"
 
+	return
 	tee -a "nixoszfs.nix" <<- EOF
 	systemd.services.doUserdata = {
 		script = ''
@@ -282,6 +283,7 @@ export -f initPackageManager
 export -f initVirtualBoxGuestAdditions
 export -f installDownloadAndEditTools
 export -f initPartitionsAndMount
+export -f refactorCustomNixConfiguration
 export -f install
 
 main "$@"; exit
