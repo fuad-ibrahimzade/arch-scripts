@@ -392,7 +392,7 @@ in {
   # Enable zsh
   programs.zsh = {
     enable = true;
-    autosuggestions = true;
+    autosuggestions.enable = true;
     syntaxHighlighting.enable = true;
     ohMyZsh = {
       enable = true;
