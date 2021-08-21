@@ -99,7 +99,7 @@ install() {
 refactorCustomNixConfiguration() {
 	user_name="$1"
 	user_password="$2"
-	hased_user_password=$(echo user_password | mkpasswd -s -m 512)
+	hased_user_password=$(echo user_password | mkpasswd -m sha-512)
 	hostid=$(head -c 8 /etc/machine-id)
 	sed -i "s|your_hostid|$hostid|g" "nixoszfs.nix"
 	sed -i "s|your_hostname|localhost|g" "nixoszfs.nix"
