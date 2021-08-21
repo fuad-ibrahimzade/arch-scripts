@@ -34,6 +34,7 @@ main() {
 	echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 
 	initPackageManager;
+	initVirtualBoxGuestAdditions;
 	initPartitionsAndMount "$Output_Device" "$root_partitionsize";
 	
 	# tee -a /etc/nixos/configuration.nix <<- EOF
@@ -190,6 +191,19 @@ initPackageManager() {
 	nix-channel --update
 }
 
+initVirtualBoxGuestAdditions() {
+	nix-env -iA nixos.linuxPackages.virtualboxGuestAdditions
+	current_user="$USER"
+	current_group=$(id -g -n)
+	systemctl enable --now vboxservice.service
+	usermod -a -G vboxsf "$current_user"
+	
+	echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+	sudo chown -R "$current_user":"$current_group" /media/sf_Public/ #create shared Public folder inside virtualbox
+	sudo cp /usr/bin/VBoxClient-all sudo cp /usr/local/bin/VBoxClient-all #needed for sharing clipboard inside virtualbox
+	sudo chown -R "$current_user":"$current_group" /usr/local/bin/VBoxClient-all
+}
+
 initDefaultOptions() {
 	read -r -p "Output Device (default: /dev/sda):" Output_Device
 	Output_Device=${Output_Device:-/dev/sda}
@@ -208,6 +222,7 @@ initDefaultOptions() {
 export -f install
 export -f connectToWIFI
 export -f initPackageManager
+export -f initVirtualBoxGuestAdditions
 export -f initDefaultOptions
 export -f initPartitionsAndMount
 
