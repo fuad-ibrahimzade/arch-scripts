@@ -119,43 +119,43 @@ in {
       # "${pkgs.unstable.nushell}/bin/nu"
     ];
 
-    etc = with pkgs; {
-      "jdk11".source = jdk11;
-      "openjfx11".source = openjfx11;
-      "containers/policy.json" = {
-        mode = "0644";
-        text = ''
-          {   
-            "default": [
-              {
-                "type": "insecureAcceptAnything"
-              }
-             ],
-            "transports":
-              {
-                "docker-daemon":
-                  {
-                    "": [{"type":"insecureAcceptAnything"}]
-                  }
-              }
-          }
-        '';
-      };
+    # etc = with pkgs; {
+    #   "jdk11".source = jdk11;
+    #   "openjfx11".source = openjfx11;
+    #   "containers/policy.json" = {
+    #     mode = "0644";
+    #     text = ''
+    #       {   
+    #         "default": [
+    #           {
+    #             "type": "insecureAcceptAnything"
+    #           }
+    #          ],
+    #         "transports":
+    #           {
+    #             "docker-daemon":
+    #               {
+    #                 "": [{"type":"insecureAcceptAnything"}]
+    #               }
+    #           }
+    #       }
+    #     '';
+    #   };
 
-      "containers/registries.conf" = {
-        mode = "0644";
-        text = ''
-          [registries.search]
-          registries = ['docker.io', 'quay.io']
-        '';
-      };
-    };
+    #   "containers/registries.conf" = {
+    #     mode = "0644";
+    #     text = ''
+    #       [registries.search]
+    #       registries = ['docker.io', 'quay.io']
+    #     '';
+    #   };
+    # };
 
-    variables = {
-      EDITOR = pkgs.lib.mkOverride 0 "kak";
-      BROWSER = pkgs.lib.mkOverride 0 "chromium";
-      TERMINAL = pkgs.lib.mkOverride 0 "kitty";
-    };
+    # variables = {
+    #   EDITOR = pkgs.lib.mkOverride 0 "kak";
+    #   BROWSER = pkgs.lib.mkOverride 0 "chromium";
+    #   TERMINAL = pkgs.lib.mkOverride 0 "kitty";
+    # };
 
     systemPackages = with pkgs; [
 
@@ -472,8 +472,6 @@ in {
   #   services.xserver.displayManager.gdm.enable = true;
   #   services.xserver.desktopManager.gnome3.enable = true;
   # region new
-  # Enable intantNix Window Manager
-  services.xserver.displayManager.gdm.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.mutableUsers = false;
