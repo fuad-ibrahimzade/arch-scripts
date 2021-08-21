@@ -87,7 +87,8 @@ install() {
 	user_password="$4"
 	
 	nixos-generate-config  --root /mnt
-
+	# cp "nixoszfs.nix" /mnt/etc/nixos/configuration.nix
+	# nixos-install
 
 	# boot.supportedFilesystems = ["zfs"];
 	# boot.zfs.requestEncryptionCredentials = true;
@@ -194,15 +195,15 @@ initAndMountPartitions() {
 	sudo zfs create -o mountpoint=legacy -o com.sun:auto-snapshot=true rpool/home
 	sudo zfs set compression=lz4 rpool/home
 
-	mount -t zfs rpool/root/nixos /mnt
-	mkdir /mnt/home
-	mount -t zfs rpool/home /mnt/home
+	sudov mount -t zfs rpool/root/nixos /mnt
+	sudo mkdir /mnt/home
+	sudo mount -t zfs rpool/home /mnt/home
 
-	mkfs.vfat "$BOOT"
-	mkdir /mnt/boot
-	mount "$BOOT" /mnt/boot
+	sudo mkfs.vfat "$BOOT"
+	sudo mkdir /mnt/boot
+	sudo mount "$BOOT" /mnt/boot
 
-	mkswap -L swap "$SWAP"
+	sudo mkswap -L swap "$SWAP"
 }
 
 installDownloadAndEditTools() {
