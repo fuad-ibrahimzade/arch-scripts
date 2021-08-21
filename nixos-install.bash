@@ -31,7 +31,8 @@ main() {
 		initDefaultOptions;
 	fi
 
-	echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+	# echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+	resetISOPasswords;
 
 	# initPackageManager;
 	# initVirtualBoxGuestAdditions;
@@ -75,7 +76,7 @@ main() {
 	install "$Output_Device" "$root_password" "$user_name" "$user_password";
 
 
-	head -n -1 /etc/sudoers > temp.txt ; sudo -u root mv temp.txt /etc/sudoers # delete NOPASSWD line
+	# head -n -1 /etc/sudoers > temp.txt ; sudo -u root mv temp.txt /etc/sudoers # delete NOPASSWD line
 	#reboot
 }
 
@@ -233,6 +234,11 @@ initVirtualBoxGuestAdditions() {
 	sudo chown -R "$current_user":"$current_group" /usr/local/bin/VBoxClient-all
 }
 
+resetISOPasswords() {
+	echo root:root | sudo chpasswd
+	echo "$USER":"$USER" | sudo chpasswd
+}
+
 initPackageManager() {
 	nix-channel --add https://nixos.org/channels/nixos-21.05 nixos
 	nix-channel --add https://nixos.org/channels/nixos-unstable unstable
@@ -279,6 +285,7 @@ connectToWIFI() {
 
 export -f connectToWIFI
 export -f initDefaultOptions
+export -f resetISOPasswords
 export -f initPackageManager
 export -f initVirtualBoxGuestAdditions
 export -f installDownloadAndEditTools
