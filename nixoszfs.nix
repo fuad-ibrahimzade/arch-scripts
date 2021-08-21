@@ -63,8 +63,8 @@ in {
   i18n = {
     defaultLocale = "en_US.UTF-8";
   };
-  console.KeyMap = "us";
-  console.Font = "Lat2-Terminus16";
+  console.keyMap = "us";
+  console.font = "Lat2-Terminus16";
 
 
   # Set your time zone.
