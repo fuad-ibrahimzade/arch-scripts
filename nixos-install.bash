@@ -169,7 +169,6 @@ initPartitionsAndMount() {
 
 installDownloadAndEditTools() {
 	packages=$(nix-env -qA --installed "*")
-	nix-env -iA nixos.linuxPackages.virtualboxGuestAdditions
 	nix-env -iA nixos.git
 	nix-env -iA nixos.curl
 	nix-env -iA nixos.wget
