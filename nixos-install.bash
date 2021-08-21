@@ -86,7 +86,7 @@ install() {
 	user_name="$3"
 	user_password="$4"
 	
-	sudo nixos-generate-config  --root /mnt
+	sudo nixos-generate-config --root /mnt
 	sudo cp "nixoszfs.nix" /mnt/etc/nixos/configuration.nix
 	sudo nixos-install --show-trace
 
