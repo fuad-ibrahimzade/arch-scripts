@@ -72,6 +72,9 @@ main() {
 	# https://nixos.wiki/wiki/User:2r/NixOS_on_ZFS
 	# virtualbox guest editions:
 	# https://gist.github.com/cleverca22/85f6d2cd680139f7c6c8b6c2844cb132
+	# zsh config:
+	# https://git.ingolf-wagner.de/palo/nixos-config/src/f7e1df5ad3c248f6a5d223fff08cac1fad3a6775/modules/programs/shell-zsh.nix
+	
 	refactorCustomNixConfiguration "$user_name" "$user_password";
 	install "$Output_Device" "$root_password" "$user_name" "$user_password";
 
