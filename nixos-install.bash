@@ -12,7 +12,7 @@ main() {
 	connectToWIFI "$ssid" "$passphrase";
 
 	default_Output_Device=${default_Output_Device:-/dev/sda}
-	default_root_partitionsize=${default_root_partitionsize:-5}
+	default_root_partitionsize=${default_root_partitionsize:-10}
 	default_root_password=${default_root_password:-root}
 	default_user_name=${default_user_name:-user}
 	default_user_password=${default_user_password:-user}
@@ -142,7 +142,9 @@ refactorCustomNixConfiguration() {
 }
 
 initAndMountPartitions() {
-	# https://github.com/bhougland18/nixos_config
+	# cari https://github.com/bhougland18/nixos_config
+	# cari https://github.com/instantOS/instantNIX	
+		 # https://raw.githubusercontent.com/instantOS/instantNIX/master/utils/configuration.nix
 
 	Output_Device="$1"
 	root_partitionsize="$2"
@@ -253,8 +255,8 @@ initDefaultOptions() {
 	read -r -p "Output Device (default: /dev/sda):" Output_Device
 	Output_Device=${Output_Device:-/dev/sda}
 	echo "$Output_Device"
-	read -r -p "Root partition size in GiB (default: 5Gib):" root_partitionsize;
-	root_partitionsize=${root_partitionsize:-5}
+	read -r -p "Root partition size in GiB (default: 10Gib):" root_partitionsize;
+	root_partitionsize=${root_partitionsize:-10}
 	echo "$root_partitionsize"
 	read -r -p "Root Password (default: root):" root_password;
 	root_password=${root_password:-root}
