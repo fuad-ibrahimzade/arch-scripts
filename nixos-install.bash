@@ -201,7 +201,7 @@ initAndMountPartitions() {
 	if [[ "$remaining_free_disk_size" -gt "$root_partitionsize" ]]; then
 		sudo sgdisk -n 0:0:+"$root_partitionsize"GiB -t 0:BF01 -c 0:ZFS "$DISK"
 	else
-		sgdisk -n 0:0:0 -t 0:BF01 -c 0:ZFS "$DISK"
+		sudo sgdisk -n 0:0:0 -t 0:BF01 -c 0:ZFS "$DISK"
 	fi
 
 	sudo partprobe;
