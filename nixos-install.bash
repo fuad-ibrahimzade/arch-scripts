@@ -38,7 +38,7 @@ main() {
 	# initVirtualBoxGuestAdditions;
 	installDownloadAndEditTools;
 
-	initPartitionsAndMount "$Output_Device" "$root_partitionsize";
+	initAndMountPartitions "$Output_Device" "$root_partitionsize";
 	
 	# tee -a /etc/nixos/configuration.nix <<- EOF
 	# security.sudo.extraRules= [
@@ -134,7 +134,7 @@ refactorCustomNixConfiguration() {
 
 }
 
-initPartitionsAndMount() {
+initAndMountPartitions() {
 	# https://github.com/bhougland18/nixos_config
 
 	Output_Device="$1"
@@ -146,7 +146,7 @@ initPartitionsAndMount() {
 
 	sudo partprobe;
 
-	starting_part_number=$(partx -g /dev/sda | wc -l)
+	starting_part_number=$(sudo partx -g /dev/sda | wc -l)
 	efipart_num=$((starting_part_number + 1))
 	swappart_num=$((starting_part_number + 2))
 	rootpart_num=$((starting_part_number + 3))
@@ -216,7 +216,7 @@ installDownloadAndEditTools() {
 	# nix-env -iA nixos.wget
 	# nix-env -iA nixos.vim
 	# nix-env -iA nixos.rsync
-	echo 'with import <nixpkgs>{}; [ git curl wget vim rsyc nix-index ]' > /tmp/tmp.nix
+	echo 'with import <nixpkgs>{}; [ git curl wget vim rsync nix-index ]' > /tmp/tmp.nix
 	nix-env -if /tmp/tmp.nix
 }
 
@@ -289,7 +289,7 @@ export -f resetISOPasswords
 export -f initPackageManager
 export -f initVirtualBoxGuestAdditions
 export -f installDownloadAndEditTools
-export -f initPartitionsAndMount
+export -f initAndMountPartitions
 export -f refactorCustomNixConfiguration
 export -f install
 
