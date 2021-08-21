@@ -87,8 +87,8 @@ install() {
 	user_password="$4"
 	
 	sudo nixos-generate-config  --root /mnt
-	# cp "nixoszfs.nix" /mnt/etc/nixos/configuration.nix
-	# nixos-install
+	# sudo cp "nixoszfs.nix" /mnt/etc/nixos/configuration.nix
+	# sudo nixos-install
 
 	# boot.supportedFilesystems = ["zfs"];
 	# boot.zfs.requestEncryptionCredentials = true;
@@ -115,7 +115,7 @@ refactorCustomNixConfiguration() {
 	sed -i "s|your_wifiinterface|$wifi_interface|g" "nixoszfs.nix"
 
 	working_interface="$physical_interface";
-	if [[ -z $(working_interface) ]]; then
+	if [[ -z "$working_interface" ]]; then
 		working_interface="$wifi_interface"
 	fi
 	sed -i "s|your_working_interface|$working_interface|g" "nixoszfs.nix"
