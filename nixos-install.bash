@@ -175,7 +175,12 @@ initAndMountPartitions() {
 		sudo sgdisk -n 0:0:+1GiB -t 0:ea00 -c 0:boot "$DISK"
 	fi
 
-	sudo sgdisk -n 0:0:+4GiB -t 0:8200 -c 0:swap "$DISK"
+	disk_size=$(sudo fdisk -l | grep Disk | grep Output_Device | awk -F'GiB' '{print $1}' | awk -F: '{print $2}')
+	if ((disk_size >14));then
+		sudo sgdisk -n 0:0:+4GiB -t 0:8200 -c 0:swap "$DISK"
+	else
+		sudo sgdisk -n 0:0:+1GiB -t 0:8200 -c 0:swap "$DISK"
+	fi
 	# sgdisk -n 0:0:0 -t 0:BF01 -c 0:ZFS "$DISK"
 	sudo sgdisk -n 0:0:+"$root_partitionsize"GiB -t 0:BF01 -c 0:ZFS "$DISK"
 
