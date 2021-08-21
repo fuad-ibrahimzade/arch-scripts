@@ -87,8 +87,8 @@ install() {
 	user_password="$4"
 	
 	sudo nixos-generate-config  --root /mnt
-	# sudo cp "nixoszfs.nix" /mnt/etc/nixos/configuration.nix
-	# sudo nixos-install
+	sudo cp "nixoszfs.nix" /mnt/etc/nixos/configuration.nix
+	sudo nixos-install --show-trace
 
 	# boot.supportedFilesystems = ["zfs"];
 	# boot.zfs.requestEncryptionCredentials = true;
