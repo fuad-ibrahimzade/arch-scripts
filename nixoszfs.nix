@@ -4,26 +4,25 @@
 
 { config, pkgs, ... }:
 
-  let
-    unstableTarball =
-      fetchTarball
-        https://github.com/NixOS/nixpkgs-channels/archive/nixos-unstable.tar.gz;
+let
+  unstableTarball = fetchTarball
+    "https://github.com/NixOS/nixpkgs-channels/archive/nixos-unstable.tar.gz";
 
-
-  in 
-  {
-    imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-      # add home-manager in an updated fashion
-      "${builtins.fetchTarball https://github.com/rycee/home-manager/archive/release-21.05.tar.gz}/nixos"
-    ];
+in {
+  imports = [ # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+    # add home-manager in an updated fashion
+    "${
+      builtins.fetchTarball
+      "https://github.com/rycee/home-manager/archive/release-21.05.tar.gz"
+    }/nixos"
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   # Add ZFS support.
-  boot.supportedFilesystems = ["zfs"];
+  boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.requestEncryptionCredentials = true;
 
   networking.hostId = "yourhostid";
@@ -41,24 +40,22 @@
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Select internationalisation properties.
-   i18n = {
-     consoleFont = "Lat2-Terminus16";
-     consoleKeyMap = "us";
-     defaultLocale = "en_US.UTF-8";
-   };
+  i18n = {
+    consoleFont = "Lat2-Terminus16";
+    consoleKeyMap = "us";
+    defaultLocale = "en_US.UTF-8";
+  };
 
   # Set your time zone.
   time.timeZone = "Asia/Baku";
 
   nixpkgs.config = {
     packageOverrides = pkgs: {
-      unstable = import unstableTarball {
-        config = config.nixpkgs.config;
-      };
+      unstable = import unstableTarball { config = config.nixpkgs.config; };
     };
-    allowUnfree = true;  
+    allowUnfree = true;
   };
-  
+
   fonts.fonts = with pkgs; [
     fira-code
     fira
@@ -67,19 +64,20 @@
     fira-code-symbols
     powerline-fonts
   ];
-  
+
   nixpkgs.overlays = [
     (self: super: {
       kakoune = super.wrapKakoune self.kakoune-unwrapped {
         configure = {
-          plugins = with self.kakounePlugins; [
-            parinfer-rust
-            #unstable.kak-lsp
-          ];
+          plugins = with self.kakounePlugins;
+            [
+              parinfer-rust
+              #unstable.kak-lsp
+            ];
         };
       };
     })
-   ];
+  ];
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -87,236 +85,233 @@
     shells = [
       "${pkgs.bash}/bin/bash"
       "${pkgs.zsh}/bin/zsh"
-     # "${pkgs.unstable.nushell}/bin/nu"
+      # "${pkgs.unstable.nushell}/bin/nu"
     ];
- 
 
     etc = with pkgs; {
       "jdk11".source = jdk11;
       "openjfx11".source = openjfx11;
       "containers/policy.json" = {
-          mode="0644";
-          text=''
-            {   
-              "default": [
-                {
-                  "type": "insecureAcceptAnything"
-                }
-               ],
-              "transports":
-                {
-                  "docker-daemon":
-                    {
-                      "": [{"type":"insecureAcceptAnything"}]
-                    }
-                }
-            }
-          '';
-        };
-
-      "containers/registries.conf" = {
-          mode="0644";
-          text=''
-            [registries.search]
-            registries = ['docker.io', 'quay.io']
-          '';
-        };
+        mode = "0644";
+        text = ''
+          {   
+            "default": [
+              {
+                "type": "insecureAcceptAnything"
+              }
+             ],
+            "transports":
+              {
+                "docker-daemon":
+                  {
+                    "": [{"type":"insecureAcceptAnything"}]
+                  }
+              }
+          }
+        '';
       };
 
+      "containers/registries.conf" = {
+        mode = "0644";
+        text = ''
+          [registries.search]
+          registries = ['docker.io', 'quay.io']
+        '';
+      };
+    };
 
     variables = {
       EDITOR = pkgs.lib.mkOverride 0 "kak";
       BROWSER = pkgs.lib.mkOverride 0 "chromium";
-      TERMINAL = pkgs.lib.mkOverride 0 "kitty";	
+      TERMINAL = pkgs.lib.mkOverride 0 "kitty";
     };
-  
+
     systemPackages = with pkgs; [
-     
-	# region old
-		#Commandline tools
-		#  coreutils
-		#  gitAndTools.gitFull
-		#  gitAndTools.grv
-		#  man
-		#  mkpasswd
-		#  wget
-		#  xorg.xkill
-		#  ripgrep-all
-		#  visidata
-		#  youtube-dl
-		#  chromedriver
-		#  geckodriver
-		#  pandoc
-		#  jdk11
-		#  openjfx11
-		#  direnv
-		#  emacs
-		#  aspell #used by flyspell in spacemacs
-		#  aspellDicts.en
-		#  aspellDicts.en-computers
-		#  chezmoi #dotfiles manager
-		#  entr
-		#  modd
-		#  devd
-		#  notify-desktop
-		#  xclip
-		#  exercism
-		#  kakoune
-		#  unstable.kak-lsp
-		#  unstable.kitty
-		#  taskwarrior
-		#  tasknc
-		#  nnn
-		#  nq     
-		#  fpp #facebook filepicker
-		#  rofi
-		#  fff
-		#  taskell
-		#  trash-cli
-		#  bat
-		#  unstable.tre
-		#  corgi
-		#  fzf
-		#  apparix #cli bookmarks
-		#  pazi # autojump
-		#  exa #better ls
-		#  skim # fuzzy finder
-		#  jq
-		#  yq-go
-		#  unstable.ncurses
-		#  unstable.tre-command
-		#  unstable.tree-sitter
-		#  surf
-		
-		#NIX tools
-		#  nixpkgs-lint
-		#  nixpkgs-fmt
-		#  nixfmt
 
-		#Containers
-		#  unstable.podman
-		#  unstable.buildah
-		#  unstable.conmon
-		#  unstable.runc
-		#  unstable.slirp4netns
-		#  unstable.fuse-overlayfs
+      # region old
+      #Commandline tools
+      #  coreutils
+      #  gitAndTools.gitFull
+      #  gitAndTools.grv
+      #  man
+      #  mkpasswd
+      #  wget
+      #  xorg.xkill
+      #  ripgrep-all
+      #  visidata
+      #  youtube-dl
+      #  chromedriver
+      #  geckodriver
+      #  pandoc
+      #  jdk11
+      #  openjfx11
+      #  direnv
+      #  emacs
+      #  aspell #used by flyspell in spacemacs
+      #  aspellDicts.en
+      #  aspellDicts.en-computers
+      #  chezmoi #dotfiles manager
+      #  entr
+      #  modd
+      #  devd
+      #  notify-desktop
+      #  xclip
+      #  exercism
+      #  kakoune
+      #  unstable.kak-lsp
+      #  unstable.kitty
+      #  taskwarrior
+      #  tasknc
+      #  nnn
+      #  nq     
+      #  fpp #facebook filepicker
+      #  rofi
+      #  fff
+      #  taskell
+      #  trash-cli
+      #  bat
+      #  unstable.tre
+      #  corgi
+      #  fzf
+      #  apparix #cli bookmarks
+      #  pazi # autojump
+      #  exa #better ls
+      #  skim # fuzzy finder
+      #  jq
+      #  yq-go
+      #  unstable.ncurses
+      #  unstable.tre-command
+      #  unstable.tree-sitter
+      #  surf
 
-		#Shells
-		#  starship
-		#  any-nix-shell
-		#  unstable.nushell
-		#zsh Tools
-		#  zsh
-		#  zsh-autosuggestions
-		#  nix-zsh-completions
+      #NIX tools
+      #  nixpkgs-lint
+      #  nixpkgs-fmt
+      #  nixfmt
 
-		#asciidoctor publishing
-		#  unstable.asciidoctorj #only on unstable chanell
-		#  graphviz
-		#  compass
-		#  pandoc
-		#  ditaa
+      #Containers
+      #  unstable.podman
+      #  unstable.buildah
+      #  unstable.conmon
+      #  unstable.runc
+      #  unstable.slirp4netns
+      #  unstable.fuse-overlayfs
 
-		#GUI Apps
-		#  chromium
-		#  dbeaver
-		#  slack
-		#  fondo
-		#  torrential
-		#  vocal
-		#  lollypop
-		#  unetbootin
-		#  vscodium
-		#  gitg
-		#  firefox
-		#  unstable.wpsoffice
-		#  unclutter
-		#  pithos
-		#  joplin-desktop
-		#  virtmanager
-		#  inkscape
-		#  calibre
+      #Shells
+      #  starship
+      #  any-nix-shell
+      #  unstable.nushell
+      #zsh Tools
+      #  zsh
+      #  zsh-autosuggestions
+      #  nix-zsh-completions
 
-		# Gnome desktop
-		#  gnome3.gnome-boxes
-		#  gnome3.polari
-		#  gnome3.dconf-editor
-		#  gnome3.gnome-tweaks
-		#  gnomeExtensions.impatience
-		#  gnomeExtensions.dash-to-dock
-		#  gnomeExtensions.dash-to-panel
-		#  unstable.gnomeExtensions.tilingnome #broken
-		#  gnomeExtensions.system-monitor
-		
-		#themes
-		#  numix-cursor-theme
-		#  bibata-cursors
-		#  capitaine-cursors
-		#  equilux-theme
-		#  materia-theme
-		#  mojave-gtk-theme
-		#  nordic
-		#  paper-gtk-theme
-		#  paper-icon-theme
-		#  papirus-icon-theme
-		#  plata-theme
-		#  sierra-gtk-theme
+      #asciidoctor publishing
+      #  unstable.asciidoctorj #only on unstable chanell
+      #  graphviz
+      #  compass
+      #  pandoc
+      #  ditaa
 
-		#Clojure
-		#  clojure
-		#  clj-kondo
-		#  leiningen
-		#  boot
-		#  parinfer-rust
-		#  unstable.clojure-lsp
+      #GUI Apps
+      #  chromium
+      #  dbeaver
+      #  slack
+      #  fondo
+      #  torrential
+      #  vocal
+      #  lollypop
+      #  unetbootin
+      #  vscodium
+      #  gitg
+      #  firefox
+      #  unstable.wpsoffice
+      #  unclutter
+      #  pithos
+      #  joplin-desktop
+      #  virtmanager
+      #  inkscape
+      #  calibre
 
-		#Python
-		#  python38Full
+      # Gnome desktop
+      #  gnome3.gnome-boxes
+      #  gnome3.polari
+      #  gnome3.dconf-editor
+      #  gnome3.gnome-tweaks
+      #  gnomeExtensions.impatience
+      #  gnomeExtensions.dash-to-dock
+      #  gnomeExtensions.dash-to-panel
+      #  unstable.gnomeExtensions.tilingnome #broken
+      #  gnomeExtensions.system-monitor
 
-	# region new
-	# Commandline tools
-	coreutils
-	gitAndTools.gitFull
-	man
-	tree
-	wget
-	vim
-	mkpasswd
-	jdk11
-	openjfx11
+      #themes
+      #  numix-cursor-theme
+      #  bibata-cursors
+      #  capitaine-cursors
+      #  equilux-theme
+      #  materia-theme
+      #  mojave-gtk-theme
+      #  nordic
+      #  paper-gtk-theme
+      #  paper-icon-theme
+      #  papirus-icon-theme
+      #  plata-theme
+      #  sierra-gtk-theme
 
-	#NIX tools2
-	nixpkgs-lint
-	nixpkgs-fmt
-	nixfmt
-	nix-index
+      #Clojure
+      #  clojure
+      #  clj-kondo
+      #  leiningen
+      #  boot
+      #  parinfer-rust
+      #  unstable.clojure-lsp
 
-	#Containers2
-	unstable.podman
-	unstable.buildah
-	unstable.conmon
-	unstable.runc
-	unstable.slirp4netns
-	unstable.fuse-overlayfs
+      #Python
+      #  python38Full
 
-	#Shells2
-	starship
-	any-nix-shell
-	unstable.nushell
-	#zsh Tools2
-	zsh
-	zsh-autosuggestions
-	nix-zsh-completions
+      # region new
+      # Commandline tools
+      coreutils
+      gitAndTools.gitFull
+      man
+      tree
+      wget
+      vim
+      mkpasswd
+      jdk11
+      openjfx11
 
-	#Python2
-	python38Full
+      #NIX tools2
+      nixpkgs-lint
+      nixpkgs-fmt
+      nixfmt
+      nix-index
 
-	#GUI Apps2
-	chromium
-    virtmanager
+      #Containers2
+      unstable.podman
+      unstable.buildah
+      unstable.conmon
+      unstable.runc
+      unstable.slirp4netns
+      unstable.fuse-overlayfs
 
+      #Shells2
+      starship
+      any-nix-shell
+      unstable.nushell
+      #zsh Tools2
+      zsh
+      zsh-autosuggestions
+      nix-zsh-completions
 
-   ];
+      #Python2
+      python38Full
+
+      #GUI Apps2
+      chromium
+      virtmanager
+
+    ];
   };
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -343,9 +338,9 @@
   services.zfs.autoSnapshot.enable = true;
   services.zfs.autoScrub.enable = true;
   services.zfs.trim.enable = true;
-  
+
   # To use Lorri for development
-  services.lorri.enable = true; 
+  services.lorri.enable = true;
 
   # Flatpak enable
   services.flatpak.enable = true;
@@ -364,42 +359,48 @@
   hardware.pulseaudio.enable = true;
 
   # Enable the X11 windowing system.
-   services.xserver.enable = true;
-   services.xserver.layout = "us";
+  services.xserver.enable = true;
+  services.xserver.layout = "us";
   # services.xserver.xkbOptions = "eurosign:e";
 
   # Enable touchpad support.
-   services.xserver.libinput.enable = true;
+  services.xserver.libinput.enable = true;
 
   # region old
-	# Enable Gnome desktop Environment
-	#   services.xserver.displayManager.gdm.enable = true;
-	#   services.xserver.desktopManager.gnome3.enable = true;
+  # Enable Gnome desktop Environment
+  #   services.xserver.displayManager.gdm.enable = true;
+  #   services.xserver.desktopManager.gnome3.enable = true;
   # region new
   # Enable intantNix Window Manager
   services.xserver.displayManager.gdm.enable = true;
-  
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.mutableUsers = false;
   users.users.qaqulya = {
-     isNormalUser = true;
-	 createHome=true;
-	 home = "/home/qaqulya";
-     shell = pkgs.zsh;
-     subUidRanges = [{ startUid = 100000; count = 65536; }]; #for podman containers
-     subGidRanges = [{ startGid = 100000; count = 65536; }];
-     extraGroups = [ "wheel" "video" "audio" "disk" "networkmanager" ]; 
-	 hashedPassword = "yourHashedPassword";
-     uid = 1000;
-   };
-   users.users.root.hashedPassword = "!";
+    isNormalUser = true;
+    createHome = true;
+    home = "/home/qaqulya";
+    shell = pkgs.zsh;
+    subUidRanges = [{
+      startUid = 100000;
+      count = 65536;
+    }]; # for podman containers
+    subGidRanges = [{
+      startGid = 100000;
+      count = 65536;
+    }];
+    extraGroups = [ "wheel" "video" "audio" "disk" "networkmanager" ];
+    hashedPassword = "yourHashedPassword";
+    uid = 1000;
+  };
+  users.users.root.hashedPassword = "!";
 
-   # VirtualBox
-   nixpkgs.config.allowUnfree = true;
-   virtualisation.virtualbox.host.enable = true;
-   users.extraGroups.vboxusers.members = [ "yourVirtualboxuser" ];
-   virtualisation.virtualbox.host.enableExtensionPack = true;
-  
+  # VirtualBox
+  nixpkgs.config.allowUnfree = true;
+  virtualisation.virtualbox.host.enable = true;
+  users.extraGroups.vboxusers.members = [ "yourVirtualboxuser" ];
+  virtualisation.virtualbox.host.enableExtensionPack = true;
+
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
