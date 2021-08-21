@@ -186,7 +186,7 @@ initAndMountPartitions() {
 
 	sudo partprobe;
 
-	disk_size=$(sudo fdisk -l | grep Disk | grep Output_Device | awk -F'GiB' '{print $1}' | awk -F: '{print $2}')
+	disk_size=$(sudo fdisk -l | grep Disk | grep Output_Device | awk -F"GiB" '{print $1}' | awk -F: '{print $2}')
 	if ((disk_size >16));then
 		sudo sgdisk -n 0:0:+4GiB -t 0:8200 -c 0:swap "$DISK"
 	else
