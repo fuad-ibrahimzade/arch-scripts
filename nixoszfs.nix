@@ -61,10 +61,11 @@ in {
 
   # Select internationalisation properties.
   i18n = {
-    consoleFont = "Lat2-Terminus16";
-    consoleKeyMap = "us";
     defaultLocale = "en_US.UTF-8";
   };
+  console.KeyMap = "us";
+  console.Font = "Lat2-Terminus16";
+
 
   # Set your time zone.
   time.timeZone = "Asia/Baku";
@@ -391,7 +392,7 @@ in {
   # Enable zsh
   programs.zsh = {
     enable = true;
-    enableAutosuggestions = true;
+    autosuggestions = true;
     syntaxHighlighting.enable = true;
     ohMyZsh = {
       enable = true;
@@ -454,7 +455,7 @@ in {
     sddm.enable = false;
   };
   services.xserver.desktopManager = {
-    gnome3.enable = false;
+    gnome.enable = false;
     plasma5.enable = false;
     xterm.enable = false;
   };
