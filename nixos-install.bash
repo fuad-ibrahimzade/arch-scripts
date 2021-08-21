@@ -36,7 +36,7 @@ main() {
 
 	# initPackageManager;
 	# initVirtualBoxGuestAdditions;
-	installDownloadAndEditTools;
+	# installDownloadAndEditTools;
 
 	initAndMountPartitions "$Output_Device" "$root_partitionsize";
 	
