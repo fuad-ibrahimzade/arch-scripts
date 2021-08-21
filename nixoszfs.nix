@@ -289,6 +289,7 @@
 	nixpkgs-lint
 	nixpkgs-fmt
 	nixfmt
+	nix-index
 
 	#Containers2
 	unstable.podman

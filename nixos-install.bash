@@ -205,7 +205,7 @@ installDownloadAndEditTools() {
 	# nix-env -iA nixos.wget
 	# nix-env -iA nixos.vim
 	# nix-env -iA nixos.rsync
-	echo 'with import <nixpkgs>{}; [ git curl wget vim rsyc ]' > /tmp/tmp.nix
+	echo 'with import <nixpkgs>{}; [ git curl wget vim rsyc nix-index ]' > /tmp/tmp.nix
 	nix-env -if /tmp/tmp.nix
 }
 
