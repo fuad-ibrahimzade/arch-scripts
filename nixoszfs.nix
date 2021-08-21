@@ -444,7 +444,7 @@ in {
   programs.slock.enable = true;
   services.clipmenu.enable = true;
   services.xserver.exportConfiguration = true;
-  services.dconf.enable = true;
+  programs.dconf.enable = true;
   services.gvfs.enable = true;
   services.xserver.displayManager = {
     defaultSession = "none+instantwm";
@@ -495,7 +495,7 @@ in {
   users.users.root.hashedPassword = "!";
 
   # VirtualBox
-  nixpkgs.config.allowUnfree = true;
+#   nixpkgs.config.allowUnfree = true;
   virtualisation.virtualbox.host.enable = true;
   users.extraGroups.vboxusers.members = [ "your_virtualboxuser" ];
   virtualisation.virtualbox.host.enableExtensionPack = true;
