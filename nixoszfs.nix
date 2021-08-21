@@ -414,6 +414,7 @@ in {
 
   # Flatpak enable
   services.flatpak.enable = true;
+  xdg.portal.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
