@@ -40,6 +40,7 @@ in {
     ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="intel_backlight", MODE="0666", RUN+="${pkgs.coreutils}/bin/chmod a+w /sys/class/backlight/%k/brightness"
   '';
   # Add ZFS support.
+  boot.initrd.supportedFilesystems = ["zfs"];
   boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.requestEncryptionCredentials = true;
   boot.tmpOnTmpfs = true;

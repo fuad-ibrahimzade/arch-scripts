@@ -32,6 +32,7 @@ in
   # programs.nm-applet.enable = true;
 
   # Add ZFS support.
+  boot.initrd.supportedFilesystems = ["zfs"]
   boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.requestEncryptionCredentials = true;
   boot.tmpOnTmpfs = true;
