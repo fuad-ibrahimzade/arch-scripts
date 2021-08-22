@@ -59,14 +59,14 @@ in
   services.zfs.trim.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.mutableUsers = false;
+  # users.mutableUsers = false;
   users.users.${main_user} = {
     isNormalUser = true;
     createHome = true;
     home = "/home/${main_user}";
     extraGroups = [ "wheel" "networkmanager" ];
   };
-  users.users.root.hashedPassword = "!";
+  # users.users.root.hashedPassword = "!";
 
   nixpkgs.config.allowUnfree = true;
 
