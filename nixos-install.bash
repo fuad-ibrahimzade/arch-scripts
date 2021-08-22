@@ -97,6 +97,7 @@ install() {
 
 	sed -i "s|canTouchEfiVariables = true;|canTouchEfiVariables = false;|g" "$nixosconfig" #bug fix efi boot no space left
 
+	# sudo nix-collect-garbage -d
 	sudo nixos-install --show-trace
 
 	efibootmgr -c -d "$Output_Device" -p 1 -L "SystemD" -l "\EFI\systemd\systemd-bootx64.efi" #bug fix efi boot no space left
