@@ -59,7 +59,7 @@ in
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.mutableUsers = false;
-  users.users."${main_user}" = {
+  users.users.${main_user} = {
     isNormalUser = true;
     createHome = true;
     home = "/home/${main_user}";
