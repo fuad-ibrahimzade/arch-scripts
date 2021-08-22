@@ -29,7 +29,7 @@ in
   # networking.networkmanager.unmanaged = [
   #   "*" "except:type:wwan" "except:type:gsm"
   # ]; #for not conflicting with wpa_supplicant
-  programs.nm-applet.enable = true;
+  # programs.nm-applet.enable = true;
 
   # Add ZFS support.
   boot.supportedFilesystems = [ "zfs" ];
