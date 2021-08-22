@@ -24,7 +24,7 @@ in
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.networkmanager.enable = true;
-  networking.iwd.enable = true;
+  networking.wireless.iwd.enable = true;
   networking.networkmanager.wifi.backend = "iwd";
   # networking.networkmanager.unmanaged = [
   #   "*" "except:type:wwan" "except:type:gsm"
