@@ -23,9 +23,9 @@ in
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # networking.networkmanager.enable = true;
+  networking.networkmanager.enable = true;
   networking.wireless.iwd.enable = true;
-  # networking.networkmanager.wifi.backend = "iwd";
+  networking.networkmanager.wifi.backend = "iwd";
   # networking.networkmanager.unmanaged = [
   #   "*" "except:type:wwan" "except:type:gsm"
   # ]; #for not conflicting with wpa_supplicant
@@ -70,7 +70,7 @@ in
     isNormalUser = true;
     createHome = true;
     home = "/home/qaqulya";
-    extraGroups = [ "wheel" ];
+    extraGroups = [ "wheel" "networkmanager" ];
   };
   # users.users.root.hashedPassword = "!";
 
