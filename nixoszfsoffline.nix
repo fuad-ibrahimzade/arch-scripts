@@ -60,11 +60,11 @@ in
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   # users.mutableUsers = false;
-  users.users.${main_user} = {
+  users.users.qaqulya = {
     isNormalUser = true;
     createHome = true;
-    home = "/home/${main_user}";
-    extraGroups = [ "wheel" "networkmanager" ];
+    home = "/home/qaqulya";
+    extraGroups = [ "wheel" ];
   };
   # users.users.root.hashedPassword = "!";
 
