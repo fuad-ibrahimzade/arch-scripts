@@ -23,11 +23,12 @@ in
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.iwd.enable = true;
   networking.networkmanager.enable = true;
-  networking.networkmanager.unmanaged = [
-    "*" "except:type:wwan" "except:type:gsm"
-  ];
+  networking.iwd.enable = true;
+  networking.networkmanager.wifi.backend = "iwd";
+  # networking.networkmanager.unmanaged = [
+  #   "*" "except:type:wwan" "except:type:gsm"
+  # ]; #for not conflicting with wpa_supplicant
   programs.nm-applet.enable = true;
 
   # Add ZFS support.
