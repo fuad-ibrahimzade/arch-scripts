@@ -75,8 +75,10 @@ main() {
 	# zsh config:
 	# https://git.ingolf-wagner.de/palo/nixos-config/src/f7e1df5ad3c248f6a5d223fff08cac1fad3a6775/modules/programs/shell-zsh.nix
 	
-	refactorCustomNixConfiguration "$user_name" "$user_password";
-	install "$Output_Device" "$root_password" "$user_name" "$user_password";
+	nixosconfig="offline-nixoszfs.nix"
+
+	refactorCustomNixConfiguration "$user_name" "$user_password" "$nixosconfig";
+	install "$Output_Device" "$root_password" "$user_name" "$user_password" "$nixosconfig";
 
 
 	# head -n -1 /etc/sudoers > temp.txt ; sudo -u root mv temp.txt /etc/sudoers # delete NOPASSWD line
@@ -88,9 +90,10 @@ install() {
 	root_password="$2"
 	user_name="$3"
 	user_password="$4"
+	nixosconfig="$5"
 	
 	sudo nixos-generate-config --root /mnt
-	sudo cp "nixoszfs.nix" /mnt/etc/nixos/configuration.nix
+	sudo cp "$nixosconfig" /mnt/etc/nixos/configuration.nix
 	sudo nixos-install --show-trace
 
 	# boot.supportedFilesystems = ["zfs"];
@@ -102,29 +105,30 @@ install() {
 refactorCustomNixConfiguration() {
 	user_name="$1"
 	user_password="$2"
+	nixosconfig="$3"
 	hased_user_password=$(echo user_password | mkpasswd -m sha-512)
 	hostid=$(head -c 8 /etc/machine-id)
-	sed -i "s|your_hostid|$hostid|g" "nixoszfs.nix"
-	sed -i "s|your_hostname|$(hostname)|g" "nixoszfs.nix"
-	sed -i "s|your_username|$user_name|g" "nixoszfs.nix"
-	sed -i "s|your_virtualboxuser|$user_name|g" "nixoszfs.nix"
-	sed -i "s|your_hashedpassword|$hased_user_password|g" "nixoszfs.nix"
+	sed -i "s|your_hostid|$hostid|g" "$nixosconfig"
+	sed -i "s|your_hostname|$(hostname)|g" "$nixosconfig"
+	sed -i "s|your_username|$user_name|g" "$nixosconfig"
+	sed -i "s|your_virtualboxuser|$user_name|g" "$nixosconfig"
+	sed -i "s|your_hashedpassword|$hased_user_password|g" "$nixosconfig"
 
 	# # run `ip a` to find the values of these
 	physical_interface=$(ls /sys/class/net | grep enp)
 	wifi_interface=$(ls /sys/class/net | grep wl)
 
-	sed -i "s|your_physicalinterface|$physical_interface|g" "nixoszfs.nix"
-	sed -i "s|your_wifiinterface|$wifi_interface|g" "nixoszfs.nix"
+	sed -i "s|your_physicalinterface|$physical_interface|g" "$nixosconfig"
+	sed -i "s|your_wifiinterface|$wifi_interface|g" "$nixosconfig"
 
 	working_interface="$physical_interface";
 	if [[ -z "$working_interface" ]]; then
 		working_interface="$wifi_interface"
 	fi
-	sed -i "s|your_working_interface|$working_interface|g" "nixoszfs.nix"
+	sed -i "s|your_working_interface|$working_interface|g" "$nixosconfig"
 
 	return
-	tee -a "nixoszfs.nix" <<- EOF
+	tee -a "$nixosconfig" <<- EOF
 	systemd.services.doUserdata = {
 		script = ''
 			echo hello
