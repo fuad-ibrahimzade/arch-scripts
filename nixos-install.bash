@@ -94,7 +94,12 @@ install() {
 	
 	sudo nixos-generate-config --root /mnt
 	sudo cp "$nixosconfig" /mnt/etc/nixos/configuration.nix
+
+	sed -i "s|canTouchEfiVariables = true;|canTouchEfiVariables = false;|g" "$nixosconfig" #bug fix efi boot no space left
+
 	sudo nixos-install --show-trace
+
+	efibootmgr -c -d "$Output_Device" -p 1 -L "SystemD" -l "\EFI\systemd\systemd-bootx64.efi" #bug fix efi boot no space left
 
 	# boot.supportedFilesystems = ["zfs"];
 	# boot.zfs.requestEncryptionCredentials = true;
