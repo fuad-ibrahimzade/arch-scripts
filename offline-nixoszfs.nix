@@ -41,6 +41,8 @@ in
   networking.hostId = your_hostid;
   # networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  # networking.wireless.networks.your_wifiname.pskRaw = "your_pskRaw_generated";
+  # networking.wireless.networks.your_wifiname.hidden = true;
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config

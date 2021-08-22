@@ -77,7 +77,7 @@ main() {
 	
 	nixosconfig="offline-nixoszfs.nix"
 
-	refactorCustomNixConfiguration "$user_name" "$user_password" "$nixosconfig";
+	refactorCustomNixConfiguration "$user_name" "$user_password" "$nixosconfig" "$passphrase" "$ssid";
 	install "$Output_Device" "$root_password" "$user_name" "$user_password" "$nixosconfig";
 
 
@@ -112,6 +112,9 @@ refactorCustomNixConfiguration() {
 	user_name="$1"
 	user_password="$2"
 	nixosconfig="$3"
+	passphrase="$4"
+	ssid="$5"
+	
 	hased_user_password=$(echo user_password | mkpasswd -m sha-512)
 	hostid=$(head -c 8 /etc/machine-id)
 	sed -i "s|your_hostid|$hostid|g" "$nixosconfig"
@@ -126,6 +129,12 @@ refactorCustomNixConfiguration() {
 
 	sed -i "s|your_physicalinterface|$physical_interface|g" "$nixosconfig"
 	sed -i "s|your_wifiinterface|$wifi_interface|g" "$nixosconfig"
+
+	sudo bash -c "wpa_passphrase $ssid $passphrase >> temp"
+	pskRaw_generated=$(cat temp);
+	sudo rm temp
+	sed -i "s|your_wifiname|myWifi|g" "$nixosconfig"
+	sed -i "s|your_pskRaw_generated|$pskRaw_generated|g" "$nixosconfig"
 
 	working_interface="$physical_interface";
 	if [[ -z "$working_interface" ]]; then
@@ -322,6 +331,7 @@ connectToWIFI() {
 		sudo bash -c "wpa_passphrase $ssid $passphrase >> /etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf"
 		sudo sed -i "s|network={|network={\n\tmode=0\n\tscan_ssid=1|g" "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf";
 		sudo wpa_supplicant -B -i "$wifi_interface" -c "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf"
+		# sudo wpa_supplicant -B -i "$wifi_interface" -D nl80211 -c "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf"
 		sudo systemctl restart wpa_supplicant.service
 	fi
 }
