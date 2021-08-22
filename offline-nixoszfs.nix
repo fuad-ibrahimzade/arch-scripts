@@ -50,6 +50,8 @@ in
   networking.interfaces.enp0s26u1u2i6.useDHCP = true;
   networking.interfaces.wlo1.useDHCP = true;
 
+  systemd.services.systemd-udev-settle.enable = false; #to fix long nixos boot on dhcpd client
+
   # Set your time zone.
   time.timeZone = "Asia/Baku";
 
