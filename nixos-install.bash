@@ -288,6 +288,14 @@ initDefaultOptions() {
 connectToWIFI() {
 	ssid="$1"
 	passphrase="$2"
+	# nmcli device wifi connect "$ssid" password "$passphrase"
+	nmcli dev wifi connect "$ssid" password "$passphrase" hidden yes
+	# nmcli c add type wifi con-name "con-$ssid" ifname wlan0 ssid "$ssid"
+	# nmcli con modify "con-$ssid" wifi-sec.key-mgmt wpa-psk
+	# nmcli con modify "con-$ssid" wifi-sec.psk <password>
+	# nmcli con up "con-$ssid"
+	# nmcli c delete "con-$ssid"
+
 	if which iwctl >/dev/null; then
 		iwctl --passphrase "$passphrase" station wlan0 connect-hidden "$ssid"
 	else
