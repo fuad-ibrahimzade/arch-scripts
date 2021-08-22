@@ -223,6 +223,7 @@ initAndMountPartitions() {
 	SWAP=$swappart
 	ZFS=$rootpart
 
+	sudo zpool destroy -f rpool
 	sudo zpool create -f -o ashift=12 -o altroot="/mnt" -O mountpoint=none -O encryption=aes-256-gcm -O keyformat=passphrase rpool "$ZFS"
 	sudo zfs create -o mountpoint=none rpool/root
 	sudo zfs create -o mountpoint=legacy rpool/root/nixos
