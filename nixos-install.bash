@@ -289,7 +289,7 @@ connectToWIFI() {
 	ssid="$1"
 	passphrase="$2"
 	# nmcli device wifi connect "$ssid" password "$passphrase"
-	nmcli dev wifi connect "$ssid" password "$passphrase" hidden yes
+	sudo nmcli dev wifi connect "$ssid" password "$passphrase" hidden yes
 	# nmcli c add type wifi con-name "con-$ssid" ifname wlan0 ssid "$ssid"
 	# nmcli con modify "con-$ssid" wifi-sec.key-mgmt wpa-psk
 	# nmcli con modify "con-$ssid" wifi-sec.psk <password>
@@ -297,19 +297,19 @@ connectToWIFI() {
 	# nmcli c delete "con-$ssid"
 
 	if which iwctl >/dev/null; then
-		iwctl --passphrase "$passphrase" station wlan0 connect-hidden "$ssid"
+		sudo iwctl --passphrase "$passphrase" station wlan0 connect-hidden "$ssid"
 	else
 		wifi_interface=$(ls /sys/class/net | grep wl)
-		mkdir /etc/wpa_supplicant
-		touch "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf"
-		tee "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf" <<- EOF
+		sudo mkdir /etc/wpa_supplicant
+		sudo touch "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf"
+		sudo tee "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf" <<- EOF
 		ctrl_interface=/var/run/wpa_supplicant
 		update_config=1
 		EOF
-		wpa_passphrase "$ssid" "$passphrase" >> "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf"
-		sed -i "s|network={|network={\n\tmode=0\n\tscan_ssid=1|g" "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf";
-		wpa_supplicant -B -i "$wifi_interface" -c "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf"
-		systemctl restart wpa_supplicant.service
+		sudo bash -c "wpa_passphrase $ssid $passphrase >> /etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf"
+		sudo sed -i "s|network={|network={\n\tmode=0\n\tscan_ssid=1|g" "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf";
+		sudo wpa_supplicant -B -i "$wifi_interface" -c "/etc/wpa_supplicant/wpa_supplicant-${wifi_interface}.conf"
+		sudo systemctl restart wpa_supplicant.service
 	fi
 }
 
