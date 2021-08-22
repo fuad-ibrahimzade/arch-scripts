@@ -9,6 +9,7 @@ main() {
 
 	passphrase=${passphrase:-mypassphrase}
 	ssid=${ssid:-myssid}
+	resetISOPasswords;
 	connectToWIFI "$ssid" "$passphrase";
 
 	default_Output_Device=${default_Output_Device:-/dev/sda}
@@ -32,7 +33,6 @@ main() {
 	fi
 
 	# echo "root ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
-	resetISOPasswords;
 
 	# initPackageManager;
 	# initVirtualBoxGuestAdditions;
