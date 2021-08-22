@@ -218,6 +218,8 @@ initAndMountPartitions() {
 	sudo zfs create -o mountpoint=legacy rpool/root/nixos
 	sudo zfs create -o mountpoint=legacy -o com.sun:auto-snapshot=true rpool/home
 	sudo zfs set compression=lz4 rpool/home
+	sudo zfs create -o refreservation=1G -o mountpoint=none rpool/reserved
+
 
 	sudo mount -t zfs rpool/root/nixos /mnt
 	sudo mkdir /mnt/home
