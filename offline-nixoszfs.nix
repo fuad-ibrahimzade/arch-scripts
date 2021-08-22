@@ -33,7 +33,7 @@ in
 
   # Add ZFS support.
   boot.kernelParams = ["zfs.zfs_arc_max=12884901888"];
-  boot.initrd.supportedFilesystems = ["zfs"]
+  boot.initrd.supportedFilesystems = ["zfs"];
   boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.requestEncryptionCredentials = true;
   boot.tmpOnTmpfs = true;
