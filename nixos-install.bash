@@ -63,8 +63,6 @@ main() {
 	# https://github.com/bhougland18/nixos_config
 	# https://gist.github.com/byrongibson/1578914d03a5c0a01a13f9ec53ee0b0a
 
-	# https://cheat.readthedocs.io/en/latest/nixos/zfs_install.html
-
 	# http://toxicfrog.github.io/automounting-zfs-on-nixos/
 	# https://nixos.wiki/wiki/Cheatsheet
 	# https://www.reddit.com/r/archlinux/comments/b2jkrp/anyone_tried_nixos_what_are_your_thoughts/
@@ -167,6 +165,7 @@ initAndMountPartitions() {
 	# cari https://github.com/bhougland18/nixos_config
 	# cari https://github.com/instantOS/instantNIX	
 		 # https://raw.githubusercontent.com/instantOS/instantNIX/master/utils/configuration.nix
+	# cari https://cheat.readthedocs.io/en/latest/nixos/zfs_install.html
 
 	Output_Device="$1"
 	root_partitionsize="$2"
@@ -233,7 +232,10 @@ initAndMountPartitions() {
 	ZFS=$rootpart
 
 	sudo zpool destroy -f rpool
-	sudo zpool create -f -o ashift=12 -o altroot="/mnt" -O mountpoint=none -O encryption=aes-256-gcm -O keyformat=passphrase rpool "$ZFS"
+	# sudo zpool create -f -o ashift=12 -o altroot="/mnt" -O mountpoint=none -O encryption=aes-256-gcm -O keyformat=passphrase rpool "$ZFS" #old 
+	sudo zpool create -f -o ashift=12 -o altroot="/mnt" -O mountpoint=none -O encryption=aes-256-gcm -O keyformat=passphrase atime=off -O compression=lz4 -O xattr=sa -O acltype=posixacl -R /mnt rpool "$ZFS" #new
+	# sudo zpool create -O mountpoint=none -O atime=off -O compression=lz4 -O xattr=sa -O acltype=posixacl -o ashift=12 -R /mnt rpool $DISK-part1
+
 	sudo zfs create -o mountpoint=none rpool/root
 	sudo zfs create -o mountpoint=legacy rpool/root/nixos
 	sudo zfs create -o mountpoint=legacy -o com.sun:auto-snapshot=true rpool/home
@@ -250,6 +252,7 @@ initAndMountPartitions() {
 	sudo mount "$BOOT" /mnt/boot
 
 	sudo mkswap -L swap "$SWAP"
+	swapon "$SWAP"
 }
 
 installDownloadAndEditTools() {
