@@ -231,6 +231,9 @@ initAndMountPartitions() {
 	SWAP=$swappart
 	ZFS=$rootpart
 
+	# import zfs pool if not from same session or destroy recreate (cari plus grub https://elis.nu/blog/2019/08/encrypted-zfs-mirror-with-mirrored-boot-on-nixos/)
+	# zpool import zroot
+	# zfs load-key zroot
 	sudo zpool destroy -f rpool
 	# sudo zpool create -f -o ashift=12 -o altroot="/mnt" -O mountpoint=none -O encryption=aes-256-gcm -O keyformat=passphrase rpool "$ZFS" #old 
 	sudo zpool create -f -o ashift=12 -o altroot="/mnt" -O mountpoint=none -O encryption=aes-256-gcm -O keyformat=passphrase atime=off -O compression=lz4 -O xattr=sa -O acltype=posixacl -R /mnt rpool "$ZFS" #new
@@ -240,7 +243,36 @@ initAndMountPartitions() {
 	sudo zfs create -o mountpoint=legacy rpool/root/nixos
 	sudo zfs create -o mountpoint=legacy -o com.sun:auto-snapshot=true rpool/home
 	sudo zfs set compression=lz4 rpool/home
-	sudo zfs create -o refreservation=1G -o mountpoint=none rpool/reserved
+	sudo zfs create -o refreservation=10G -o mountpoint=none rpool/reserved
+
+	# https://nixos.wiki/wiki/NixOS_on_ZFS
+	# sudo zfs set com.sun:auto-snapshot=true rpool/root
+	# services.zfs.autoSnapshot = {
+	# 	enable = true;
+	# 	frequent = 8; # keep the latest eight 15-minute snapshots (instead of four)
+	# 	monthly = 1;  # keep only one monthly snapshot (instead of twelve)
+	# };
+	# zfs set com.sun:auto-snapshot:weekly=false rpool/root
+	# services.zfs.trim.enable = true
+	# zpool set autotrim=on rpool
+	# zpool iostat -r
+
+	# zpool trim tank
+	# zpool status -t
+	# zpool iostat -r
+	# zpool iostat -w
+
+	# https://www.kringles.org/linux/zfs/vmware/2015/02/10/linux-zfs-resize.html
+	# zpool set autoexpand=on tank
+	# zpool status # get diskname
+	# parted /dev/sdb # resize
+	# # (parted) resizepart                                                       
+	# # Partition number? 1                                                       
+	# # End?  [X.XGB]?                                                           
+	# # (parted) quit   
+	# zpool online -e tank sdb
+	# df -h
+
 
 
 	sudo mount -t zfs rpool/root/nixos /mnt
