@@ -68,7 +68,7 @@ in
     nox nix-du graphviz
     nixpkgs-fmt
     wget curl vim git rsync
-    python38Full python38Packages.pip pipenv
+    python38Full python38Packages.pip python38Packages.poetry
     htop micro fd snapper 
     trash-cli thefuck aria2 shellcheck
   ];
