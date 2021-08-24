@@ -73,7 +73,7 @@ main() {
 	# zsh config:
 	# https://git.ingolf-wagner.de/palo/nixos-config/src/f7e1df5ad3c248f6a5d223fff08cac1fad3a6775/modules/programs/shell-zsh.nix
 	
-	nixosconfig="offline-nixoszfs.nix"
+	nixosconfig="online-nixoszfs.nix"
 
 	refactorCustomNixConfiguration "$user_name" "$user_password" "$nixosconfig" "$passphrase" "$ssid";
 	install "$Output_Device" "$root_password" "$user_name" "$user_password" "$nixosconfig";
