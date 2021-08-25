@@ -73,6 +73,8 @@ in
     trash-cli thefuck aria2 shellcheck
   ];
 
+  environment.variables = { EDITOR = "vim"; };
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   # users.mutableUsers = false;
   users.users.qaqulya = {
